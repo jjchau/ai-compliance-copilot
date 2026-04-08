@@ -208,3 +208,7 @@ __marimo__/
 
 # Virtual environment
 .venv/
+
+# Log files
+logs/
+*.db
