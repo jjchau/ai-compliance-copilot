@@ -34,6 +34,7 @@ Includes:
 - (Optional) React / simple frontend
 
 ## Project Structure
+```
 ai-compliance-copilot/
 │
 ├── README.md
@@ -43,13 +44,13 @@ ai-compliance-copilot/
 |
 ├── docs/
 │   ├── product_vision.md
-│   ├── PRD.md
+│   ├── product_requirements.md
 │   ├── user_persona.md
 │   ├── metric_hierarchy.md
 │   ├── risk_register.md
-│   ├── DoR.md
-│   ├── DoD.md
-│   └── data-schema.md
+│   ├── definition_of_ready.md
+│   ├── definition_of_done.md
+│   └── data_schema.md
 │
 ├── data/
 │   ├── raw/                            # Generated or source datasets
@@ -101,6 +102,7 @@ ai-compliance-copilot/
 |
 └── logs/
     └── sample_logs.json                # Generated logs
+```
 
 ## Status
 Sprint 1 in progress
