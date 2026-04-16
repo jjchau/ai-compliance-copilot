@@ -87,9 +87,9 @@ def generate_base_case() -> Trade:
 def generate_labeled_case() -> LabeledTrade:
     base_case = generate_base_case()
     # Placeholder logic for labeling - in practice, this would be based on domain expertise
-    true_compliance = compute_true_compliance(base_case)
+    true_compliance: bool = compute_true_compliance(base_case)
     case_type: Literal["Suitability Violation", "KYC Missing", "Insufficient Experience", "Risk Signal", "Aligned Recommendation"] = assign_case_type(base_case)
-    difficulty: Literal['Easy', 'Medium', 'Hard'] = random.choice(['Easy', 'Medium', 'Hard'])
+    difficulty: Literal['Easy', 'Medium', 'Hard'] = assign_difficulty(base_case)
     
     return LabeledTrade(
         **base_case.model_dump(),
