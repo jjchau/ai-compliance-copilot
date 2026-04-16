@@ -32,7 +32,6 @@ class Trade(BaseModel):
 class LabeledTrade(Trade):
     # Ground truth
     true_compliance: bool
-    true_risk_tier: Literal['Low', 'Medium', 'High']
     """
     # COMPUTE THESE IN RUN-TIME SCORING LOGIC:
     risk_score: float
@@ -54,7 +53,8 @@ class LabeledTrade(Trade):
     case_type: Literal[
         "Suitability Violation",
         "KYC Missing",
-        "Overtrading",
+        "Insufficient Experience",
+        "Risk Signal",
         "Aligned Recommendation"
     ]
     difficulty: Literal['Easy', 'Medium', 'Hard'] # Rough mappings: Easy->Clean, Medium->Ambiguous, Hard->Edge
