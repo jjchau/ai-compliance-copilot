@@ -12,6 +12,9 @@ ADVISOR_EXPERIENCE: list[Literal['Junior', 'Mid', 'Senior']] = ['Junior', 'Mid',
 ADVISOR_HISTORY_RISK: list[Literal['Low', 'Medium', 'High']] = ['Low', 'Medium', 'High']
 KYC_COMPLETENESS: list[Literal['Complete', 'Uncertain', 'Missing']] = ['Complete', 'Uncertain', 'Missing']
 
+# TODO: Refactor into a config file:
+KYC_COMPLETENESS_DISTRIBUTION = [0.7, 0.25, 0.05]  # 70% Complete, 25% Uncertain, 5% Missing
+
 advisor_profiles: dict[str, Literal['Low', 'Medium', 'High']] = {
     'ADV-001': 'Low',
 	'ADV-002': 'Low',
@@ -81,7 +84,7 @@ def generate_base_case() -> Trade:
         advisor_history_risk=advisor_profiles[advisor_id],
         has_rationale=random.choice([True, False]),
         advisor_notes=None if random.random() < 0.2 else "Sample note",
-        kyc_completeness=random.choice(KYC_COMPLETENESS)
+        kyc_completeness=random.choices(KYC_COMPLETENESS, KYC_COMPLETENESS_DISTRIBUTION, k=1)[0]
     )
 
 def generate_labeled_case() -> LabeledTrade:
