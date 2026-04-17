@@ -27,7 +27,7 @@ class Trade(BaseModel):
     advisor_notes: Optional[str] = None
 
     # Data quality
-    kyc_completeness: Literal['Complete', 'Partial', 'Missing']
+    kyc_completeness: Literal['Complete', 'Uncertain', 'Missing']
 
 class LabeledTrade(Trade):
     # Ground truth

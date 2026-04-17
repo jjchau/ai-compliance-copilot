@@ -27,3 +27,9 @@ def is_overexposure(trade: Trade) -> bool:
     - An investment amount that exceeds 30% of the client's income may be a soft signal of overexposure.
     """
     return trade.investment_amount > 0.3 * trade.client_income
+
+def is_kyc_uncertain(trade: Trade) -> bool:
+    """
+    A KYC uncertain signal occurs when the client's KYC completeness is 'Uncertain', which may indicate an outdated KYC profile, inconsistent responses vs behaviour, vague/incomplete answers, or a stale risk profile that could impact compliance decisions.
+    """
+    return trade.kyc_completeness == 'Uncertain'
