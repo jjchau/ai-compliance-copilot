@@ -10,7 +10,7 @@ INVESTMENT_TIME_HORIZONS: list[Literal['Short', 'Medium', 'Long']] = ['Short', '
 INVESTMENT_TYPES: list[Literal['Stocks', 'Bonds', 'GICs', 'T-Bills', 'Mutual Funds', 'ETFs', 'Options']] = ['Stocks', 'Bonds', 'GICs', 'T-Bills', 'Mutual Funds', 'ETFs', 'Options']
 ADVISOR_EXPERIENCE: list[Literal['Junior', 'Mid', 'Senior']] = ['Junior', 'Mid', 'Senior']
 ADVISOR_HISTORY_RISK: list[Literal['Low', 'Medium', 'High']] = ['Low', 'Medium', 'High']
-KYC_COMPLETENESS: list[Literal['Complete', 'Partial', 'Missing']] = ['Complete', 'Partial', 'Missing']
+KYC_COMPLETENESS: list[Literal['Complete', 'Uncertain', 'Missing']] = ['Complete', 'Uncertain', 'Missing']
 
 advisor_profiles: dict[str, Literal['Low', 'Medium', 'High']] = {
     'ADV-001': 'Low',

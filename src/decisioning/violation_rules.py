@@ -2,9 +2,9 @@ from src.data.schema import Trade
 
 def is_kyc_violation(trade: Trade) -> bool:
     """
-    A KYC violation occurs when the client's KYC completeness is 'Missing' or 'Partial'.
+    A KYC violation occurs when the client's KYC completeness is 'Missing'.
     """
-    return trade.kyc_completeness in ['Missing', 'Partial']
+    return trade.kyc_completeness == 'Missing'
 
 def is_suitability_violation(trade: Trade) -> bool:
     """
