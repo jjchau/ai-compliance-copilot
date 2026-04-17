@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from src.data.schema import Trade
-from src.decisioning.risk_signals import is_horizon_mismatch, is_objective_mismatch, is_overexposure
+from src.decisioning.risk_signals import is_horizon_mismatch, is_objective_mismatch, is_overexposure, is_kyc_uncertain
 
 
 @pytest.fixture
@@ -88,3 +88,13 @@ class TestIsOverexposure:
         mock_trade.investment_amount = 0
         mock_trade.client_income = 100000
         assert is_overexposure(mock_trade) is False
+
+
+class TestIsKycUncertain:
+    def test_kyc_uncertain(self, mock_trade):
+        mock_trade.kyc_completeness = 'Uncertain'
+        assert is_kyc_uncertain(mock_trade) is True
+
+    def test_kyc_complete(self, mock_trade):
+        mock_trade.kyc_completeness = 'Complete'
+        assert is_kyc_uncertain(mock_trade) is False

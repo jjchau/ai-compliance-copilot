@@ -90,10 +90,12 @@ class TestGenerateBaseCase:
 
 class TestGenerateLabeledCase:
     @patch('src.data.generator.compute_true_compliance')
+    @patch('src.data.generator.assign_difficulty')
     @patch('src.data.generator.assign_case_type')
-    def test_generate_labeled_case_returns_labeled_trade(self, mock_assign, mock_compute):
+    def test_generate_labeled_case_returns_labeled_trade(self, mock_assign, mock_difficulty, mock_compute):
         mock_compute.return_value = True
         mock_assign.return_value = "Aligned Recommendation"
+        mock_difficulty.return_value = "Medium"
         
         labeled_trade = generate_labeled_case()
         assert labeled_trade is not None
@@ -102,43 +104,49 @@ class TestGenerateLabeledCase:
         assert hasattr(labeled_trade, 'case_type')
         assert labeled_trade.case_type == "Aligned Recommendation"
         assert hasattr(labeled_trade, 'difficulty')
-        assert labeled_trade.difficulty in ['Easy', 'Medium', 'Hard']
-        assert hasattr(labeled_trade, 'case_type')
-        assert hasattr(labeled_trade, 'difficulty')
+        assert labeled_trade.difficulty == "Medium"
 
     @patch('src.data.generator.compute_true_compliance')
+    @patch('src.data.generator.assign_difficulty')
     @patch('src.data.generator.assign_case_type')
-    def test_true_compliance_is_set(self, mock_assign, mock_compute):
+    def test_true_compliance_is_set(self, mock_assign, mock_difficulty, mock_compute):
         mock_compute.return_value = True
         mock_assign.return_value = "Aligned Recommendation"
+        mock_difficulty.return_value = "Easy"
         
         labeled_trade = generate_labeled_case()
         assert labeled_trade.true_compliance is True
 
     @patch('src.data.generator.compute_true_compliance')
+    @patch('src.data.generator.assign_difficulty')
     @patch('src.data.generator.assign_case_type')
-    def test_case_type_is_set(self, mock_assign, mock_compute):
+    def test_case_type_is_set(self, mock_assign, mock_difficulty, mock_compute):
         mock_compute.return_value = False
         mock_assign.return_value = "Suitability Violation"
+        mock_difficulty.return_value = "Hard"
         
         labeled_trade = generate_labeled_case()
         assert labeled_trade.case_type == "Suitability Violation"
 
     @patch('src.data.generator.compute_true_compliance')
+    @patch('src.data.generator.assign_difficulty')
     @patch('src.data.generator.assign_case_type')
-    def test_difficulty_is_valid(self, mock_assign, mock_compute):
+    def test_difficulty_is_valid(self, mock_assign, mock_difficulty, mock_compute):
         mock_compute.return_value = True
         mock_assign.return_value = "Aligned Recommendation"
+        mock_difficulty.return_value = "Hard"
         
         for _ in range(10):
             labeled_trade = generate_labeled_case()
-            assert labeled_trade.difficulty in ['Easy', 'Medium', 'Hard']
+            assert labeled_trade.difficulty == "Hard"
 
     @patch('src.data.generator.compute_true_compliance')
+    @patch('src.data.generator.assign_difficulty')
     @patch('src.data.generator.assign_case_type')
-    def test_labeled_case_inherits_base_trade_fields(self, mock_assign, mock_compute):
+    def test_labeled_case_inherits_base_trade_fields(self, mock_assign, mock_difficulty, mock_compute):
         mock_compute.return_value = False
         mock_assign.return_value = "KYC Missing"
+        mock_difficulty.return_value = "Easy"
         
         labeled_trade = generate_labeled_case()
         assert 18 <= labeled_trade.client_age <= 80
