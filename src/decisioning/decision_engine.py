@@ -5,7 +5,7 @@ from src.scoring.confidence_scoring import compute_confidence_score
 from src.decisioning.policy_rules import should_flag
 from src.decisioning.conflict_detection import (
     has_conflicting_signals,
-    get_conflict_signals
+    get_signals
 )
 
 def evaluate_trade(trade: Trade) -> dict:
@@ -14,7 +14,7 @@ def evaluate_trade(trade: Trade) -> dict:
     confidence_score = compute_confidence_score(trade)
     flag_for_review = should_flag(trade, risk_score, confidence_score)
     has_conflict = has_conflicting_signals(trade)
-    conflict_signals = get_conflict_signals(trade)
+    conflict_signals = get_signals(trade)
 
     return {
         'trade_id': trade.trade_id,
