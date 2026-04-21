@@ -1,23 +1,23 @@
 from src.data.schema import Trade
+from src.decisioning.risk_signals import (
+    is_kyc_missing,
+    is_risk_too_high_for_profile,
+    is_too_complex_for_experience    
+)
 
 def is_kyc_violation(trade: Trade) -> bool:
     """
     A KYC violation occurs when the client's KYC completeness is 'Missing'.
     """
-    return trade.kyc_completeness == 'Missing'
+    return is_kyc_missing(trade)
 
 def is_suitability_violation(trade: Trade) -> bool:
     """
     A suitability violation occurs when the investment type or amount is not suitable for the client's profile.
     For example:
     - A high-risk investment (e.g., Options) for a client with low risk tolerance.
-    - An investment amount that exceeds a certain percentage of the client's income.
     """
-    if trade.risk_tolerance == 'Low' and trade.investment_type in ['Options', 'Stocks']:
-        return True
-    if trade.investment_amount > 0.5 * trade.client_income:
-        return True
-    return False
+    return is_risk_too_high_for_profile(trade)
 
 def is_experience_violation(trade: Trade) -> bool:
     """
@@ -25,7 +25,4 @@ def is_experience_violation(trade: Trade) -> bool:
     For example:
     - A beginner client investing in complex products like Options or ETFs.
     """
-    return (
-        trade.investment_experience == 'Beginner'
-        and trade.investment_type == 'Options'
-        )
+    return is_too_complex_for_experience(trade)

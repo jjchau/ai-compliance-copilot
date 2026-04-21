@@ -1,16 +1,19 @@
 from src.data.schema import Trade
-from src.decisioning.violation_rules import  *
+from src.decisioning.violation_rules import *
 from src.decisioning.risk_signals import *
 
 WEIGHTS = {
+    "kyc_violation": 30,
     "suitability": 40,
     "experience": 35,
-    "kyc_violation": 30,
-    "horizon": 15,
-    "objective": 10,
+    "aggressive_for_horizon": 15,
+    "aggressive_for_objective": 10,
     "overexposure": 10,
+    "advisor_history": 10,
     "kyc_uncertain": 10,
-    "advisor_history": 10
+    "risk_too_low": 5,
+    "conservative_for_horizon": 5,
+    "conservative_for_objective": 5
 }
 
 def compute_risk_score(trade: Trade) -> int:
@@ -24,48 +27,37 @@ def compute_risk_score(trade: Trade) -> int:
     
     score = 0
 
-    # HARD VIOLATIONS (high weight, but not sole decision drivers)
+    if is_kyc_violation(trade):
+        score += WEIGHTS["kyc_violation"]
+
     if is_suitability_violation(trade):
         score += WEIGHTS["suitability"]
 
     if is_experience_violation(trade):
         score += WEIGHTS["experience"]
 
-    if is_kyc_violation(trade):
-        score += WEIGHTS["kyc_violation"]
-
-    # SOFT SIGNALS (moderate weight)
-    if is_horizon_mismatch(trade):
+    if is_investment_too_agressive_for_horizon(trade):
         score += WEIGHTS["horizon"]
 
-    if is_objective_mismatch(trade):
-        score += WEIGHTS["objective"]
+    if is_investment_too_aggressive_for_objective(trade):
+        score += WEIGHTS["aggressive_for_objective"]
 
     if is_overexposure(trade):
         score += WEIGHTS["overexposure"]
 
+    if is_advisor_history_high_risk(trade):
+        score += WEIGHTS["advisor_history"]
+    
     if is_kyc_uncertain(trade):
         score += WEIGHTS["kyc_uncertain"]
 
-    # CONTEXTUAL RISK FACTORS
-    if trade.advisor_history_risk == "High":
-        score += WEIGHTS["advisor_history"]
+    if is_risk_too_low_for_profile(trade):
+        score += WEIGHTS["risk_too_low"]
+
+    if is_investment_too_conservative_for_horizon(trade):
+        score += WEIGHTS["conservative_for_horizon"]
+
+    if is_investment_too_conservative_for_objective(trade):
+        score += WEIGHTS["conservative_for_objective"]
 
     return min(score, 100)  # optional cap for normalization
-
-def assign_risk_tier(score: int) -> str:
-    if score < 5:
-        return 'Low'
-    elif score < 10:
-        return 'Medium'
-    else:
-        return 'High'
-    
-def detect_conflicts(trade: Trade) -> bool:
-    if trade.risk_tolerance == 'Low' and trade.investment_type in ['Stocks', 'Options']:
-        return True
-    if trade.risk_tolerance == 'High' and trade.investment_type in ['Bonds']:
-        return True
-    if trade.investment_experience == 'Beginner' and trade.investment_type in ['Options']:
-        return True
-    return False

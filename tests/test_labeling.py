@@ -45,8 +45,8 @@ class TestAssignCaseType:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=False), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_horizon_mismatch', return_value=True), \
-             patch('src.decisioning.labeling.is_objective_mismatch', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=True), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
             assert assign_case_type(mock_trade) == "Risk Signal"
@@ -55,8 +55,8 @@ class TestAssignCaseType:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=False), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_horizon_mismatch', return_value=False), \
-             patch('src.decisioning.labeling.is_objective_mismatch', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=True):
             assert assign_case_type(mock_trade) == "Risk Signal"
@@ -65,8 +65,8 @@ class TestAssignCaseType:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=False), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_horizon_mismatch', return_value=False), \
-             patch('src.decisioning.labeling.is_objective_mismatch', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
             assert assign_case_type(mock_trade) == "Aligned Recommendation"
@@ -77,8 +77,8 @@ class TestAssignDifficulty:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=False), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_horizon_mismatch', return_value=False), \
-             patch('src.decisioning.labeling.is_objective_mismatch', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
             assert assign_difficulty(mock_trade) == "Easy"
@@ -87,8 +87,8 @@ class TestAssignDifficulty:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=True), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=True), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_horizon_mismatch', return_value=False), \
-             patch('src.decisioning.labeling.is_objective_mismatch', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
             assert assign_difficulty(mock_trade) == "Easy"
@@ -97,8 +97,8 @@ class TestAssignDifficulty:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=True), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_horizon_mismatch', return_value=False), \
-             patch('src.decisioning.labeling.is_objective_mismatch', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
             assert assign_difficulty(mock_trade) == "Medium"
@@ -107,8 +107,8 @@ class TestAssignDifficulty:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=False), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_horizon_mismatch', return_value=True), \
-             patch('src.decisioning.labeling.is_objective_mismatch', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=True), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
             assert assign_difficulty(mock_trade) == "Hard"
@@ -117,8 +117,8 @@ class TestAssignDifficulty:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=False), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_horizon_mismatch', return_value=False), \
-             patch('src.decisioning.labeling.is_objective_mismatch', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=True):
             assert assign_difficulty(mock_trade) == "Hard"
@@ -127,8 +127,8 @@ class TestAssignDifficulty:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=True), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_horizon_mismatch', return_value=True), \
-             patch('src.decisioning.labeling.is_objective_mismatch', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=True), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
             assert assign_difficulty(mock_trade) == "Hard"
