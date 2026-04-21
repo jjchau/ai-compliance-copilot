@@ -9,7 +9,7 @@ from src.decisioning.risk_signals import (
     is_investment_too_conservative_for_horizon
 )
 
-def get_conflict_signals(trade: Trade) -> dict:
+def get_signals(trade: Trade) -> dict:
     """
     Returns a dictionary signals for a given trade.
     This can be used for debugging and explainability of conflict detection.
@@ -31,7 +31,7 @@ def has_conflicting_signals(trade: Trade) -> bool:
     This can be used to identify cases where the system is uncertain about the risk level, which may warrant human review or more cautious handling.
     """
 
-    signals = get_conflict_signals(trade)
+    signals = get_signals(trade)
     
     aggressive_signals = [
         signals["risk_too_high_for_profile"],      # pushing toward risk
