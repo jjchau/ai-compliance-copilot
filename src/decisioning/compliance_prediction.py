@@ -1,6 +1,13 @@
-from src.decisioning.violation_rules import *
-from src.decisioning.risk_signals import *
 from src.data.schema import Trade
+from src.decisioning.violation_rules import (
+    is_kyc_violation,
+    is_suitability_violation,
+    is_experience_violation,
+)
+from src.decisioning.risk_signals import (
+    is_investment_too_agressive_for_horizon,
+    is_investment_too_aggressive_for_objective
+)
 import random
 
 # TODO: Refactor into a config file:
@@ -32,11 +39,11 @@ def predict_compliance(trade: Trade) -> bool:
             violation_evidence.append(True)
 
     # Soft signals → cause false positives
-    if is_horizon_mismatch(trade):
+    if is_investment_too_agressive_for_horizon(trade):
         if random.random() < DETECTION_RATES["horizon_fp"]:
             violation_evidence.append(True)
 
-    if is_objective_mismatch(trade):
+    if is_investment_too_aggressive_for_objective(trade):
         if random.random() < DETECTION_RATES["objective_fp"]:
             violation_evidence.append(True)
 

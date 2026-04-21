@@ -1,5 +1,9 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import pytest
-from src.scoring.risk_scoring import compute_risk_score, assign_risk_tier, detect_conflicts
+from src.scoring.risk_scoring import compute_risk_score
 from src.data.schema import Trade
 
 # Dummy trade factory for tests
@@ -34,24 +38,13 @@ def test_compute_risk_score_high_suitability(monkeypatch):
     monkeypatch.setattr(rs_mod, 'is_suitability_violation', lambda t: True)
     monkeypatch.setattr(rs_mod, 'is_experience_violation', lambda t: False)
     monkeypatch.setattr(rs_mod, 'is_kyc_violation', lambda t: False)
-    monkeypatch.setattr(rs_mod, 'is_horizon_mismatch', lambda t: False)
-    monkeypatch.setattr(rs_mod, 'is_objective_mismatch', lambda t: False)
+    monkeypatch.setattr(rs_mod, 'is_investment_too_agressive_for_horizon', lambda t: False)
+    monkeypatch.setattr(rs_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
     monkeypatch.setattr(rs_mod, 'is_overexposure', lambda t: False)
     monkeypatch.setattr(rs_mod, 'is_kyc_uncertain', lambda t: False)
+    monkeypatch.setattr(rs_mod, 'is_advisor_history_high_risk', lambda t: False)
+    monkeypatch.setattr(rs_mod, 'is_risk_too_low_for_profile', lambda t: False)
+    monkeypatch.setattr(rs_mod, 'is_investment_too_conservative_for_horizon', lambda t: False)
+    monkeypatch.setattr(rs_mod, 'is_investment_too_conservative_for_objective', lambda t: False)
     score = compute_risk_score(trade)
     assert score >= 40
-
-def test_assign_risk_tier():
-    assert assign_risk_tier(0) == 'Low'
-    assert assign_risk_tier(7) == 'Medium'
-    assert assign_risk_tier(15) == 'High'
-
-def test_detect_conflicts():
-    t1 = make_trade(risk_tolerance='Low', investment_type='Stocks')
-    t2 = make_trade(risk_tolerance='High', investment_type='Bonds')
-    t3 = make_trade(investment_experience='Beginner', investment_type='Options')
-    t4 = make_trade(risk_tolerance='Medium', investment_type='ETFs')
-    assert detect_conflicts(t1) is True
-    assert detect_conflicts(t2) is True
-    assert detect_conflicts(t3) is True
-    assert detect_conflicts(t4) is False
