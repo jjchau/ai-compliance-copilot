@@ -37,7 +37,7 @@ def compute_risk_score(trade: Trade) -> int:
         score += WEIGHTS["experience"]
 
     if is_investment_too_agressive_for_horizon(trade):
-        score += WEIGHTS["horizon"]
+        score += WEIGHTS["aggressive_for_horizon"]
 
     if is_investment_too_aggressive_for_objective(trade):
         score += WEIGHTS["aggressive_for_objective"]

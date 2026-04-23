@@ -212,3 +212,12 @@ __marimo__/
 # Log files
 logs/
 *.db
+
+# Generated data / artifacts
+outputs/
+data/processed/
+*.csv
+*.parquet
+
+# Notebooks checkpoints
+.ipynb_checkpoints/

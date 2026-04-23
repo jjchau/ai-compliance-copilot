@@ -40,10 +40,10 @@ def assign_difficulty(trade: Trade) -> Literal['Easy', 'Medium', 'Hard']:
     if hard_violations == 0 and soft_signals == 0:
         return "Easy"
 
-    if hard_violations >= 2:
+    if hard_violations >= 1 and soft_signals <= 1:
         return "Easy"
 
-    if hard_violations == 1 and soft_signals == 0:
+    if hard_violations == 1:
         return "Medium"
 
-    return "Hard"  # ambiguous / conflicting
+    return "Hard"

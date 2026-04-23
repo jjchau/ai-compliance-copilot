@@ -1,11 +1,21 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Literal
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, timedelta
+import random
+
+def random_timestamp():
+    now = datetime.now()
+    start = now - timedelta(days=30)
+
+    delta = now - start
+    random_microseconds = random.randint(0, int(delta.total_seconds() * 1_000_000))
+
+    return start + timedelta(microseconds=random_microseconds)
 
 class Trade(BaseModel):
     trade_id: str = Field(default_factory=lambda: f'TRADE-{uuid4().hex[:8]}')
-    trade_timestamp: datetime = Field(default_factory=datetime.now)
+    trade_timestamp: datetime = Field(default_factory=lambda: random_timestamp())
 
     # Client
     client_age: int

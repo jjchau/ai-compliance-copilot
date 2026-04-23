@@ -29,7 +29,7 @@ def make_trade(**kwargs):
     return Trade(**base)
 
 
-@patch('src.decisioning.decision_engine.get_conflict_signals')
+@patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
 @patch('src.decisioning.decision_engine.should_flag')
 @patch('src.decisioning.decision_engine.compute_confidence_score')
@@ -73,7 +73,7 @@ def test_evaluate_trade_compliant_trade(mock_predict, mock_risk, mock_confidence
     assert result == expected
 
 
-@patch('src.decisioning.decision_engine.get_conflict_signals')
+@patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
 @patch('src.decisioning.decision_engine.should_flag')
 @patch('src.decisioning.decision_engine.compute_confidence_score')
@@ -109,7 +109,7 @@ def test_evaluate_trade_non_compliant_trade(mock_predict, mock_risk, mock_confid
     assert result == expected
 
 
-@patch('src.decisioning.decision_engine.get_conflict_signals')
+@patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
 @patch('src.decisioning.decision_engine.should_flag')
 @patch('src.decisioning.decision_engine.compute_confidence_score')
@@ -139,7 +139,7 @@ def test_evaluate_trade_high_risk_flagged(mock_predict, mock_risk, mock_confiden
     assert result['has_conflicting_signals'] is False
 
 
-@patch('src.decisioning.decision_engine.get_conflict_signals')
+@patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
 @patch('src.decisioning.decision_engine.should_flag')
 @patch('src.decisioning.decision_engine.compute_confidence_score')
@@ -169,7 +169,7 @@ def test_evaluate_trade_low_confidence_flagged(mock_predict, mock_risk, mock_con
     assert result['flag_for_review'] is True
 
 
-@patch('src.decisioning.decision_engine.get_conflict_signals')
+@patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
 @patch('src.decisioning.decision_engine.should_flag')
 @patch('src.decisioning.decision_engine.compute_confidence_score')
@@ -197,7 +197,7 @@ def test_evaluate_trade_with_conflicts(mock_predict, mock_risk, mock_confidence,
     assert result['conflict_signals'] == ['Conflicting risk signals detected']
 
 
-@patch('src.decisioning.decision_engine.get_conflict_signals')
+@patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
 @patch('src.decisioning.decision_engine.should_flag')
 @patch('src.decisioning.decision_engine.compute_confidence_score')
@@ -226,7 +226,7 @@ def test_evaluate_trade_zero_scores(mock_predict, mock_risk, mock_confidence,
     assert result['flag_for_review'] is True
 
 
-@patch('src.decisioning.decision_engine.get_conflict_signals')
+@patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
 @patch('src.decisioning.decision_engine.should_flag')
 @patch('src.decisioning.decision_engine.compute_confidence_score')
@@ -255,7 +255,7 @@ def test_evaluate_trade_max_scores(mock_predict, mock_risk, mock_confidence,
     assert result['flag_for_review'] is True  # Due to high risk
 
 
-@patch('src.decisioning.decision_engine.get_conflict_signals')
+@patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
 @patch('src.decisioning.decision_engine.should_flag')
 @patch('src.decisioning.decision_engine.compute_confidence_score')
@@ -290,7 +290,7 @@ def test_evaluate_trade_multiple_conflicts(mock_predict, mock_risk, mock_confide
     assert 'Advisor history conflicts with recommendation' in result['conflict_signals']
 
 
-@patch('src.decisioning.decision_engine.get_conflict_signals')
+@patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
 @patch('src.decisioning.decision_engine.should_flag')
 @patch('src.decisioning.decision_engine.compute_confidence_score')
@@ -318,7 +318,7 @@ def test_evaluate_trade_call_order(mock_predict, mock_risk, mock_confidence,
     mock_flag.assert_called_once_with(trade, 40, 0.8)
 
 
-@patch('src.decisioning.decision_engine.get_conflict_signals')
+@patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
 @patch('src.decisioning.decision_engine.should_flag')
 @patch('src.decisioning.decision_engine.compute_confidence_score')
@@ -344,7 +344,7 @@ def test_evaluate_trade_different_trade_ids(mock_predict, mock_risk, mock_confid
         assert result['trade_id'] == trade_id
 
 
-@patch('src.decisioning.decision_engine.get_conflict_signals')
+@patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
 @patch('src.decisioning.decision_engine.should_flag')
 @patch('src.decisioning.decision_engine.compute_confidence_score')
@@ -372,7 +372,7 @@ def test_evaluate_trade_empty_conflict_signals(mock_predict, mock_risk, mock_con
     assert result['conflict_signals'] == []
 
 
-@patch('src.decisioning.decision_engine.get_conflict_signals')
+@patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
 @patch('src.decisioning.decision_engine.should_flag')
 @patch('src.decisioning.decision_engine.compute_confidence_score')
