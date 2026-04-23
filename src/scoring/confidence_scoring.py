@@ -1,3 +1,17 @@
+"""
+confidence_scoring.py
+
+Purpose:
+    Heuristically calculate a confidence score for a trade based on various risk
+    and data quality factors.
+
+Usage:
+    from src.scoring.confidence_scoring import compute_confidence_score
+
+Author: Jason Chau
+Date: 2026-04-16
+"""
+
 from src.data.schema import Trade
 
 from src.decisioning.violation_rules import (

@@ -1,3 +1,16 @@
+"""
+labeling.py
+
+Purpose:
+    Logic for aggregating and assigning ground truth labels for evaluation and analysis.
+
+Usage:
+    from src.decisioning.labeling import compute_true_compliance, assign_case_type, etc.
+
+Author: Jason Chau
+Date: 2026-04-16
+"""
+
 from src.data.schema import Trade
 from src.decisioning.violation_rules import  *
 from src.decisioning.risk_signals import *

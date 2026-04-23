@@ -1,3 +1,16 @@
+"""
+generator.py
+
+Purpose:
+    Generate synthetic trade data for testing and evaluation.
+
+Usage:
+    from src.data.generator import generate_labeled_case
+
+Author: Jason Chau
+Date: 2026-04-16
+"""
+
 import random
 from typing import Literal
 from src.data.schema import Trade, LabeledTrade

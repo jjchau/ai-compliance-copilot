@@ -1,3 +1,16 @@
+"""
+risk_signals.py
+
+Purpose:
+    Identify potential risk signals that may indicate non-compliance, based on heuristic rules.
+
+Usage:
+    from src.decisioning.risk_signals import is_kyc_missing, is_suitability_violation, etc.
+
+Author: Jason Chau
+Date: 2026-04-16
+"""
+
 from src.data.schema import Trade
 
 # --- KYC ---

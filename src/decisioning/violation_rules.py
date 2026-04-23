@@ -1,3 +1,17 @@
+"""
+violation_rules.py
+
+Purpose:
+    Wrapper functions for determining the ground truths of individual compliance conditions
+    of trades based on heuristic rules.
+
+Usage:
+    from src.decisioning.violation_rules import is_kyc_violation, is_suitability_violation, etc.
+
+Author: Jason Chau
+Date: 2026-04-15
+"""
+
 from src.data.schema import Trade
 from src.decisioning.risk_signals import (
     is_kyc_missing,

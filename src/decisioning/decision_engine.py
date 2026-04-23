@@ -1,3 +1,16 @@
+"""
+decision_engine.py
+
+Purpose:
+    Main decision engine for evaluating trades and determining compliance status.
+
+Usage:
+    from src.decisioning.decision_engine import evaluate_trade
+
+Author: Jason Chau
+Date: 2026-04-21
+"""
+
 from src.data.schema import Trade
 from src.decisioning.compliance_prediction import predict_compliance
 from src.scoring.risk_scoring import compute_risk_score

@@ -1,3 +1,17 @@
+"""
+risk_scoring.py
+
+Purpose:
+    Heuristically calculate a risk score for a trade based on client profile, advisor, and trade
+    characteristics.
+
+Usage:
+    from src.scoring.risk_scoring import compute_risk_score
+
+Author: Jason Chau
+Date: 2026-04-16
+"""
+
 from src.data.schema import Trade
 from src.decisioning.violation_rules import *
 from src.decisioning.risk_signals import *

@@ -104,5 +104,12 @@ ai-compliance-copilot/
     └── sample_logs.json                # Generated logs
 ```
 
+## Setup
+```bash
+pip install -r requirements.txt
+
+## Run
+python notebooks/S1_evaluation.ipynb
+
 ## Status
 Sprint 1 in progress

@@ -1,3 +1,16 @@
+"""
+schema.py
+
+Purpose:
+    Define the data structures for trades and labeled trades.
+
+Usage:
+    from src.data.schema import Trade, LabeledTrade
+
+Author: Jason Chau
+Date: 2026-04-14
+"""
+
 from pydantic import BaseModel, Field
 from typing import Optional, Literal
 from uuid import uuid4

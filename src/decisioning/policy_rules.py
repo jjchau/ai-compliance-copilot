@@ -1,3 +1,16 @@
+"""
+policy_rules.py
+
+Purpose:
+    Generate a policy-based flagging decision for a trade based on heuristic rules.
+
+Usage:
+    from src.decisioning.policy_rules import should_flag
+
+Author: Jason Chau
+Date: 2026-04-21
+"""
+
 from src.data.schema import Trade
 from src.decisioning.violation_rules import (
     is_kyc_violation,

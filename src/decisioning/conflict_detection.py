@@ -1,3 +1,16 @@
+"""
+conflict_detection.py
+
+Purpose:
+    Logic for detecting conflicting risk signals in client profile and trades.
+
+Usage:
+    from src.decisioning.conflict_detection import has_conflicting_signals, get_signals
+
+Author: Jason Chau
+Date: 2026-04-21
+"""
+
 from src.data.schema import Trade
 from src.decisioning.risk_signals import (
     is_risk_too_high_for_profile,

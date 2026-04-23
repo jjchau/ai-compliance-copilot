@@ -1,3 +1,16 @@
+"""
+compliance_prediction.py
+
+Purpose:
+    Predict compliance status based on trade characteristics and risk signals.
+
+Usage:
+    from src.decisioning.compliance_prediction import predict_compliance
+
+Author: Jason Chau
+Date: 2026-04-17
+"""
+
 from src.data.schema import Trade
 from src.decisioning.violation_rules import (
     is_kyc_violation,
