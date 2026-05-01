@@ -31,37 +31,50 @@ DETECTION_RATES = {
     "noise": 0.05
 }
 
-def predict_compliance(trade: Trade) -> bool:
+def predict_compliance(trade: Trade) -> dict:
     """
-    A simple heuristic-based compliance prediction function that combines violation rules and risk signals.
-    Returns True if predicted compliant, False if predicted non-compliant.
+    Heuristic-based compliance prediction that outputs probability + label.
+    Designed to simulate imperfect model behavior (FN/FP/noise).
     In a real implementation, this could be replaced with a more sophisticated machine learning model trained on historical data.
     """
-    violation_evidence = []
 
-    # Detect strong violations (but NOT all)
+    score = 0.0  # higher = more likely NON-compliant
+
+    # --- HARD VIOLATIONS (strong signals) ---
     if is_suitability_violation(trade):
-        violation_evidence.append(True)
+        score += 0.6
 
     if is_experience_violation(trade):
-        violation_evidence.append(True)
+        score += 0.5
 
-    # Intentionally MISS KYC sometimes (major FN source)
+    # KYC violation (imperfect detection → FN source)
     if is_kyc_violation(trade):
-        if random.random() < DETECTION_RATES["kyc"]:  # only catch 60% of the time
-            violation_evidence.append(True)
+        if random.random() < DETECTION_RATES["kyc"]:
+            score += 0.8
 
-    # Soft signals → cause false positives
+    # --- SOFT SIGNALS (FP source) ---
     if is_investment_too_agressive_for_horizon(trade):
         if random.random() < DETECTION_RATES["horizon_fp"]:
-            violation_evidence.append(True)
+            score += 0.2
 
     if is_investment_too_aggressive_for_objective(trade):
         if random.random() < DETECTION_RATES["objective_fp"]:
-            violation_evidence.append(True)
+            score += 0.2
 
-    # Small random noise
+    # --- RANDOM NOISE ---
     if random.random() < DETECTION_RATES["noise"]:
-        return False  # random false positive
+        score += 0.3  # random false signal
 
-    return not any(violation_evidence)
+    # --- CONVERT TO PROBABILITY ---
+    # squash score into [0,1]
+    non_compliance_prob = min(score, 1.0)
+
+    compliance_probability = 1.0 - non_compliance_prob
+
+    # --- LABEL (temporary threshold) ---
+    compliance_label = compliance_probability >= 0.9
+
+    return {
+        "compliance_probability": round(compliance_probability, 3),
+        "compliance_label": compliance_label
+    }

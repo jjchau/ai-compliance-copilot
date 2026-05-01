@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import pytest
 from unittest.mock import patch, MagicMock
 from src.decisioning.compliance_prediction import predict_compliance
@@ -25,7 +29,9 @@ class TestPredictCompliance:
         result = predict_compliance(trade)
 
         # Assert
-        assert result is True
+        assert isinstance(result, dict)
+        assert result['compliance_label'] is True
+        assert result['compliance_probability'] == 1.0
 
     @patch('src.decisioning.compliance_prediction.random.random')
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
@@ -47,7 +53,9 @@ class TestPredictCompliance:
         result = predict_compliance(trade)
 
         # Assert
-        assert result is False
+        assert isinstance(result, dict)
+        assert result['compliance_label'] is False
+        assert result['compliance_probability'] == 0.4
 
     @patch('src.decisioning.compliance_prediction.random.random')
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
@@ -69,7 +77,9 @@ class TestPredictCompliance:
         result = predict_compliance(trade)
 
         # Assert
-        assert result is False
+        assert isinstance(result, dict)
+        assert result['compliance_label'] is False
+        assert result['compliance_probability'] == 0.2
 
     @patch('src.decisioning.compliance_prediction.random.random')
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
@@ -91,7 +101,9 @@ class TestPredictCompliance:
         result = predict_compliance(trade)
 
         # Assert
-        assert result is True
+        assert isinstance(result, dict)
+        assert result['compliance_label'] is True
+        assert result['compliance_probability'] == 1.0
 
     @patch('src.decisioning.compliance_prediction.random.random')
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
@@ -113,7 +125,9 @@ class TestPredictCompliance:
         result = predict_compliance(trade)
 
         # Assert
-        assert result is False
+        assert isinstance(result, dict)
+        assert result['compliance_label'] is False
+        assert result['compliance_probability'] == 0.7
 
     @patch('src.decisioning.compliance_prediction.random.random')
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
@@ -135,7 +149,9 @@ class TestPredictCompliance:
         result = predict_compliance(trade)
 
         # Assert
-        assert result is False
+        assert isinstance(result, dict)
+        assert result['compliance_label'] is False
+        assert result['compliance_probability'] == 0.8
 
     @patch('src.decisioning.compliance_prediction.random.random')
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
@@ -157,4 +173,6 @@ class TestPredictCompliance:
         result = predict_compliance(trade)
 
         # Assert
-        assert result is False
+        assert isinstance(result, dict)
+        assert result['compliance_label'] is False
+        assert result['compliance_probability'] == 0.8
