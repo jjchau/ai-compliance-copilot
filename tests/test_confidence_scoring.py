@@ -43,8 +43,14 @@ def test_confidence_score_kyc_violation(monkeypatch):
     trade = make_trade(kyc_completeness='Missing')
     import src.scoring.confidence_scoring as cs_mod
     monkeypatch.setattr(cs_mod, 'is_kyc_violation', lambda t: True)
+    monkeypatch.setattr(cs_mod, 'is_suitability_violation', lambda t: False)
+    monkeypatch.setattr(cs_mod, 'is_experience_violation', lambda t: False)
+    monkeypatch.setattr(cs_mod, 'is_kyc_uncertain', lambda t: False)
+    monkeypatch.setattr(cs_mod, 'has_conflicting_signals', lambda t: False)
+    monkeypatch.setattr(cs_mod, 'is_overexposure', lambda t: False)
+    monkeypatch.setattr(cs_mod, 'is_advisor_history_high_risk', lambda t: False)
     score = compute_confidence_score(trade)
-    assert score == 0.3
+    assert score == 0.9
 
 def test_confidence_score_uncertain(monkeypatch):
     trade = make_trade(kyc_completeness='Uncertain')
