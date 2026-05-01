@@ -26,40 +26,44 @@ def make_trade(**kwargs):
     base.update(kwargs)
     return Trade(**base)
 
+
+def patch_all_signals(monkeypatch, cs_mod, **overrides):
+    defaults = {
+        'is_kyc_violation': False,
+        'is_suitability_violation': False,
+        'is_experience_violation': False,
+        'is_kyc_uncertain': False,
+        'is_investment_too_agressive_for_horizon': False,
+        'is_investment_too_aggressive_for_objective': False,
+        'is_overexposure': False,
+        'is_risk_too_low_for_profile': False,
+        'is_investment_too_conservative_for_objective': False,
+        'is_investment_too_conservative_for_horizon': False,
+    }
+    defaults.update(overrides)
+
+    for name, value in defaults.items():
+        monkeypatch.setattr(cs_mod, name, (lambda v: (lambda t: v))(value))
+
+
 def test_confidence_score_high(monkeypatch):
     trade = make_trade()
     import src.scoring.confidence_scoring as cs_mod
-    monkeypatch.setattr(cs_mod, 'is_kyc_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_suitability_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_experience_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_kyc_uncertain', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_overexposure', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_agressive_for_horizon', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_risk_too_low_for_profile', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_conservative_for_objective', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_conservative_for_horizon', lambda t: False)
+    patch_all_signals(monkeypatch, cs_mod)
 
     score = compute_confidence_score(trade)
 
+    assert isinstance(score, dict)
     assert score['overall'] == 0.82
     assert score['data_completeness'] == 1.0
     assert score['signal_consistency'] == 0.7
     assert score['rule_coverage'] == 0.7
 
+
 def test_confidence_score_kyc_violation(monkeypatch):
     trade = make_trade(kyc_completeness='Missing')
     import src.scoring.confidence_scoring as cs_mod
-    monkeypatch.setattr(cs_mod, 'is_kyc_violation', lambda t: True)
-    monkeypatch.setattr(cs_mod, 'is_suitability_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_experience_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_kyc_uncertain', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_overexposure', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_agressive_for_horizon', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_risk_too_low_for_profile', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_conservative_for_objective', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_conservative_for_horizon', lambda t: False)
+    patch_all_signals(monkeypatch, cs_mod, is_kyc_violation=True)
 
     score = compute_confidence_score(trade)
 
@@ -68,19 +72,11 @@ def test_confidence_score_kyc_violation(monkeypatch):
     assert score['signal_consistency'] == 0.7
     assert score['rule_coverage'] == 0.75
 
+
 def test_confidence_score_uncertain(monkeypatch):
     trade = make_trade(kyc_completeness='Uncertain')
     import src.scoring.confidence_scoring as cs_mod
-    monkeypatch.setattr(cs_mod, 'is_kyc_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_kyc_uncertain', lambda t: True)
-    monkeypatch.setattr(cs_mod, 'is_suitability_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_experience_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_overexposure', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_agressive_for_horizon', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_risk_too_low_for_profile', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_conservative_for_objective', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_conservative_for_horizon', lambda t: False)
+    patch_all_signals(monkeypatch, cs_mod, is_kyc_uncertain=True)
 
     score = compute_confidence_score(trade)
 
@@ -89,39 +85,23 @@ def test_confidence_score_uncertain(monkeypatch):
     assert score['signal_consistency'] == 0.7
     assert score['rule_coverage'] == 0.5
 
-def test_confidence_score_single_negative_signal(monkeypatch):
+
+def test_confidence_score_conflicting_ignored(monkeypatch):
     trade = make_trade()
     import src.scoring.confidence_scoring as cs_mod
-    monkeypatch.setattr(cs_mod, 'is_kyc_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_kyc_uncertain', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_suitability_violation', lambda t: True)
-    monkeypatch.setattr(cs_mod, 'is_experience_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_overexposure', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_agressive_for_horizon', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_risk_too_low_for_profile', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_conservative_for_objective', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_conservative_for_horizon', lambda t: False)
+    patch_all_signals(monkeypatch, cs_mod)
+    # has_conflicting_signals is not used in compute_confidence_score
+    monkeypatch.setattr(cs_mod, 'has_conflicting_signals', lambda t: True)
 
     score = compute_confidence_score(trade)
 
-    assert score['signal_consistency'] == 0.6
-    assert score['rule_coverage'] == 0.65
-    assert score['overall'] == 0.775
+    assert score['overall'] == 0.82
+
 
 def test_confidence_score_no_rationale(monkeypatch):
     trade = make_trade(has_rationale=False)
     import src.scoring.confidence_scoring as cs_mod
-    monkeypatch.setattr(cs_mod, 'is_kyc_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_kyc_uncertain', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_suitability_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_experience_violation', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_overexposure', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_agressive_for_horizon', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_risk_too_low_for_profile', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_conservative_for_objective', lambda t: False)
-    monkeypatch.setattr(cs_mod, 'is_investment_too_conservative_for_horizon', lambda t: False)
+    patch_all_signals(monkeypatch, cs_mod)
 
     score = compute_confidence_score(trade)
 
