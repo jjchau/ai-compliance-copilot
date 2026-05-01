@@ -3,7 +3,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from src.decisioning.decision_engine import evaluate_trade
 from src.data.schema import Trade
 
@@ -54,7 +54,7 @@ def test_evaluate_trade_compliant_trade(mock_predict, mock_risk, mock_confidence
     result = evaluate_trade(trade)
 
     # Verify all mocks were called with the trade
-    mock_predict.assert_called_with(trade)
+    mock_predict.assert_called_once_with(trade)
     mock_risk.assert_called_once_with(trade)
     mock_confidence.assert_called_once_with(trade)
     mock_escalate.assert_called_once_with(trade, 0.95, 25, 0.85)
@@ -96,6 +96,8 @@ def test_evaluate_trade_non_compliant_trade(mock_predict, mock_risk, mock_confid
     # Execute
     result = evaluate_trade(trade)
 
+    mock_predict.assert_called_once_with(trade)
+
     # Verify result structure
     assert result['trade_id'] == 'TRADE-456'
     assert result['compliance_label'] is False
@@ -129,6 +131,8 @@ def test_evaluate_trade_high_risk_escalated(mock_predict, mock_risk, mock_confid
     # Execute
     result = evaluate_trade(trade)
 
+    mock_predict.assert_called_once_with(trade)
+
     # Verify escalation despite compliant prediction
     assert result['compliance_label'] is True
     assert result['risk_score'] == 85
@@ -158,6 +162,8 @@ def test_evaluate_trade_low_confidence_escalated(mock_predict, mock_risk, mock_c
 
     # Execute
     result = evaluate_trade(trade)
+
+    mock_predict.assert_called_once_with(trade)
 
     # Verify escalation despite compliant prediction and low risk
     assert result['compliance_label'] is True
@@ -189,6 +195,8 @@ def test_evaluate_trade_with_conflicts(mock_predict, mock_risk, mock_confidence,
     # Execute
     result = evaluate_trade(trade)
 
+    mock_predict.assert_called_once_with(trade)
+
     # Verify conflict information
     assert result['has_conflicting_signals'] is True
     assert result['conflict_signals'] == ['Conflicting risk signals detected']
@@ -218,6 +226,8 @@ def test_evaluate_trade_zero_scores(mock_predict, mock_risk, mock_confidence,
     # Execute
     result = evaluate_trade(trade)
 
+    mock_predict.assert_called_once_with(trade)
+
     # Verify zero scores are handled correctly
     assert result['risk_score'] == 0
     assert result['confidence_score'] == 0.0
@@ -246,6 +256,8 @@ def test_evaluate_trade_max_scores(mock_predict, mock_risk, mock_confidence,
 
     # Execute
     result = evaluate_trade(trade)
+
+    mock_predict.assert_called_once_with(trade)
 
     # Verify max scores
     assert result['risk_score'] == 100
@@ -280,6 +292,8 @@ def test_evaluate_trade_multiple_conflicts(mock_predict, mock_risk, mock_confide
     # Execute
     result = evaluate_trade(trade)
 
+    mock_predict.assert_called_once_with(trade)
+
     # Verify multiple conflicts
     assert result['has_conflicting_signals'] is True
     assert len(result['conflict_signals']) == 3
@@ -310,6 +324,8 @@ def test_evaluate_trade_call_order(mock_predict, mock_risk, mock_confidence,
 
     # Execute
     result = evaluate_trade(trade)
+
+    mock_predict.assert_called_once_with(trade)
 
     # Verify call order by checking that compliance_probability, risk_score and confidence_score
     # are passed to assess_escalation
@@ -342,6 +358,8 @@ def test_evaluate_trade_different_trade_ids(mock_predict, mock_risk, mock_confid
         result = evaluate_trade(trade)
         assert result['trade_id'] == trade_id
 
+    assert mock_predict.call_count == len(trade_ids)
+
 
 @patch('src.decisioning.decision_engine.get_signals')
 @patch('src.decisioning.decision_engine.has_conflicting_signals')
@@ -365,6 +383,8 @@ def test_evaluate_trade_empty_conflict_signals(mock_predict, mock_risk, mock_con
 
     # Execute
     result = evaluate_trade(trade)
+
+    mock_predict.assert_called_once_with(trade)
 
     # Verify empty conflict signals
     assert result['has_conflicting_signals'] is False
@@ -395,6 +415,8 @@ def test_evaluate_trade_result_structure(mock_predict, mock_risk, mock_confidenc
     # Execute
     result = evaluate_trade(trade)
 
+    mock_predict.assert_called_once_with(trade)
+
     # Verify result is a dictionary
     assert isinstance(result, dict)
 
@@ -406,6 +428,7 @@ def test_evaluate_trade_result_structure(mock_predict, mock_risk, mock_confidenc
         'risk_score',
         'confidence_score',
         'escalation_level',
+        'priority_score',
         'has_conflicting_signals',
         'conflict_signals'
     }
@@ -418,5 +441,6 @@ def test_evaluate_trade_result_structure(mock_predict, mock_risk, mock_confidenc
     assert isinstance(result['risk_score'], int)
     assert isinstance(result['confidence_score'], float)
     assert isinstance(result['escalation_level'], str)
+    assert isinstance(result['priority_score'], float)
     assert isinstance(result['has_conflicting_signals'], bool)
     assert isinstance(result['conflict_signals'], list)
