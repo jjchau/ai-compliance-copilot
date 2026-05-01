@@ -41,44 +41,39 @@ def compute_confidence_score(trade: Trade) -> float:
     # Start from a high baseline
     confidence = 0.9
 
-    # Critical uncertainty: missing KYC
-    if is_kyc_violation(trade):
-        return 0.3  # immediate low confidence
-
-    # Data quality issues
+    # Data uncertainty
     if is_kyc_uncertain(trade):
         confidence -= 0.2
 
     if not trade.has_rationale:
         confidence -= 0.1
 
-    # Ambiguity: conflicting signals
+    # Ambiguity
     if has_conflicting_signals(trade):
         confidence -= 0.25
 
-    # Contextual risk factors (not violations, but add uncertainty)
+    # Contextual uncertainty
     if is_overexposure(trade):
         confidence -= 0.1
 
     if is_advisor_history_high_risk(trade):
         confidence -= 0.05
 
-    # Strong, clear cases increase confidence
+    # Clear cases increase confidence
     violations = sum([
         is_suitability_violation(trade),
         is_experience_violation(trade),
+        is_kyc_violation(trade),
     ])
 
     if violations >= 2:
-        confidence += 0.1  # clearly non-compliant
+        confidence += 0.1
 
     if (
-    violations == 0
-    and not is_kyc_uncertain(trade)
-    and not has_conflicting_signals(trade)
+        violations == 0
+        and not is_kyc_uncertain(trade)
+        and not has_conflicting_signals(trade)
     ):
-        confidence += 0.1  # clearly clean
+        confidence += 0.1
 
-
-    # Clamp to valid range
     return max(0.0, min(confidence, 1.0))
