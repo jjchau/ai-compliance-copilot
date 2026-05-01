@@ -15,26 +15,28 @@ from src.data.schema import Trade
 from src.decisioning.compliance_prediction import predict_compliance
 from src.scoring.risk_scoring import compute_risk_score
 from src.scoring.confidence_scoring import compute_confidence_score
-from src.decisioning.policy_rules import should_flag
+from src.decisioning.policy_rules import assess_escalation
 from src.decisioning.conflict_detection import (
     has_conflicting_signals,
     get_signals
 )
 
 def evaluate_trade(trade: Trade) -> dict:
-    compliance_prediction = predict_compliance(trade)
+    compliance_probability = predict_compliance(trade)['compliance_probability']
+    compliance_label = predict_compliance(trade)['compliance_label']
     risk_score = compute_risk_score(trade)
-    confidence_score = compute_confidence_score(trade)
-    flag_for_review = should_flag(trade, risk_score, confidence_score)
+    confidence_score = compute_confidence_score(trade)['overall']
+    escalation_level = assess_escalation(trade, compliance_probability, risk_score, confidence_score)
     has_conflict = has_conflicting_signals(trade)
     conflict_signals = get_signals(trade)
 
     return {
         'trade_id': trade.trade_id,
-        'compliance_prediction': compliance_prediction,
+        'compliance_probability': compliance_probability,
+        'compliance_label': compliance_label,
         'risk_score': risk_score,
         'confidence_score': confidence_score,
-        'flag_for_review': flag_for_review,
+        'escalation_level': escalation_level,
         'has_conflicting_signals': has_conflict,
         'conflict_signals': conflict_signals
     }
