@@ -63,7 +63,7 @@ POLICY_CORPUS = {
     "POLICY_RISK_002": {
         "title": "Leverage Suitability",
         "category": "Risk",
-        "text": "Leveraged investment strategies must only be recommended to clients who can تحمل the associated risks and losses.",
+        "text": "Leveraged investment strategies must only be recommended to clients who can absorb the associated risks and losses.",
         "severity": "high",
         "tags": ["risk", "leverage"]
     },
@@ -90,7 +90,7 @@ POLICY_CORPUS = {
     "POLICY_CLIENT_001": {
         "title": "Client Interest First",
         "category": "Suitability",
-        "text": "All recommendations must prioritize the client’s interests over the advisor’s or firm’s interests.",
+        "text": "All recommendations must prioritize the client's interests over the advisor's or firm's interests.",
         "severity": "critical",
         "tags": ["fiduciary", "ethics"]
     },
