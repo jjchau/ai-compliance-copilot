@@ -109,3 +109,68 @@ def test_confidence_score_no_rationale(monkeypatch):
     assert score['data_completeness'] == 0.9
     assert score['signal_consistency'] == 0.7
     assert score['rule_coverage'] == 0.7
+
+
+def test_confidence_score_single_signal_consistency(monkeypatch):
+    trade = make_trade()
+    import src.scoring.confidence_scoring as cs_mod
+    patch_all_signals(monkeypatch, cs_mod, is_overexposure=True)
+
+    score = compute_confidence_score(trade)
+
+    assert score['signal_consistency'] == 0.6
+    assert score['rule_coverage'] == 0.5
+    assert score['overall'] == 0.73
+
+
+def test_confidence_score_two_strong_violations(monkeypatch):
+    trade = make_trade()
+    import src.scoring.confidence_scoring as cs_mod
+    patch_all_signals(
+        monkeypatch,
+        cs_mod,
+        is_suitability_violation=True,
+        is_experience_violation=True
+    )
+
+    score = compute_confidence_score(trade)
+
+    assert score['data_completeness'] == 1.0
+    assert score['signal_consistency'] == 1.0
+    assert score['rule_coverage'] == 0.8
+    assert score['overall'] == 0.94
+
+
+def test_confidence_score_soft_signals_consistent(monkeypatch):
+    trade = make_trade()
+    import src.scoring.confidence_scoring as cs_mod
+    patch_all_signals(
+        monkeypatch,
+        cs_mod,
+        is_investment_too_agressive_for_horizon=True,
+        is_investment_too_aggressive_for_objective=True
+    )
+
+    score = compute_confidence_score(trade)
+
+    assert score['signal_consistency'] == 1.0
+    assert score['rule_coverage'] == 0.65
+    assert score['overall'] == 0.895
+
+
+def test_confidence_score_soft_signals_conflicting_reduces_rule_coverage(monkeypatch):
+    trade = make_trade()
+    import src.scoring.confidence_scoring as cs_mod
+    patch_all_signals(
+        monkeypatch,
+        cs_mod,
+        is_investment_too_agressive_for_horizon=True,
+        is_investment_too_aggressive_for_objective=True,
+        is_risk_too_low_for_profile=True
+    )
+
+    score = compute_confidence_score(trade)
+
+    assert score['signal_consistency'] == 0.667
+    assert score['rule_coverage'] == 0.3
+    assert score['overall'] == 0.69
