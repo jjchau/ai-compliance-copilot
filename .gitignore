@@ -221,3 +221,6 @@ data/processed/
 
 # Notebooks checkpoints
 .ipynb_checkpoints/
+
+# PowerPoint files
+*.pptx
