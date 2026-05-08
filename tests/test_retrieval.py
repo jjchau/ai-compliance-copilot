@@ -152,6 +152,28 @@ class TestRetrievePoliciesKycSignals:
         
         assert 'POLICY_KYC_001' not in result
 
+    @patch('src.policy.retrieval.random.random')
+    def test_kyc_uncertain_triggers_kyc_002(self, mock_random):
+        """Test that uncertain KYC triggers POLICY_KYC_002."""
+        mock_random.return_value = 0.3
+        
+        trade = make_trade(kyc_completeness='Uncertain')
+        result = retrieve_policies(trade)
+        
+        assert 'POLICY_KYC_002' in result
+
+    @patch('src.policy.retrieval.has_conflicting_signals')
+    @patch('src.policy.retrieval.random.random')
+    def test_conflicting_signals_triggers_kyc_003(self, mock_random, mock_conflict):
+        """Test that conflicting signals trigger POLICY_KYC_003."""
+        mock_random.return_value = 0.3
+        mock_conflict.return_value = True
+        
+        trade = make_trade(kyc_completeness='Complete')
+        result = retrieve_policies(trade)
+        
+        assert 'POLICY_KYC_003' in result
+
 
 class TestRetrievePoliciesSuitabilitySignals:
     """Test retrieval based on suitability attributes."""
@@ -195,6 +217,30 @@ class TestRetrievePoliciesSuitabilitySignals:
         result = retrieve_policies(trade)
         
         assert 'POLICY_SUIT_003' not in result
+
+
+class TestRetrievePoliciesRiskAndSupervisionSignals:
+    """Test retrieval based on risk and supervisor-related policies."""
+
+    @patch('src.policy.retrieval.random.random')
+    def test_high_amount_triggers_risk_001(self, mock_random):
+        """Test that high investment amount triggers POLICY_RISK_001."""
+        mock_random.return_value = 0.3
+        
+        trade = make_trade(investment_amount=40000.0)
+        result = retrieve_policies(trade)
+        
+        assert 'POLICY_RISK_001' in result
+
+    @patch('src.policy.retrieval.random.random')
+    def test_high_advisor_history_risk_triggers_sup_001(self, mock_random):
+        """Test that high advisor history risk triggers POLICY_SUP_001."""
+        mock_random.return_value = 0.3
+        
+        trade = make_trade(advisor_history_risk='High')
+        result = retrieve_policies(trade)
+        
+        assert 'POLICY_SUP_001' in result
 
 
 class TestRetrievePoliciesDocumentationSignals:
@@ -253,10 +299,7 @@ class TestRetrievePoliciesNoiseInjection:
     @patch('src.policy.retrieval.random.random')
     def test_noise_injection_adds_irrelevant_policies(self, mock_random, mock_randint, mock_sample):
         """Test that noise injection adds irrelevant policies."""
-        # First calls to random: trigger no relevant policies
-        # Last call to random: trigger noise injection
-        mock_random.side_effect = [0.1, 0.1, 0.1, 0.1, 0.1, 0.9]  # Last one triggers noise
-        
+        mock_random.return_value = 0.1
         mock_randint.return_value = 1
         mock_sample.return_value = ['POLICY_RISK_001']
         
@@ -264,36 +307,32 @@ class TestRetrievePoliciesNoiseInjection:
         result = retrieve_policies(trade)
         
         assert 'POLICY_RISK_001' in result
+        assert len(result) == len(set(result))
 
     @patch('src.policy.retrieval.random.random')
     def test_noise_respects_config_rate(self, mock_random):
-        """Test that noise injection respects noise_rate config."""
-        # All random calls below noise_rate except last
-        mock_random.return_value = 0.1
+        """Test that no noise is injected when noise_rate is not met."""
+        mock_random.return_value = 0.9
         
         trade = make_trade()
         result = retrieve_policies(trade)
         
-        # No noise should be injected since random is always < noise_rate threshold initially
-        # This is a probabilistic test, so we just verify it works without error
-        assert isinstance(result, list)
+        assert result == []
 
-    @patch('src.policy.retrieval.random.randint')
     @patch('src.policy.retrieval.random.sample')
+    @patch('src.policy.retrieval.random.randint')
     @patch('src.policy.retrieval.random.random')
-    def test_noise_respects_max_noise(self, mock_random, mock_sample, mock_randint):
+    def test_noise_respects_max_noise(self, mock_random, mock_randint, mock_sample):
         """Test that noise respects max_noise limit."""
-        mock_random.side_effect = [0.1, 0.1, 0.1, 0.1, 0.1, 0.9]
-        
-        # Return more noise than max_noise allows
+        mock_random.return_value = 0.1
         mock_randint.return_value = 10
-        mock_sample.return_value = ['POLICY_RISK_001', 'POLICY_RISK_002']
+        mock_sample.return_value = ALL_POLICY_IDS[:10]
         
         trade = make_trade()
         result = retrieve_policies(trade)
         
-        # Should not exceed max_noise
-        assert isinstance(result, list)
+        assert len(result) == 10
+        assert set(result) == set(ALL_POLICY_IDS[:10])
 
 
 class TestRetrievePoliciesMultipleSignals:
