@@ -211,6 +211,7 @@ __marimo__/
 
 # Log files
 logs/
+*.jsonl
 *.db
 
 # Generated data / artifacts
