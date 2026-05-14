@@ -48,7 +48,7 @@ class TestAssignCaseType:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=False), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=True), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_horizon', return_value=True), \
              patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
@@ -58,7 +58,7 @@ class TestAssignCaseType:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=False), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_horizon', return_value=False), \
              patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=True):
@@ -68,7 +68,7 @@ class TestAssignCaseType:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=False), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_horizon', return_value=False), \
              patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
@@ -80,7 +80,7 @@ class TestAssignDifficulty:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=False), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_horizon', return_value=False), \
              patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
@@ -90,7 +90,7 @@ class TestAssignDifficulty:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=True), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=True), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_horizon', return_value=False), \
              patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
@@ -100,7 +100,7 @@ class TestAssignDifficulty:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=True), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_horizon', return_value=False), \
              patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
@@ -110,7 +110,7 @@ class TestAssignDifficulty:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=False), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=True), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_horizon', return_value=True), \
              patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):
@@ -120,7 +120,7 @@ class TestAssignDifficulty:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=False), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=False), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_horizon', return_value=False), \
              patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=True):
@@ -130,7 +130,7 @@ class TestAssignDifficulty:
         with patch('src.decisioning.labeling.is_kyc_violation', return_value=True), \
              patch('src.decisioning.labeling.is_suitability_violation', return_value=False), \
              patch('src.decisioning.labeling.is_experience_violation', return_value=False), \
-             patch('src.decisioning.labeling.is_investment_too_agressive_for_horizon', return_value=True), \
+             patch('src.decisioning.labeling.is_investment_too_aggressive_for_horizon', return_value=True), \
              patch('src.decisioning.labeling.is_investment_too_aggressive_for_objective', return_value=False), \
              patch('src.decisioning.labeling.is_overexposure', return_value=False), \
              patch('src.decisioning.labeling.is_kyc_uncertain', return_value=False):

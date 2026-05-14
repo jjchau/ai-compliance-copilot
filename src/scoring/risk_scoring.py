@@ -63,7 +63,7 @@ def compute_risk_score(trade: Trade) -> int:
         contextual_risk += WEIGHTS["kyc_uncertain"]
 
     # --- SOFT MISALIGNMENTS ---
-    if is_investment_too_agressive_for_horizon(trade):
+    if is_investment_too_aggressive_for_horizon(trade):
         contextual_risk += WEIGHTS["aggressive_for_horizon"]
 
     if is_investment_too_aggressive_for_objective(trade):

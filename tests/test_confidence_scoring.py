@@ -33,7 +33,7 @@ def patch_all_signals(monkeypatch, cs_mod, **overrides):
         'is_suitability_violation': False,
         'is_experience_violation': False,
         'is_kyc_uncertain': False,
-        'is_investment_too_agressive_for_horizon': False,
+        'is_investment_too_aggressive_for_horizon': False,
         'is_investment_too_aggressive_for_objective': False,
         'is_overexposure': False,
         'is_risk_too_low_for_profile': False,
@@ -147,7 +147,7 @@ def test_confidence_score_soft_signals_consistent(monkeypatch):
     patch_all_signals(
         monkeypatch,
         cs_mod,
-        is_investment_too_agressive_for_horizon=True,
+        is_investment_too_aggressive_for_horizon=True,
         is_investment_too_aggressive_for_objective=True
     )
 
@@ -164,7 +164,7 @@ def test_confidence_score_soft_signals_conflicting_reduces_rule_coverage(monkeyp
     patch_all_signals(
         monkeypatch,
         cs_mod,
-        is_investment_too_agressive_for_horizon=True,
+        is_investment_too_aggressive_for_horizon=True,
         is_investment_too_aggressive_for_objective=True,
         is_risk_too_low_for_profile=True
     )
