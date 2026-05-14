@@ -31,7 +31,7 @@ def assign_case_type(trade: Trade) -> Literal["Suitability Violation", "KYC Miss
         return "Suitability Violation"
     elif is_experience_violation(trade):
         return "Insufficient Experience"
-    elif any([is_investment_too_agressive_for_horizon(trade), is_investment_too_aggressive_for_objective(trade), is_overexposure(trade), is_kyc_uncertain(trade) ]):
+    elif any([is_investment_too_aggressive_for_horizon(trade), is_investment_too_aggressive_for_objective(trade), is_overexposure(trade), is_kyc_uncertain(trade) ]):
         return "Risk Signal"
     else:
         return "Aligned Recommendation"
@@ -44,7 +44,7 @@ def assign_difficulty(trade: Trade) -> Literal['Easy', 'Medium', 'Hard']:
     ])
 
     soft_signals = sum([
-        is_investment_too_agressive_for_horizon(trade),
+        is_investment_too_aggressive_for_horizon(trade),
         is_investment_too_aggressive_for_objective(trade),
         is_overexposure(trade),
         is_kyc_uncertain(trade)

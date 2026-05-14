@@ -18,7 +18,7 @@ from src.decisioning.violation_rules import (
     is_experience_violation,
 )
 from src.decisioning.risk_signals import (
-    is_investment_too_agressive_for_horizon,
+    is_investment_too_aggressive_for_horizon,
     is_investment_too_aggressive_for_objective
 )
 
@@ -41,7 +41,7 @@ def predict_with_retrieval(trade: Trade, retrieved_policies: list) -> dict[str, 
 
     # --- SOFT SIGNALS (FP source) ---
     if "POLICY_SUIT_003" in retrieved_policies:
-        if is_investment_too_agressive_for_horizon(trade):
+        if is_investment_too_aggressive_for_horizon(trade):
             score += 0.2
 
     if "POLICY_SUIT_002" in retrieved_policies:

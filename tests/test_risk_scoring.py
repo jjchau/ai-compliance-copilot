@@ -79,7 +79,7 @@ def test_compute_risk_score_kyc_uncertain():
 def test_compute_risk_score_aggressive_for_horizon():
     """Test investment too aggressive for horizon adds 15 points."""
     trade = make_trade()
-    with patch('src.scoring.risk_scoring.is_investment_too_agressive_for_horizon', return_value=True):
+    with patch('src.scoring.risk_scoring.is_investment_too_aggressive_for_horizon', return_value=True):
         score = compute_risk_score(trade)
         assert score == 15
 
@@ -148,7 +148,7 @@ def test_compute_risk_score_regulatory_vs_contextual():
 def test_compute_risk_score_all_soft_signals():
     """Test all soft signals combined."""
     trade = make_trade()
-    with patch('src.scoring.risk_scoring.is_investment_too_agressive_for_horizon', return_value=True), \
+    with patch('src.scoring.risk_scoring.is_investment_too_aggressive_for_horizon', return_value=True), \
          patch('src.scoring.risk_scoring.is_investment_too_aggressive_for_objective', return_value=True), \
          patch('src.scoring.risk_scoring.is_risk_too_low_for_profile', return_value=True), \
          patch('src.scoring.risk_scoring.is_investment_too_conservative_for_horizon', return_value=True), \

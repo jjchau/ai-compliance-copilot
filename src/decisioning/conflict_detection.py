@@ -16,7 +16,7 @@ from src.decisioning.risk_signals import (
     is_risk_too_high_for_profile,
     is_too_complex_for_experience,
     is_investment_too_aggressive_for_objective,
-    is_investment_too_agressive_for_horizon,
+    is_investment_too_aggressive_for_horizon,
     is_risk_too_low_for_profile,
     is_investment_too_conservative_for_objective,
     is_investment_too_conservative_for_horizon
@@ -31,7 +31,7 @@ def get_signals(trade: Trade) -> dict:
         "risk_too_high_for_profile": is_risk_too_high_for_profile(trade),
         "too_complex_for_experience": is_too_complex_for_experience(trade),
         "investment_too_aggressive_for_objective": is_investment_too_aggressive_for_objective(trade),
-        "investment_too_agressive_for_horizon": is_investment_too_agressive_for_horizon(trade),
+        "investment_too_aggressive_for_horizon": is_investment_too_aggressive_for_horizon(trade),
         "risk_too_low_for_profile": is_risk_too_low_for_profile(trade),
         "investment_too_conservative_for_objective": is_investment_too_conservative_for_objective(trade),
         "investment_too_conservative_for_horizon": is_investment_too_conservative_for_horizon(trade)
@@ -50,7 +50,7 @@ def has_conflicting_signals(trade: Trade) -> bool:
         signals["risk_too_high_for_profile"],      # pushing toward risk
         signals["too_complex_for_experience"],
         signals["investment_too_aggressive_for_objective"],
-        signals["investment_too_agressive_for_horizon"]
+        signals["investment_too_aggressive_for_horizon"]
     ]
 
     conservative_signals = [

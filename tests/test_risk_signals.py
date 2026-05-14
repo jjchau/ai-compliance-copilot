@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 from src.data.schema import Trade
 from src.decisioning.risk_signals import (
-    is_investment_too_agressive_for_horizon, 
+    is_investment_too_aggressive_for_horizon, 
     is_investment_too_aggressive_for_objective, 
     is_overexposure, 
     is_kyc_uncertain,
@@ -25,27 +25,27 @@ class TestIsHorizonMismatch:
     def test_short_horizon_stocks(self, mock_trade):
         mock_trade.investment_time_horizon = 'Short'
         mock_trade.investment_type = 'Stocks'
-        assert is_investment_too_agressive_for_horizon(mock_trade) is True
+        assert is_investment_too_aggressive_for_horizon(mock_trade) is True
 
     def test_short_horizon_options(self, mock_trade):
         mock_trade.investment_time_horizon = 'Short'
         mock_trade.investment_type = 'Options'
-        assert is_investment_too_agressive_for_horizon(mock_trade) is True
+        assert is_investment_too_aggressive_for_horizon(mock_trade) is True
 
     def test_short_horizon_bonds(self, mock_trade):
         mock_trade.investment_time_horizon = 'Short'
         mock_trade.investment_type = 'Bonds'
-        assert is_investment_too_agressive_for_horizon(mock_trade) is False
+        assert is_investment_too_aggressive_for_horizon(mock_trade) is False
 
     def test_medium_horizon_stocks(self, mock_trade):
         mock_trade.investment_time_horizon = 'Medium'
         mock_trade.investment_type = 'Stocks'
-        assert is_investment_too_agressive_for_horizon(mock_trade) is False
+        assert is_investment_too_aggressive_for_horizon(mock_trade) is False
 
     def test_long_horizon_options(self, mock_trade):
         mock_trade.investment_time_horizon = 'Long'
         mock_trade.investment_type = 'Options'
-        assert is_investment_too_agressive_for_horizon(mock_trade) is False
+        assert is_investment_too_aggressive_for_horizon(mock_trade) is False
 
 
 class TestIsInvestmentTooAggressiveForObjective:

@@ -47,7 +47,7 @@ def is_too_complex_for_experience(trade: Trade) -> bool:
     return trade.investment_experience == "Beginner" and trade.investment_type == "Options"
 
 # --- Horizon ---
-def is_investment_too_agressive_for_horizon(trade: Trade) -> bool:
+def is_investment_too_aggressive_for_horizon(trade: Trade) -> bool:
     """
     An investment too aggressive for the time horizon occurs when the client's investment time horizon is not aligned with the investment type. For example, a short-term investor investing in long-term products like Mutual Funds or ETFs may be a signal of non-compliance, but it should be evaluated alongside other factors such as suitability and risk alignment.
     """

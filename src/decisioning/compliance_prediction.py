@@ -18,7 +18,7 @@ from src.decisioning.violation_rules import (
     is_experience_violation,
 )
 from src.decisioning.risk_signals import (
-    is_investment_too_agressive_for_horizon,
+    is_investment_too_aggressive_for_horizon,
     is_investment_too_aggressive_for_objective
 )
 import random
@@ -53,7 +53,7 @@ def predict_compliance(trade: Trade) -> dict:
             score += 0.8
 
     # --- SOFT SIGNALS (FP source) ---
-    if is_investment_too_agressive_for_horizon(trade):
+    if is_investment_too_aggressive_for_horizon(trade):
         if random.random() < DETECTION_RATES["horizon_fp"]:
             score += 0.2
 

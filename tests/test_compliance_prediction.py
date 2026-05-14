@@ -13,7 +13,7 @@ class TestPredictCompliance:
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
     @patch('src.decisioning.compliance_prediction.is_experience_violation')
     @patch('src.decisioning.compliance_prediction.is_kyc_violation')
-    @patch('src.decisioning.compliance_prediction.is_investment_too_agressive_for_horizon')
+    @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_horizon')
     @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_objective')
     def test_predict_compliance_no_violations(self, mock_obj_aggr_obj, mock_obj_aggr_horizon, mock_kyc, mock_exp, mock_suit, mock_random):
         # Arrange
@@ -37,7 +37,7 @@ class TestPredictCompliance:
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
     @patch('src.decisioning.compliance_prediction.is_experience_violation')
     @patch('src.decisioning.compliance_prediction.is_kyc_violation')
-    @patch('src.decisioning.compliance_prediction.is_investment_too_agressive_for_horizon')
+    @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_horizon')
     @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_objective')
     def test_predict_compliance_suitability_violation(self, mock_obj_aggr_obj, mock_obj_aggr_horizon, mock_kyc, mock_exp, mock_suit, mock_random):
         # Arrange
@@ -61,7 +61,7 @@ class TestPredictCompliance:
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
     @patch('src.decisioning.compliance_prediction.is_experience_violation')
     @patch('src.decisioning.compliance_prediction.is_kyc_violation')
-    @patch('src.decisioning.compliance_prediction.is_investment_too_agressive_for_horizon')
+    @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_horizon')
     @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_objective')
     def test_predict_compliance_kyc_violation_detected(self, mock_obj_aggr_obj, mock_obj_aggr_horizon, mock_kyc, mock_exp, mock_suit, mock_random):
         # Arrange
@@ -85,7 +85,7 @@ class TestPredictCompliance:
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
     @patch('src.decisioning.compliance_prediction.is_experience_violation')
     @patch('src.decisioning.compliance_prediction.is_kyc_violation')
-    @patch('src.decisioning.compliance_prediction.is_investment_too_agressive_for_horizon')
+    @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_horizon')
     @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_objective')
     def test_predict_compliance_kyc_violation_missed(self, mock_obj_aggr_obj, mock_obj_aggr_horizon, mock_kyc, mock_exp, mock_suit, mock_random):
         # Arrange
@@ -109,7 +109,7 @@ class TestPredictCompliance:
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
     @patch('src.decisioning.compliance_prediction.is_experience_violation')
     @patch('src.decisioning.compliance_prediction.is_kyc_violation')
-    @patch('src.decisioning.compliance_prediction.is_investment_too_agressive_for_horizon')
+    @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_horizon')
     @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_objective')
     def test_predict_compliance_false_positive_noise(self, mock_obj_aggr_obj, mock_obj_aggr_horizon, mock_kyc, mock_exp, mock_suit, mock_random):
         # Arrange
@@ -133,7 +133,7 @@ class TestPredictCompliance:
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
     @patch('src.decisioning.compliance_prediction.is_experience_violation')
     @patch('src.decisioning.compliance_prediction.is_kyc_violation')
-    @patch('src.decisioning.compliance_prediction.is_investment_too_agressive_for_horizon')
+    @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_horizon')
     @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_objective')
     def test_predict_compliance_horizon_mismatch_fp(self, mock_obj_aggr_obj, mock_obj_aggr_horizon, mock_kyc, mock_exp, mock_suit, mock_random):
         # Arrange
@@ -157,7 +157,7 @@ class TestPredictCompliance:
     @patch('src.decisioning.compliance_prediction.is_suitability_violation')
     @patch('src.decisioning.compliance_prediction.is_experience_violation')
     @patch('src.decisioning.compliance_prediction.is_kyc_violation')
-    @patch('src.decisioning.compliance_prediction.is_investment_too_agressive_for_horizon')
+    @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_horizon')
     @patch('src.decisioning.compliance_prediction.is_investment_too_aggressive_for_objective')
     def test_predict_compliance_objective_mismatch_fp(self, mock_obj_aggr_obj, mock_obj_aggr_horizon, mock_kyc, mock_exp, mock_suit, mock_random):
         # Arrange

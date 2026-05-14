@@ -24,7 +24,7 @@ from src.decisioning.violation_rules import (
 from src.decisioning.risk_signals import (
     is_kyc_uncertain,
     is_overexposure,
-    is_investment_too_agressive_for_horizon,
+    is_investment_too_aggressive_for_horizon,
     is_investment_too_aggressive_for_objective,
     is_risk_too_low_for_profile,
     is_investment_too_conservative_for_horizon,
@@ -76,7 +76,7 @@ def compute_confidence_score(trade: Trade) -> Dict[str, float]:
     if is_experience_violation(trade):
         negative_signals.append("experience")
 
-    if is_investment_too_agressive_for_horizon(trade):
+    if is_investment_too_aggressive_for_horizon(trade):
         negative_signals.append("horizon")
 
     if is_investment_too_aggressive_for_objective(trade):
@@ -118,7 +118,7 @@ def compute_confidence_score(trade: Trade) -> Dict[str, float]:
     ])
 
     soft_signals = sum([
-        is_investment_too_agressive_for_horizon(trade),
+        is_investment_too_aggressive_for_horizon(trade),
         is_investment_too_aggressive_for_objective(trade),
         is_overexposure(trade),
     ])

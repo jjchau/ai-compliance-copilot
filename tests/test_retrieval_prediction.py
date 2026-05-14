@@ -23,7 +23,7 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: False)
-        monkeypatch.setattr(rp_mod, 'is_investment_too_agressive_for_horizon', lambda t: False)
+        monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
         
         result = predict_with_retrieval(trade, [])
@@ -39,7 +39,7 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: True)
-        monkeypatch.setattr(rp_mod, 'is_investment_too_agressive_for_horizon', lambda t: False)
+        monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
         
         result = predict_with_retrieval(trade, ["POLICY_KYC_001"])
@@ -55,7 +55,7 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: False)
-        monkeypatch.setattr(rp_mod, 'is_investment_too_agressive_for_horizon', lambda t: False)
+        monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
         
         result = predict_with_retrieval(trade, ["POLICY_SUIT_001"])
@@ -71,7 +71,7 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: False)
-        monkeypatch.setattr(rp_mod, 'is_investment_too_agressive_for_horizon', lambda t: False)
+        monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
         
         result = predict_with_retrieval(trade, ["POLICY_EXP_001"])
@@ -87,7 +87,7 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: False)
-        monkeypatch.setattr(rp_mod, 'is_investment_too_agressive_for_horizon', lambda t: True)
+        monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: True)
         
         result = predict_with_retrieval(trade, ["POLICY_SUIT_002", "POLICY_SUIT_003"])
@@ -103,7 +103,7 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: True)
-        monkeypatch.setattr(rp_mod, 'is_investment_too_agressive_for_horizon', lambda t: True)
+        monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: True)
         
         result = predict_with_retrieval(trade, [
@@ -123,7 +123,7 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: True)
-        monkeypatch.setattr(rp_mod, 'is_investment_too_agressive_for_horizon', lambda t: True)
+        monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: True)
         
         # No relevant policies retrieved
@@ -142,7 +142,7 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: False)
-        monkeypatch.setattr(rp_mod, 'is_investment_too_agressive_for_horizon', lambda t: False)
+        monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
         
         result = predict_with_retrieval(trade, [])
@@ -150,7 +150,7 @@ class TestPredictWithRetrieval:
         assert result["compliance_label"] is True
         
         # Test just below threshold (score = 0.1, prob = 0.9)
-        monkeypatch.setattr(rp_mod, 'is_investment_too_agressive_for_horizon', lambda t: True)
+        monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: True)
         result = predict_with_retrieval(trade, ["POLICY_SUIT_003"])
         assert result["compliance_probability"] == 0.8  # 1.0 - 0.2
         assert result["compliance_label"] is False
