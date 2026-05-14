@@ -226,7 +226,7 @@ class TestGetCaseByIdEndpoint:
         """Test that review submission succeeds for a valid case."""
         review_body = {
             "reviewer": "Auditor",
-            "decision": "Approve",
+            "action": "approve",
             "notes": "Looks compliant"
         }
         with patch('builtins.open', mock_open()) as mocked_file, \
@@ -239,7 +239,7 @@ class TestGetCaseByIdEndpoint:
         assert data["status"] == "review posted successfully"
         assert data["review"]["trade_id"] == "T001"
         assert data["review"]["reviewer"] == "Auditor"
-        assert data["review"]["decision"] == "Approve"
+        assert data["review"]["action"] == "approve"
         assert data["review"]["notes"] == "Looks compliant"
         assert data["review"]["timestamp"] == "2026-05-13T12:00:00"
 
@@ -247,7 +247,7 @@ class TestGetCaseByIdEndpoint:
         """Test that review submission returns 404 for missing trade_id."""
         review_body = {
             "reviewer": "Auditor",
-            "decision": "Approve",
+            "action": "approve",
             "notes": "Looks compliant"
         }
         response = client.post("/cases/UNKNOWN/review", json=review_body)
@@ -258,7 +258,7 @@ class TestGetCaseByIdEndpoint:
         """Test that review submission returns validation error for missing fields."""
         review_body = {
             "reviewer": "Auditor",
-            "notes": "Missing decision"
+            "notes": "Missing action"
         }
         response = client.post("/cases/T001/review", json=review_body)
         assert response.status_code == 422
