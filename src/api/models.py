@@ -1,6 +1,7 @@
 from pydantic import BaseModel
+from typing import Literal
 
 class ReviewSubmission(BaseModel):
     reviewer: str
-    decision: str
+    action: Literal["approve", "override"]
     notes: str

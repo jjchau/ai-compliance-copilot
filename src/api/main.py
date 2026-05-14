@@ -35,7 +35,7 @@ def submit_review(trade_id: str, review: ReviewSubmission):
     log_entry = {
         "trade_id": trade_id,
         "reviewer": review.reviewer,
-        "decision": review.decision,
+        "action": review.action,
         "notes": review.notes,
         "timestamp": datetime.now().isoformat()
     }
