@@ -15,7 +15,7 @@ RETRIEVAL_CONFIG = {
 ALL_POLICY_IDS = list(POLICY_CORPUS.keys())
 
 
-def retrieve_policies(trade: Trade) -> List[set[str]]:
+def retrieve_policies(trade: Trade) -> List[str]:
     """
     Simulates imperfect retrieval:
     - Misses some relevant policies (false negatives)
