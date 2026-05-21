@@ -25,7 +25,7 @@ class TestDataLoaderImport:
 
         # Reload module with mocked read_csv
         import importlib
-        import src.api.data_loader as data_loader_module
+        import src.data.data_loader as data_loader_module
         importlib.reload(data_loader_module)
 
         mock_read_csv.assert_called_once()
@@ -42,7 +42,7 @@ class TestDataLoaderImport:
         mock_read_csv.return_value = mock_df
 
         import importlib
-        import src.api.data_loader as data_loader_module
+        import src.data.data_loader as data_loader_module
         importlib.reload(data_loader_module)
 
         # Verify cases is a list of dicts
@@ -61,7 +61,7 @@ class TestDataLoaderImport:
         mock_read_csv.return_value = mock_df
 
         import importlib
-        import src.api.data_loader as data_loader_module
+        import src.data.data_loader as data_loader_module
         importlib.reload(data_loader_module)
 
         # Verify case_lookup is a dict with trade_id keys
@@ -82,7 +82,7 @@ class TestDataLoaderImport:
         mock_read_csv.return_value = mock_df
 
         import importlib
-        import src.api.data_loader as data_loader_module
+        import src.data.data_loader as data_loader_module
         importlib.reload(data_loader_module)
 
         # Verify case data is correct
@@ -107,7 +107,7 @@ class TestDataLoaderImport:
         mock_read_csv.return_value = mock_df
 
         import importlib
-        import src.api.data_loader as data_loader_module
+        import src.data.data_loader as data_loader_module
         importlib.reload(data_loader_module)
 
         # Verify NaN is replaced with empty string
@@ -128,7 +128,7 @@ class TestDataLoaderImport:
         mock_read_csv.return_value = mock_df
 
         import importlib
-        import src.api.data_loader as data_loader_module
+        import src.data.data_loader as data_loader_module
         importlib.reload(data_loader_module)
 
         # Verify empty structures
@@ -159,7 +159,7 @@ class TestDataLoaderImport:
         mock_read_csv.return_value = mock_df
 
         import importlib
-        import src.api.data_loader as data_loader_module
+        import src.data.data_loader as data_loader_module
         importlib.reload(data_loader_module)
 
         # Verify all columns are present in cases
@@ -179,7 +179,7 @@ class TestDataLoaderImport:
         mock_read_csv.return_value = mock_df
 
         import importlib
-        import src.api.data_loader as data_loader_module
+        import src.data.data_loader as data_loader_module
         importlib.reload(data_loader_module)
 
         # Verify order is maintained
