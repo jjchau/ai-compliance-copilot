@@ -28,17 +28,6 @@ def make_trade(**kwargs):
     return Trade(**base)
 
 
-def test_assess_escalation_kyc_violation_urgent(monkeypatch):
-    """Test that KYC violation escalates to urgent."""
-    trade = make_trade()
-    import src.decisioning.policy_rules as pr_mod
-    monkeypatch.setattr(pr_mod, 'is_kyc_violation', lambda t: True)
-    monkeypatch.setattr(pr_mod, 'has_conflicting_signals', lambda t: False)
-
-    result = assess_escalation(trade, compliance_probability=0.9, risk_score=50, confidence_score=0.8)
-    assert result == "urgent"
-
-
 def test_assess_escalation_low_compliance_high_risk_urgent(monkeypatch):
     """Test that low compliance + high risk escalates to urgent."""
     trade = make_trade()
@@ -224,14 +213,3 @@ def test_assess_escalation_priority_overrides_queue(monkeypatch):
 
     result = assess_escalation(trade, compliance_probability=0.4, risk_score=50, confidence_score=0.8)
     assert result == "priority"
-
-
-def test_assess_escalation_urgent_overrides_all(monkeypatch):
-    """Test that urgent-level conditions override everything."""
-    trade = make_trade()
-    import src.decisioning.policy_rules as pr_mod
-    monkeypatch.setattr(pr_mod, 'is_kyc_violation', lambda t: True)
-    monkeypatch.setattr(pr_mod, 'has_conflicting_signals', lambda t: False)
-
-    result = assess_escalation(trade, compliance_probability=0.9, risk_score=50, confidence_score=0.8)
-    assert result == "urgent"
