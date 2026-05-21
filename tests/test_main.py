@@ -1,5 +1,6 @@
 import sys
 import os
+import importlib
 from unittest.mock import patch, MagicMock, mock_open
 
 import pytest
@@ -46,23 +47,25 @@ mock_case_lookup = {
 @pytest.fixture
 def client():
     """Provide a TestClient for the FastAPI app."""
-    # Use a fresh import with patches applied
-    import importlib
-    import src.api.main
-    
-    # Apply patches and reload the module
-    with patch.dict('sys.modules', {'src.api.data_loader': MagicMock(cases=mock_cases, case_lookup=mock_case_lookup)}):
-        # Remove cached main module and reimport with mocked dependencies
-        if 'src.api.main' in sys.modules:
-            del sys.modules['src.api.main']
-        
-        from src.api import main as main_module
-        
+    # Remove cached modules so the app is imported fresh with mocked dependencies
+    for module_name in ('src.api.main', 'src.services.review_case_service'):
+        sys.modules.pop(module_name, None)
+
+    old_service_module = sys.modules.get('src.services.review_case_service')
+    sys.modules['src.services.review_case_service'] = MagicMock(cases=mock_cases, case_lookup=mock_case_lookup)
+    try:
+        main_module = importlib.import_module('src.api.main')
+
         # Directly patch the app's data
         main_module.cases = mock_cases
         main_module.case_lookup = mock_case_lookup
-        
+
         return TestClient(main_module.app)
+    finally:
+        if old_service_module is None:
+            sys.modules.pop('src.services.review_case_service', None)
+        else:
+            sys.modules['src.services.review_case_service'] = old_service_module
 
 
 class TestRootEndpoint:
@@ -99,20 +102,19 @@ class TestGetCasesEndpoint:
         """Test that /cases endpoint returns a list."""
         response = client.get("/cases")
         data = response.json()
-        assert isinstance(data, dict)
-        assert isinstance(data["cases"], list)
+        assert isinstance(data, list)
 
     def test_get_cases_returns_all_cases(self, client):
         """Test that /cases endpoint returns all cases."""
         response = client.get("/cases")
         data = response.json()
-        assert len(data["cases"]) == 3
+        assert len(data) == 3
 
     def test_get_cases_contains_correct_trade_ids(self, client):
         """Test that /cases returns cases with correct trade_ids."""
         response = client.get("/cases")
         data = response.json()
-        trade_ids = [case["trade_id"] for case in data["cases"]]
+        trade_ids = [case["trade_id"] for case in data]
         assert "T001" in trade_ids
         assert "T002" in trade_ids
         assert "T003" in trade_ids
@@ -122,7 +124,7 @@ class TestGetCasesEndpoint:
         response = client.get("/cases")
         data = response.json()
 
-        case_t001 = next((case for case in data["cases"] if case["trade_id"] == "T001"), None)
+        case_t001 = next((case for case in data if case["trade_id"] == "T001"), None)
         assert case_t001 is not None
         assert case_t001["client_age"] == 35
         assert case_t001["risk_tolerance"] == "Medium"
@@ -141,29 +143,37 @@ class TestGetCasesEndpoint:
         ]
         patched_lookup = {case["trade_id"]: case for case in patched_cases}
 
-        with patch.dict('sys.modules', {'src.api.data_loader': MagicMock(cases=patched_cases, case_lookup=patched_lookup)}):
-            if 'src.api.main' in sys.modules:
-                del sys.modules['src.api.main']
-            from src.api import main as main_module
+        for module_name in ('src.api.main', 'src.services.review_case_service'):
+            sys.modules.pop(module_name, None)
+
+        old_service_module = sys.modules.get('src.services.review_case_service')
+        sys.modules['src.services.review_case_service'] = MagicMock(cases=patched_cases, case_lookup=patched_lookup)
+        try:
+            main_module = importlib.import_module('src.api.main')
             main_module.cases = patched_cases
             main_module.case_lookup = patched_lookup
             client_override = TestClient(main_module.app)
+        finally:
+            if old_service_module is None:
+                sys.modules.pop('src.services.review_case_service', None)
+            else:
+                sys.modules['src.services.review_case_service'] = old_service_module
 
             response = client_override.get("/cases?escalation=urgent")
             assert response.status_code == 200
-            assert response.json()["cases"] == [patched_cases[0]]
+            assert response.json() == [patched_cases[0]]
 
     def test_get_cases_filters_by_escalation_priority(self, client):
         """Test that /cases filters by escalation=priority."""
         response = client.get("/cases?escalation=priority")
         assert response.status_code == 200
-        assert response.json()["cases"] == [mock_cases[1]]
+        assert response.json() == [mock_cases[1]]
 
     def test_get_cases_filters_by_escalation_queue(self, client):
         """Test that /cases filters by escalation=queue."""
         response = client.get("/cases?escalation=queue")
         assert response.status_code == 200
-        assert response.json()["cases"] == [mock_cases[2]]
+        assert response.json() == [mock_cases[2]]
 
 
 class TestGetCaseByIdEndpoint:
@@ -282,7 +292,7 @@ class TestAPIIntegration:
         """Test that data is consistent between /cases and /cases/{trade_id}."""
         # Get all cases
         all_cases_response = client.get("/cases")
-        all_cases = all_cases_response.json()["cases"]
+        all_cases = all_cases_response.json()
 
         # Verify each case can be retrieved individually
         for case in all_cases:
@@ -306,7 +316,7 @@ class TestAPIIntegration:
             # /cases should return empty list
             response = client.get("/cases")
             assert response.status_code == 200
-            assert response.json() == {"cases": []}
+            assert response.json() == []
             
             # /cases/{trade_id} should return 404
             assert client.get("/cases/T001").status_code == 404
