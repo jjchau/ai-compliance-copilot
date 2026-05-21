@@ -1,10 +1,26 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import json
-from src.api.data_loader import cases, case_lookup
+from src.services.review_case_service import cases, case_lookup
 from src.api.models import ReviewSubmission
 
-app = FastAPI()
+app = FastAPI(title="AI Compliance Copilot API")
+
+# Define the origins that are allowed to talk to your backend
+origins = [
+    "http://localhost:5173",  # Vite dev server
+    "http://127.0.0.1:5173",
+]
+
+# Add the CORS middleware to app instance
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,            # Allows Vite frontend through
+    allow_credentials=True,
+    allow_methods=["*"],              # Allows GET, POST, PUT, DELETE, etc.
+    allow_headers=["*"],              # Allows all custom/standard headers
+)
 
 @app.get("/")
 def root():
@@ -12,14 +28,13 @@ def root():
 
 @app.get("/cases")
 def get_cases(escalation: str | None = None):
-    if escalation == "urgent":
-        return {"cases": [case for case in cases if case["escalation_level"] == "urgent"]}
-    elif escalation == "priority":
-        return {"cases": [case for case in cases if case["escalation_level"] == "priority"]}
-    elif escalation == "queue":
-        return {"cases": [case for case in cases if case["escalation_level"] == "queue"]}
-    return {"cases": cases}
-
+    # If a specific escalation filter is passed, filter and return the flat list directly
+    if escalation in ["urgent", "priority", "queue"]:
+        return [case for case in cases if case["escalation_level"] == escalation]
+        
+    # Default: Return the entire flat list of cases directly
+    return cases
+    
 @app.get("/cases/{trade_id}")
 def get_case(trade_id: str):
     case = case_lookup.get(trade_id)
