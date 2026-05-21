@@ -1,5 +1,4 @@
 from src.data.schema import Trade
-from src.decisioning.decision_engine import evaluate_trade
 from src.policy.retrieval import retrieve_policies
 from src.decisioning.retrieval_prediction import predict_with_retrieval
 from src.decisioning.decision_engine import evaluate_prediction
