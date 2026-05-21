@@ -14,11 +14,11 @@ Date: 2026-04-21
 from typing import Literal
 from src.data.schema import Trade
 from src.decisioning.conflict_detection import has_conflicting_signals
-from src.decisioning.violation_rules import (
-    is_kyc_violation,
-    is_suitability_violation
-)
-from src.decisioning.risk_signals import is_too_complex_for_experience
+# from src.decisioning.violation_rules import (
+#     is_kyc_violation,
+#     is_suitability_violation
+# )
+# from src.decisioning.risk_signals import is_too_complex_for_experience
 
 ESCALATION_LEVEL = Literal['none', 'queue', 'priority', 'urgent']
 
@@ -32,9 +32,9 @@ def assess_escalation(trade: Trade, compliance_probability: float, risk_score: i
         - Presence of conflicting signals
     """
     
-    # --- URGENT ---
-    if is_kyc_violation(trade):
-        return "urgent"
+    # # --- URGENT ---
+    # if is_kyc_violation(trade):
+    #     return "urgent"
 
     if compliance_probability < 0.3 and risk_score >= 70:
         return "urgent"
