@@ -30,13 +30,22 @@ def make_raw_trade(trade_id: str):
 
 
 def test_load_review_cases_builds_one_case_per_raw_record(monkeypatch):
-    import src.services.review_case_service as service_mod
+    import src.api.data_loader as data_loader_mod
+    import src.orchestration.review_pipeline as pipeline_mod
 
     raw_cases = [make_raw_trade('T001'), make_raw_trade('T002')]
-    monkeypatch.setattr(service_mod, 'raw_cases', raw_cases)
+    monkeypatch.setattr(data_loader_mod, 'cases', raw_cases)
 
-    mock_build_review_case = MagicMock(side_effect=[{'trade_id': 'T001'}, {'trade_id': 'T002'}])
-    monkeypatch.setattr(service_mod, 'build_review_case', mock_build_review_case)
+    def build_case_side_effect(trade):
+        return {'trade_id': trade.trade_id}
+
+    mock_build_review_case = MagicMock(side_effect=build_case_side_effect)
+    monkeypatch.setattr(pipeline_mod, 'build_review_case', mock_build_review_case)
+
+    sys.modules.pop('src.services.review_case_service', None)
+    import importlib
+    service_mod = importlib.import_module('src.services.review_case_service')
+    mock_build_review_case.reset_mock()
 
     review_cases = service_mod.load_review_cases()
 

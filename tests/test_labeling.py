@@ -1,8 +1,5 @@
-import sys
-import os
 import pytest
 from unittest.mock import Mock, patch
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.data.schema import Trade
 from src.decisioning.labeling import compute_true_compliance, assign_case_type, assign_difficulty
 
