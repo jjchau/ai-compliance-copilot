@@ -1,45 +1,24 @@
-/* VERSION 14 */
+/* VERSION 15 - Refactored */
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useTriageWorkflow } from "../hooks/useTriageWorkflow";
-import { CheckCircle, Clock, ShieldAlert, FileText, User, Briefcase, HelpCircle, Check, X, CornerUpRight } from "lucide-react";
+import { CaseAuditWorkspace } from "../components/triage/CaseAuditWorkspace";
+import { CheckCircle, Clock, ShieldAlert } from "lucide-react";
 
-function Dashboard() {
+export default function Dashboard() {
   const workflow = useTriageWorkflow();
-  const [currentNotes, setCurrentNotes] = useState<string>("");
 
-  useEffect(() => {
-    if (workflow.selectedCase?.trade_id) {
-      const savedState = workflow.caseStates[workflow.selectedCase.trade_id];
-      setCurrentNotes(savedState ? savedState.notes : "");
-    } else {
-      setCurrentNotes("");
-    }
-  }, [workflow.selectedCase, workflow.caseStates]);
-
-  const handleNotesChange = (text: string) => {
-    setCurrentNotes(text);
-    if (workflow.selectedCase?.trade_id) {
-      workflow.updateNotes(workflow.selectedCase.trade_id, text);
-    }
-  };
-
-  // --- Flexible Spreadsheet Column Resize States (4 Distinct Data Frameworks) ---
+  // --- Spreadsheet Column Resize Frameworks ---
   const [urgentWidths, setUrgentWidths] = useState({ tradeId: 100, risk: 85, conf: 85, reason: 320 });
   const [queuedWidths, setQueuedWidths] = useState({ tradeId: 100, priority: 75, risk: 85, conf: 85, reason: 280 });
   const [reviewedWidths, setReviewedWidths] = useState({ tradeId: 110, type: 130, amount: 110, status: 120, notes: 340 });
   const [passedWidths, setPassedWidths] = useState({ tradeId: 110, asset: 130, value: 120, confidence: 120, status: 140 });
 
-  const dragInfo = useRef<{ table: 'urgent' | 'queued' | 'reviewed' | 'passed'; col: string; startX: number; startWidth: number } | null>(null);
+  const dragInfo = useRef<{ table: "urgent" | "queued" | "reviewed" | "passed"; col: string; startX: number; startWidth: number } | null>(null);
 
-  const handleMouseDown = (table: 'urgent' | 'queued' | 'reviewed' | 'passed', col: string, e: React.MouseEvent) => {
+  const handleMouseDown = (table: "urgent" | "queued" | "reviewed" | "passed", col: string, e: React.MouseEvent) => {
     e.preventDefault();
-    let currentWidths: any;
-    if (table === 'urgent') currentWidths = urgentWidths;
-    else if (table === 'queued') currentWidths = queuedWidths;
-    else if (table === 'reviewed') currentWidths = reviewedWidths;
-    else currentWidths = passedWidths;
-
+    let currentWidths: any = table === "urgent" ? urgentWidths : table === "queued" ? queuedWidths : table === "reviewed" ? reviewedWidths : passedWidths;
     dragInfo.current = { table, col, startX: e.clientX, startWidth: currentWidths[col] };
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
@@ -51,10 +30,10 @@ function Dashboard() {
     const deltaX = e.clientX - startX;
     const newWidth = Math.max(60, startWidth + deltaX);
 
-    if (table === 'urgent') setUrgentWidths(prev => ({ ...prev, [col]: newWidth }));
-    else if (table === 'queued') setQueuedWidths(prev => ({ ...prev, [col]: newWidth }));
-    else if (table === 'reviewed') setReviewedWidths(prev => ({ ...prev, [col]: newWidth }));
-    else setPassedWidths(prev => ({ ...prev, [col]: newWidth }));
+    if (table === "urgent") setUrgentWidths((prev) => ({ ...prev, [col]: newWidth }));
+    else if (table === "queued") setQueuedWidths((prev) => ({ ...prev, [col]: newWidth }));
+    else if (table === "reviewed") setReviewedWidths((prev) => ({ ...prev, [col]: newWidth }));
+    else setPassedWidths((prev) => ({ ...prev, [col]: newWidth }));
   };
 
   const handleMouseUp = () => {
@@ -63,19 +42,11 @@ function Dashboard() {
     document.removeEventListener("mouseup", handleMouseUp);
   };
 
-  const handleDoubleClick = (table: 'urgent' | 'queued' | 'reviewed' | 'passed') => {
-    if (table === 'urgent') setUrgentWidths({ tradeId: 100, risk: 85, conf: 85, reason: 320 });
-    else if (table === 'queued') setQueuedWidths({ tradeId: 100, priority: 75, risk: 85, conf: 85, reason: 280 });
-    else if (table === 'reviewed') setReviewedWidths({ tradeId: 110, type: 130, amount: 110, status: 120, notes: 340 });
-    else setPassedWidths({ tradeId: 110, asset: 130, value: 120, confidence: 120, status: 140 });
-  };
-
   const renderPolicies = (policies: any) => {
     if (!policies) return <span className="text-[10px] text-slate-500">No policies attached.</span>;
     let items: string[] = [];
-    if (Array.isArray(policies)) {
-      items = policies;
-    } else if (typeof policies === "string" && policies.startsWith("[")) {
+    if (Array.isArray(policies)) items = policies;
+    else if (typeof policies === "string" && policies.startsWith("[")) {
       items = policies.replace(/[\[\]']/g, "").split(",").map((p) => p.trim()).filter(Boolean);
     } else if (typeof policies === "string" && policies.trim().length > 0) {
       items = policies.split(",");
@@ -90,177 +61,131 @@ function Dashboard() {
 
   return (
     <div className="p-2 h-screen bg-slate-950 text-slate-100 flex flex-col gap-2 overflow-hidden select-none">
-      
       {/* Top Header Metrics Row */}
       <div className="flex items-center justify-between border-b border-slate-900 pb-2 shrink-0">
         <div className="flex items-center gap-6">
           <h1 className="text-base font-bold tracking-tight text-slate-200">AI Compliance Review Copilot</h1>
-          
           <div className="flex bg-slate-900 p-0.5 rounded border border-slate-800 gap-0.5">
-            <button onClick={() => workflow.setView("active")} className={`px-4 py-1 text-xs font-semibold rounded transition-all ${workflow.activeView === 'active' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'}`}>
+            <button onClick={() => workflow.setView("active")} className={`px-4 py-1 text-xs font-semibold rounded transition-all ${workflow.activeView === "active" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"}`}>
               Active ({workflow.urgentCases.length + workflow.queuedCases.length})
             </button>
-            <button onClick={() => workflow.setView("reviewed")} className={`px-4 py-1 text-xs font-semibold rounded transition-all ${workflow.activeView === 'reviewed' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'}`}>
+            <button onClick={() => workflow.setView("reviewed")} className={`px-4 py-1 text-xs font-semibold rounded transition-all ${workflow.activeView === "reviewed" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"}`}>
               Reviewed ({workflow.reviewedCasesList.length})
             </button>
-            <button onClick={() => workflow.setView("passed")} className={`px-4 py-1 text-xs font-semibold rounded transition-all ${workflow.activeView === 'passed' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'}`}>
+            <button onClick={() => workflow.setView("passed")} className={`px-4 py-1 text-xs font-semibold rounded transition-all ${workflow.activeView === "passed" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"}`}>
               Passed ({workflow.passedCasesList.length})
             </button>
           </div>
         </div>
-        
-        {/* Top Right Master Counters Row */}
+
+        {/* Counter Badges */}
         <div className="flex items-center gap-2">
-          <div className="bg-rose-950/20 border border-rose-500/20 rounded px-2.5 py-1 flex items-center gap-1.5 text-xs font-medium">
-            <span className="text-rose-400">Urgent:</span>
-            <span className="font-bold text-rose-200">{workflow.urgentCases.length}</span>
-          </div>
-          <div className="bg-amber-950/20 border border-amber-500/20 rounded px-2.5 py-1 flex items-center gap-1.5 text-xs font-medium">
-            <span className="text-amber-400">Review:</span>
-            <span className="font-bold text-amber-200">{workflow.queuedCases.length}</span>
-          </div>
-          <div className="bg-emerald-950/20 border border-emerald-500/20 rounded px-2.5 py-1 flex items-center gap-1.5 text-xs font-medium">
-            <span className="text-emerald-400">Reviewed Today:</span>
-            <span className="font-bold text-emerald-200">{workflow.reviewedTodayCount}</span>
-          </div>
-          <div className="bg-indigo-950/20 border border-indigo-500/20 rounded px-2.5 py-1 flex items-center gap-1.5 text-xs font-medium">
-            <span className="text-indigo-400">Passed:</span>
-            <span className="font-bold text-indigo-200">{workflow.passedCasesList.length}</span>
-          </div>
+          <div className="bg-rose-950/20 border border-rose-500/20 rounded px-2.5 py-1 text-xs font-medium"><span className="text-rose-400">Urgent:</span> <span className="font-bold text-rose-200">{workflow.urgentCases.length}</span></div>
+          <div className="bg-amber-950/20 border border-amber-500/20 rounded px-2.5 py-1 text-xs font-medium"><span className="text-amber-400">Review:</span> <span className="font-bold text-amber-200">{workflow.queuedCases.length}</span></div>
+          <div className="bg-emerald-950/20 border border-emerald-500/20 rounded px-2.5 py-1 text-xs font-medium"><span className="text-emerald-400">Reviewed Today:</span> <span className="font-bold text-emerald-200">{workflow.reviewedTodayCount}</span></div>
         </div>
       </div>
 
-      {/* Primary Split Workspace: Upper View 40% / Lower Workspace 60% */}
+      {/* Primary Split Workspace */}
       <div className="flex-1 grid grid-rows-[40fr_60fr] gap-2 min-h-0">
         
-        {/* UPPER VIEW SEGMENT */}
+        {/* UPPER VIEW GRIDS */}
         <div className="min-h-0">
           {workflow.activeView === "active" && (
             <div className="grid grid-cols-2 gap-2 h-full min-h-0">
-              
-              {/* Table 1: Urgent Table */}
+              {/* Table A: Urgent Items */}
               <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col min-h-0">
                 <div className="flex items-center gap-1 border-b border-slate-800 pb-0.5 mb-1 shrink-0">
                   <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
                   <h2 className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Urgent Action Required</h2>
                 </div>
-                <div className="flex-1 overflow-x-auto overflow-y-auto border border-slate-800/30 rounded dynamic-scroll min-h-0">
+                <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
                   {workflow.urgentCases.length === 0 ? <p className="text-xs text-slate-500 p-2 italic">No urgent cases outstanding.</p> : (
                     <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                       <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
                         <tr>
-                          <th style={{ width: urgentWidths.tradeId }} className="p-1 relative group">Trade ID
-                            <div onMouseDown={(e) => handleMouseDown('urgent', 'tradeId', e)} onDoubleClick={() => handleDoubleClick('urgent')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
-                          </th>
-                          <th style={{ width: urgentWidths.risk }} className="p-1 text-right relative group">Risk Score
-                            <div onMouseDown={(e) => handleMouseDown('urgent', 'risk', e)} onDoubleClick={() => handleDoubleClick('urgent')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
-                          </th>
-                          <th style={{ width: urgentWidths.conf }} className="p-1 text-right relative group">Conf.
-                            <div onMouseDown={(e) => handleMouseDown('urgent', 'conf', e)} onDoubleClick={() => handleDoubleClick('urgent')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
-                          </th>
-                          <th style={{ width: urgentWidths.reason }} className="p-1 pl-2 relative group">Flag Reason</th>
+                          <th style={{ width: urgentWidths.tradeId }} className="p-1 relative group">Trade ID<div onMouseDown={(e) => handleMouseDown("urgent", "tradeId", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
+                          <th style={{ width: urgentWidths.risk }} className="p-1 text-right relative group">Risk Score<div onMouseDown={(e) => handleMouseDown("urgent", "risk", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
+                          <th style={{ width: urgentWidths.conf }} className="p-1 text-right relative group">Conf.<div onMouseDown={(e) => handleMouseDown("urgent", "conf", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
+                          <th style={{ width: urgentWidths.reason }} className="p-1 pl-2">Flag Reason</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/30">
-                        {workflow.urgentCases.map((c, i) => {
-                          const isSelected = workflow.selectedCase?.trade_id === c?.trade_id;
-                          return (
-                            <tr key={`${c.trade_id}-${i}`} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${isSelected ? 'bg-rose-950/40 font-semibold border-l-2 border-rose-500 text-rose-200' : 'hover:bg-slate-800/20 text-slate-300'}`}>
-                              <td className="p-1 font-mono truncate">{c.trade_id}</td>
-                              <td className="p-1 text-right font-mono text-rose-400">{(1 - (Number(c.compliance_probability) || 1)).toFixed(2)}</td>
-                              <td className="p-1 text-right font-mono text-slate-400">{(Number(c.confidence_score) || 0).toFixed(2)}</td>
-                              <td className="p-1 pl-2 truncate text-[10px]">{c.flag_reason}</td>
-                            </tr>
-                          );
-                        })}
+                        {workflow.urgentCases.map((c) => (
+                          <tr key={c.trade_id} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${workflow.selectedCase?.trade_id === c.trade_id ? "bg-rose-950/40 font-semibold border-l-2 border-rose-500 text-rose-200" : "hover:bg-slate-800/20 text-slate-300"}`}>
+                            <td className="p-1 font-mono truncate">{c.trade_id}</td>
+                            <td className="p-1 text-right font-mono text-rose-400">{(1 - (Number(c.compliance_probability) || 1)).toFixed(2)}</td>
+                            <td className="p-1 text-right font-mono text-slate-400">{(Number(c.confidence_score) || 0).toFixed(2)}</td>
+                            <td className="p-1 pl-2 truncate text-[10px]">{c.flag_reason}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   )}
                 </div>
               </div>
 
-              {/* Table 2: Review Table */}
+              {/* Table B: Review/Queued Items */}
               <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col min-h-0">
                 <div className="flex items-center gap-1 border-b border-slate-800 pb-0.5 mb-1 shrink-0">
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  <h2 className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Review</h2>
+                  <h2 className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Review Queue</h2>
                 </div>
-                <div className="flex-1 overflow-x-auto overflow-y-auto border border-slate-800/30 rounded dynamic-scroll min-h-0">
+                <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
                   {workflow.queuedCases.length === 0 ? <p className="text-xs text-slate-500 p-1 italic">Review queue empty.</p> : (
                     <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                       <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
                         <tr>
-                          <th style={{ width: queuedWidths.tradeId }} className="p-1 relative group">Trade ID
-                            <div onMouseDown={(e) => handleMouseDown('queued', 'tradeId', e)} onDoubleClick={() => handleDoubleClick('queued')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
-                          </th>
-                          <th style={{ width: queuedWidths.priority }} className="p-1 text-right relative group text-amber-400">Priority</th>
-                          <th style={{ width: queuedWidths.risk }} className="p-1 text-right relative group">Risk Score</th>
-                          <th style={{ width: queuedWidths.conf }} className="p-1 text-right relative group">Conf.</th>
-                          <th style={{ width: queuedWidths.reason }} className="p-1 pl-2 relative group">Flag Reason</th>
+                          <th style={{ width: queuedWidths.tradeId }} className="p-1 relative group">Trade ID<div onMouseDown={(e) => handleMouseDown("queued", "tradeId", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
+                          <th style={{ width: queuedWidths.priority }} className="p-1 text-right text-amber-400">Priority</th>
+                          <th style={{ width: queuedWidths.risk }} className="p-1 text-right">Risk Score</th>
+                          <th style={{ width: queuedWidths.conf }} className="p-1 text-right">Conf.</th>
+                          <th style={{ width: queuedWidths.reason }} className="p-1 pl-2">Flag Reason</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/30">
-                        {workflow.queuedCases.map((c, i) => {
-                          const isSelected = workflow.selectedCase?.trade_id === c?.trade_id;
-                          return (
-                            <tr key={`${c.trade_id}-${i}`} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${isSelected ? 'bg-purple-950/40 font-semibold border-l-2 border-purple-500 text-purple-200' : 'hover:bg-slate-800/20 text-slate-300'}`}>
-                              <td className="p-1 font-mono truncate">{c.trade_id}</td>
-                              <td className="p-1 text-right font-mono font-bold text-amber-400">{c.priority_score ?? "0"}</td>
-                              <td className="p-1 text-right font-mono text-rose-400">{(1 - (Number(c.compliance_probability) || 1)).toFixed(2)}</td>
-                              <td className="p-1 text-right font-mono text-slate-400">{(Number(c.confidence_score) || 0).toFixed(2)}</td>
-                              <td className="p-1 pl-2 truncate text-[10px]">{c.flag_reason}</td>
-                            </tr>
-                          );
-                        })}
+                        {workflow.queuedCases.map((c) => (
+                          <tr key={c.trade_id} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${workflow.selectedCase?.trade_id === c.trade_id ? "bg-purple-950/40 font-semibold border-l-2 border-purple-500 text-purple-200" : "hover:bg-slate-800/20 text-slate-300"}`}>
+                            <td className="p-1 font-mono truncate">{c.trade_id}</td>
+                            <td className="p-1 text-right font-mono font-bold text-amber-400">{c.priority_score ?? "0"}</td>
+                            <td className="p-1 text-right font-mono text-rose-400">{(1 - (Number(c.compliance_probability) || 1)).toFixed(2)}</td>
+                            <td className="p-1 text-right font-mono text-slate-400">{(Number(c.confidence_score) || 0).toFixed(2)}</td>
+                            <td className="p-1 pl-2 truncate text-[10px]">{c.flag_reason}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   )}
                 </div>
               </div>
-
             </div>
           )}
 
-          {/* Table 3: Scrollable Resizable Reviewed View Panel */}
+          {/* Table C: Historical Audited Logs */}
           {workflow.activeView === "reviewed" && (
             <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col h-full min-h-0">
-              <div className="flex items-center gap-1 border-b border-slate-800 pb-0.5 mb-1 shrink-0">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                <h2 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">User Reviewed Logs</h2>
-              </div>
-              <div className="flex-1 overflow-x-auto overflow-y-auto border border-slate-800/30 rounded dynamic-scroll min-h-0">
+              <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
                 {workflow.reviewedCasesList.length === 0 ? <p className="text-slate-500 text-xs p-3 italic text-center">No logs audited yet.</p> : (
                   <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                     <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
                       <tr>
-                        <th style={{ width: reviewedWidths.tradeId }} className="p-1 relative group">Trade ID
-                          <div onMouseDown={(e) => handleMouseDown('reviewed', 'tradeId', e)} onDoubleClick={() => handleDoubleClick('reviewed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
-                        </th>
-                        <th style={{ width: reviewedWidths.type }} className="p-1 relative group">Investment Type
-                          <div onMouseDown={(e) => handleMouseDown('reviewed', 'type', e)} onDoubleClick={() => handleDoubleClick('reviewed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
-                        </th>
-                        <th style={{ width: reviewedWidths.amount }} className="p-1 text-right relative group">Amount
-                          <div onMouseDown={(e) => handleMouseDown('reviewed', 'amount', e)} onDoubleClick={() => handleDoubleClick('reviewed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
-                        </th>
-                        <th style={{ width: reviewedWidths.status }} className="p-1 text-center relative group">Outcome
-                          <div onMouseDown={(e) => handleMouseDown('reviewed', 'status', e)} onDoubleClick={() => handleDoubleClick('reviewed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
-                        </th>
-                        <th style={{ width: reviewedWidths.notes }} className="p-1 pl-3 relative group">Auditor Justification Notes</th>
+                        <th style={{ width: reviewedWidths.tradeId }} className="p-1 relative group">Trade ID<div onMouseDown={(e) => handleMouseDown("reviewed", "tradeId", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
+                        <th style={{ width: reviewedWidths.type }} className="p-1">Investment Type</th>
+                        <th style={{ width: reviewedWidths.amount }} className="p-1 text-right">Amount</th>
+                        <th style={{ width: reviewedWidths.status }} className="p-1 text-center">Outcome</th>
+                        <th style={{ width: reviewedWidths.notes }} className="p-1 pl-3">Auditor Notes</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/30">
-                      {workflow.reviewedCasesList.map((c, i) => {
+                      {workflow.reviewedCasesList.map((c) => {
                         const s = workflow.caseStates[c.trade_id];
-                        const isSelected = workflow.selectedCase?.trade_id === c?.trade_id;
                         return (
-                          <tr key={`${c.trade_id}-${i}`} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${isSelected ? 'bg-emerald-950/40 font-semibold border-l-2 border-emerald-500 text-emerald-200' : 'hover:bg-slate-800/20 text-slate-300'}`}>
+                          <tr key={c.trade_id} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${workflow.selectedCase?.trade_id === c.trade_id ? "bg-emerald-950/40 font-semibold border-l-2 border-emerald-500 text-emerald-200" : "hover:bg-slate-800/20 text-slate-300"}`}>
                             <td className="p-1 font-mono truncate">{c.trade_id}</td>
                             <td className="p-1 truncate">{c.investment_type || "N/A"}</td>
-                            <td className="p-1 text-right font-mono text-emerald-400 truncate">${Number(c.investment_amount || 0).toLocaleString()}</td>
-                            <td className="p-1 text-center truncate">
-                              <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${s?.userAction === 'Approved' ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/30' : s?.userAction === 'Rejected' ? 'bg-rose-950 text-rose-400 border border-rose-900/30' : 'bg-amber-950 text-amber-400 border border-amber-900/30'}`}>
-                                {s?.userAction || 'Processed'}
-                              </span>
+                            <td className="p-1 text-right font-mono text-emerald-400">${Number(c.investment_amount || 0).toLocaleString()}</td>
+                            <td className="p-1 text-center">
+                              <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${s?.userAction === "Approved" ? "bg-emerald-950 text-emerald-400" : "bg-rose-950 text-rose-400"}`}>{s?.userAction || "Processed"}</span>
                             </td>
                             <td className="p-1 pl-3 italic text-slate-400 truncate">{s?.notes || "—"}</td>
                           </tr>
@@ -273,48 +198,31 @@ function Dashboard() {
             </div>
           )}
 
-          {/* Table 4: Scrollable Resizable Passed View Panel */}
+          {/* Table D: Straight-Through System Passed Logs */}
           {workflow.activeView === "passed" && (
             <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col h-full min-h-0">
-              <div className="flex items-center gap-1 border-b border-slate-800 pb-0.5 mb-1 shrink-0">
-                <CheckCircle className="w-3.5 h-3.5 text-indigo-400" />
-                <h2 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">System Automatic Clearance Log</h2>
-              </div>
-              <div className="flex-1 overflow-x-auto overflow-y-auto border border-slate-800/30 rounded dynamic-scroll min-h-0">
+              <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
                 {workflow.passedCasesList.length === 0 ? <p className="text-slate-500 text-xs p-3 italic text-center">No auto-passed logs found.</p> : (
                   <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                     <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
                       <tr>
-                        <th style={{ width: passedWidths.tradeId }} className="p-1 relative group">Trade ID
-                          <div onMouseDown={(e) => handleMouseDown('passed', 'tradeId', e)} onDoubleClick={() => handleDoubleClick('passed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
-                        </th>
-                        <th style={{ width: passedWidths.asset }} className="p-1 relative group">Asset Class
-                          <div onMouseDown={(e) => handleMouseDown('passed', 'asset', e)} onDoubleClick={() => handleDoubleClick('passed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
-                        </th>
-                        <th style={{ width: passedWidths.value }} className="p-1 text-right relative group">Notional Value
-                          <div onMouseDown={(e) => handleMouseDown('passed', 'value', e)} onDoubleClick={() => handleDoubleClick('passed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
-                        </th>
-                        <th style={{ width: passedWidths.confidence }} className="p-1 text-right relative group">Confidence Score
-                          <div onMouseDown={(e) => handleMouseDown('passed', 'confidence', e)} onDoubleClick={() => handleDoubleClick('passed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
-                        </th>
-                        <th style={{ width: passedWidths.status }} className="p-1 text-center relative group">Clearance Status</th>
+                        <th style={{ width: passedWidths.tradeId }} className="p-1 relative group">Trade ID<div onMouseDown={(e) => handleMouseDown("passed", "tradeId", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
+                        <th style={{ width: passedWidths.asset }} className="p-1">Asset Class</th>
+                        <th style={{ width: passedWidths.value }} className="p-1 text-right">Notional Value</th>
+                        <th style={{ width: passedWidths.confidence }} className="p-1 text-right">Confidence Score</th>
+                        <th style={{ width: passedWidths.status }} className="p-1 text-center">Clearance Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/30">
-                      {workflow.passedCasesList.map((c, i) => {
-                        const isSelected = workflow.selectedCase?.trade_id === c?.trade_id;
-                        return (
-                          <tr key={`${c.trade_id}-${i}`} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${isSelected ? 'bg-indigo-950/40 font-semibold border-l-2 border-indigo-500 text-indigo-200' : 'hover:bg-slate-800/20 text-slate-300'}`}>
-                            <td className="p-1 font-mono truncate">{c.trade_id}</td>
-                            <td className="p-1 truncate">{c.investment_type || "N/A"}</td>
-                            <td className="p-1 text-right font-mono truncate">${Number(c.notional_value || 0).toLocaleString()}</td>
-                            <td className="p-1 text-right font-mono text-sky-400 truncate">{(Number(c.confidence_score) || 1).toFixed(4)}</td>
-                            <td className="p-1 text-center truncate">
-                              <span className="text-[9px] font-bold bg-emerald-950/30 text-emerald-400 px-2 py-0.5 rounded border border-emerald-900/20">Passed Engine</span>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {workflow.passedCasesList.map((c) => (
+                        <tr key={c.trade_id} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${workflow.selectedCase?.trade_id === c.trade_id ? "bg-indigo-950/40 font-semibold border-l-2 border-indigo-500 text-indigo-200" : "hover:bg-slate-800/20 text-slate-300"}`}>
+                          <td className="p-1 font-mono truncate">{c.trade_id}</td>
+                          <td className="p-1 truncate">{c.investment_type || "N/A"}</td>
+                          <td className="p-1 text-right font-mono truncate">${Number(c.notional_value || 0).toLocaleString()}</td>
+                          <td className="p-1 text-right font-mono text-sky-400">{(Number(c.confidence_score) || 1).toFixed(4)}</td>
+                          <td className="p-1 text-center"><span className="text-[9px] font-bold bg-emerald-950/30 text-emerald-400 px-2 py-0.5 rounded border border-emerald-900/20">Passed Engine</span></td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 )}
@@ -323,146 +231,16 @@ function Dashboard() {
           )}
         </div>
 
-        {/* LOWER WORKSPACE AREA (Expansive 60% Form Layout Framework) */}
+        {/* LOWER WORKSPACE AREA */}
         <div className="bg-slate-900 border border-slate-800 rounded-md p-3 flex flex-col min-h-0 justify-between shadow-2xl">
-          {workflow.selectedCase ? (() => {
-            const c = workflow.selectedCase;
-            const currentState = workflow.caseStates[c.trade_id] || { reviewStatus: "Not reviewed", notes: "" };
-            
-            // Safe variable mappings protecting lowercase rendering routes
-            const parsedProb = Number(c.compliance_probability);
-            const riskVal = isNaN(parsedProb) ? 0.000 : 1 - parsedProb;
-            const isRecCompliant = String(currentState.overriddenLabel || c.compliance_label || "").toLowerCase() === "compliant";
-            const isAutoPassed = workflow.activeView === "passed";
-
-            // Clean number extractions out of dirty CSV string profiles
-            const rawAmount = Number(String(c.investment_amount || "").replace(/[^0-9.-]/g, ""));
-            const displayAmount = isNaN(rawAmount) ? "0" : rawAmount.toLocaleString();
-
-            const rawNotional = Number(String(c.notional_value || "").replace(/[^0-9.-]/g, ""));
-            const displayNotional = isNaN(rawNotional) ? "0" : rawNotional.toLocaleString();
-
-            const rawIncome = Number(String(c.client_income || "").replace(/[^0-9.-]/g, ""));
-            const displayIncome = isNaN(rawIncome) || rawIncome === 0 ? "—" : `${Math.round(rawIncome / 1000)}k`;
-
-            return (
-              <div className="flex flex-col h-full justify-between min-h-0 space-y-3">
-                
-                {/* Workspace Module header block */}
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-black uppercase bg-purple-950/40 px-2 py-0.5 rounded border border-purple-900/50 text-purple-400 tracking-wider">Selected Case Audit Space</span>
-                    <span className="text-xs font-mono font-bold text-slate-100 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">{c.trade_id}</span>
-                  </div>
-
-                  {/* Restored Score metrics block badge back to the top-right position */}
-                  <div className="flex items-center gap-2 bg-slate-950/60 px-2.5 py-1 rounded-md border border-slate-800/80 text-[10px] font-mono">
-                    <div className="flex items-center gap-1.5 border-r border-slate-800 pr-2">
-                      <span className="text-slate-500 font-sans text-[9px] font-bold uppercase">AI Rec:</span>
-                      <span className={`px-1 rounded text-[9px] font-black ${isRecCompliant ? "bg-emerald-950 text-emerald-400" : "bg-rose-950 text-rose-400"}`}>
-                        {isRecCompliant ? "COMPLIANT" : "FLAGGED"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 border-r border-slate-800 pr-2 pl-1">
-                      <span className="text-slate-500 font-sans text-[9px] font-bold uppercase">Risk:</span>
-                      <span className="text-rose-400 font-bold">{riskVal.toFixed(3)}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 pl-1">
-                      <span className="text-slate-500 font-sans text-[9px] font-bold uppercase">Conf:</span>
-                      <span className="text-sky-400 font-bold">{Number(c.confidence_score || 0).toFixed(3)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Expanded 3 Column Matrix Grid Layout (Spaced for high-density zero overlap readability) */}
-                <div className="grid grid-cols-3 gap-3 flex-1 min-h-0 py-1">
-                  
-                  {/* MODULE A: Trade Details */}
-                  <div className="bg-slate-950/30 border border-slate-800/60 p-3 rounded-lg flex flex-col justify-between">
-                    <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2 text-purple-400 text-[10px] font-black uppercase tracking-widest shrink-0">
-                      <Briefcase className="w-3.5 h-3.5"/>
-                      <span>Trade Details</span>
-                    </div>
-                    <div className="text-xs grid grid-cols-2 gap-x-3 gap-y-3 flex-1 items-center text-slate-300">
-                      <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Type</span><div className="truncate font-semibold text-slate-200">{c.investment_type || "N/A"}</div></div>
-                      <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Amount</span><div className="truncate font-mono font-black text-emerald-400">${displayAmount}</div></div>
-                      <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Notional</span><div className="truncate font-mono font-medium text-slate-400">${displayNotional}</div></div>
-                      <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Timestamp</span><div className="truncate font-mono text-[10px] text-slate-400">{c.timestamp || "—"}</div></div>
-                    </div>
-                  </div>
-
-                  {/* MODULE B: Client Profile */}
-                  <div className="bg-slate-950/30 border border-slate-800/60 p-3 rounded-lg flex flex-col justify-between">
-                    <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2 text-sky-400 text-[10px] font-black uppercase tracking-widest shrink-0">
-                      <User className="w-3.5 h-3.5"/>
-                      <span>Client Profile</span>
-                    </div>
-                    <div className="text-xs grid grid-cols-2 gap-x-3 gap-y-3 flex-1 items-center text-slate-300">
-                      <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Age / Income</span><div className="truncate font-mono font-semibold text-slate-200">{c.client_age ?? "—"} / ${displayIncome}</div></div>
-                      <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Risk Profile</span><div className="truncate font-black text-amber-400">{c.risk_tolerance || "—"}</div></div>
-                      <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Experience</span><div className="truncate text-slate-400">{c.investment_experience || "—"}</div></div>
-                      <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Objective & Horizon</span><div className="truncate text-slate-400 font-medium">{c.investment_objective || "—"} {c?.investment_time_horizon ? `(${c.investment_time_horizon})` : ""}</div></div>
-                    </div>
-                  </div>
-
-                  {/* MODULE C: Advisor Info */}
-                  <div className="bg-slate-950/30 border border-slate-800/60 p-3 rounded-lg flex flex-col justify-between">
-                    <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2 text-amber-400 text-[10px] font-black uppercase tracking-widest shrink-0">
-                      <FileText className="w-3.5 h-3.5"/>
-                      <span>Advisor Info</span>
-                    </div>
-                    <div className="text-xs grid grid-cols-2 gap-x-3 gap-y-3 flex-1 items-center text-slate-300">
-                      <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Advisor ID</span><div className="truncate font-mono font-semibold text-slate-200">{c.advisor_id || "—"}</div></div>
-                      <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Exp / Risk History</span><div className="truncate text-slate-400">{c.advisor_experience || "—"} / <span className="text-rose-400 font-mono font-bold">{c.advisor_history_risk ?? 0}</span></div></div>
-                      <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Rationale File</span><div className={`px-2 py-0.5 text-[9px] font-black rounded-md w-fit tracking-wider ${c.has_rationale ? "bg-emerald-950 text-emerald-400 border border-emerald-900/30" : "bg-slate-900 text-slate-500"}`}>{c.has_rationale ? "FILED" : "MISSING"}</div></div>
-                      <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Desk Context</span><div className="truncate text-slate-400 text-[11px] italic font-serif leading-tight">{c.advisor_notes || "None"}</div></div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Policy Compliance Framework Bar Row */}
-                <div className="border-t border-slate-800/80 pt-2 shrink-0 items-center bg-slate-950/40 p-2 rounded-lg text-xs flex justify-between gap-4">
-                  <div className="flex items-center gap-2 truncate max-w-xl">
-                    <HelpCircle className={`w-4 h-4 shrink-0 ${isAutoPassed ? "text-emerald-400" : "text-rose-400"}`}/>
-                    <span className="text-[9px] uppercase text-slate-500 font-black tracking-wider shrink-0">Exception Rule:</span>
-                    <span className={`font-semibold truncate text-[11px] ${isAutoPassed ? "text-emerald-300" : "text-rose-300"}`}>
-                      {isAutoPassed ? "Trade met all baseline validation parameters. No active human review required." : (c.flag_reason || "None.")}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 overflow-hidden truncate">
-                    <span className="text-[9px] uppercase text-slate-600 font-black tracking-wider shrink-0">Attached Regulations:</span>
-                    <div className="flex gap-1 items-center truncate">
-                      {c.retrieved_policies && (Array.isArray(c.retrieved_policies) || typeof c.retrieved_policies === 'string') ? (
-                        renderPolicies(c.retrieved_policies)
-                      ) : (
-                        <span className="text-[10px] text-slate-600 italic tracking-wide">No regulations attached</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Execution Signature Action Form Tray */}
-                <div className="pt-1 flex gap-3 items-end shrink-0 border-t border-slate-800/40">
-                  <div className="flex-1 flex flex-col">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Reviewer Sign-off Justification Matrix</label>
-                    <input type="text" value={currentNotes} onChange={(e) => handleNotesChange(e.target.value)} placeholder="Type definitive legal compliance assessment or operational arguments..." className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-all shadow-inner h-8" />
-                  </div>
-                  <div className="flex gap-2 h-8">
-                    <button onClick={() => workflow.executeAction(c.trade_id, "Reviewed", "Rejected", currentNotes)} className="bg-rose-600 hover:bg-rose-500 text-white font-black text-[10px] px-4 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-md transition-colors"><X className="w-3.5 h-3.5"/>Reject Trade</button>
-                    <button onClick={() => workflow.executeAction(c.trade_id, "Reviewed", "Approved", currentNotes)} className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-[10px] px-4 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-md transition-colors"><Check className="w-3.5 h-3.5"/>Approve Trade</button>
-                    <button onClick={() => workflow.executeAction(c.trade_id, "Escalated", "Escalated", currentNotes)} className="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-black text-[10px] px-4 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-md transition-colors"><CornerUpRight className="w-3.5 h-3.5"/>Escalate Review</button>
-                  </div>
-                </div>
-
-              </div>
-            );
-          })() : (
-            <div className="h-full flex flex-col items-center justify-center text-slate-500 text-xs font-semibold border border-dashed border-slate-800 rounded p-6 text-center bg-slate-950/20">
-              <CheckCircle className="w-10 h-10 text-emerald-500/30 mb-2" />
-              <span className="text-slate-400 font-bold uppercase tracking-wider text-[11px]">All Tasks Cleared</span>
-              <p className="text-[10px] text-slate-600 font-normal max-w-xs mt-1">Select an item from any active stream or historical tab above to evaluate details.</p>
-            </div>
-          )}
+          <CaseAuditWorkspace
+            selectedCase={workflow.selectedCase}
+            caseStates={workflow.caseStates}
+            activeView={workflow.activeView}
+            onUpdateNotes={workflow.updateNotes}
+            onExecuteAction={workflow.executeAction}
+            renderPolicies={renderPolicies}
+          />
         </div>
 
       </div>
@@ -470,7 +248,479 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+// /* VERSION 14 */
+
+// import React, { useState, useRef, useEffect } from "react";
+// import { useTriageWorkflow } from "../hooks/useTriageWorkflow";
+// import { CheckCircle, Clock, ShieldAlert, FileText, User, Briefcase, HelpCircle, Check, X, CornerUpRight } from "lucide-react";
+
+// function Dashboard() {
+//   const workflow = useTriageWorkflow();
+//   const [currentNotes, setCurrentNotes] = useState<string>("");
+
+//   useEffect(() => {
+//     if (workflow.selectedCase?.trade_id) {
+//       const savedState = workflow.caseStates[workflow.selectedCase.trade_id];
+//       setCurrentNotes(savedState ? savedState.notes : "");
+//     } else {
+//       setCurrentNotes("");
+//     }
+//   }, [workflow.selectedCase, workflow.caseStates]);
+
+//   const handleNotesChange = (text: string) => {
+//     setCurrentNotes(text);
+//     if (workflow.selectedCase?.trade_id) {
+//       workflow.updateNotes(workflow.selectedCase.trade_id, text);
+//     }
+//   };
+
+//   // --- Flexible Spreadsheet Column Resize States (4 Distinct Data Frameworks) ---
+//   const [urgentWidths, setUrgentWidths] = useState({ tradeId: 100, risk: 85, conf: 85, reason: 320 });
+//   const [queuedWidths, setQueuedWidths] = useState({ tradeId: 100, priority: 75, risk: 85, conf: 85, reason: 280 });
+//   const [reviewedWidths, setReviewedWidths] = useState({ tradeId: 110, type: 130, amount: 110, status: 120, notes: 340 });
+//   const [passedWidths, setPassedWidths] = useState({ tradeId: 110, asset: 130, value: 120, confidence: 120, status: 140 });
+
+//   const dragInfo = useRef<{ table: 'urgent' | 'queued' | 'reviewed' | 'passed'; col: string; startX: number; startWidth: number } | null>(null);
+
+//   const handleMouseDown = (table: 'urgent' | 'queued' | 'reviewed' | 'passed', col: string, e: React.MouseEvent) => {
+//     e.preventDefault();
+//     let currentWidths: any;
+//     if (table === 'urgent') currentWidths = urgentWidths;
+//     else if (table === 'queued') currentWidths = queuedWidths;
+//     else if (table === 'reviewed') currentWidths = reviewedWidths;
+//     else currentWidths = passedWidths;
+
+//     dragInfo.current = { table, col, startX: e.clientX, startWidth: currentWidths[col] };
+//     document.addEventListener("mousemove", handleMouseMove);
+//     document.addEventListener("mouseup", handleMouseUp);
+//   };
+
+//   const handleMouseMove = (e: MouseEvent) => {
+//     if (!dragInfo.current) return;
+//     const { table, col, startX, startWidth } = dragInfo.current;
+//     const deltaX = e.clientX - startX;
+//     const newWidth = Math.max(60, startWidth + deltaX);
+
+//     if (table === 'urgent') setUrgentWidths(prev => ({ ...prev, [col]: newWidth }));
+//     else if (table === 'queued') setQueuedWidths(prev => ({ ...prev, [col]: newWidth }));
+//     else if (table === 'reviewed') setReviewedWidths(prev => ({ ...prev, [col]: newWidth }));
+//     else setPassedWidths(prev => ({ ...prev, [col]: newWidth }));
+//   };
+
+//   const handleMouseUp = () => {
+//     dragInfo.current = null;
+//     document.removeEventListener("mousemove", handleMouseMove);
+//     document.removeEventListener("mouseup", handleMouseUp);
+//   };
+
+//   const handleDoubleClick = (table: 'urgent' | 'queued' | 'reviewed' | 'passed') => {
+//     if (table === 'urgent') setUrgentWidths({ tradeId: 100, risk: 85, conf: 85, reason: 320 });
+//     else if (table === 'queued') setQueuedWidths({ tradeId: 100, priority: 75, risk: 85, conf: 85, reason: 280 });
+//     else if (table === 'reviewed') setReviewedWidths({ tradeId: 110, type: 130, amount: 110, status: 120, notes: 340 });
+//     else setPassedWidths({ tradeId: 110, asset: 130, value: 120, confidence: 120, status: 140 });
+//   };
+
+//   const renderPolicies = (policies: any) => {
+//     if (!policies) return <span className="text-[10px] text-slate-500">No policies attached.</span>;
+//     let items: string[] = [];
+//     if (Array.isArray(policies)) {
+//       items = policies;
+//     } else if (typeof policies === "string" && policies.startsWith("[")) {
+//       items = policies.replace(/[\[\]']/g, "").split(",").map((p) => p.trim()).filter(Boolean);
+//     } else if (typeof policies === "string" && policies.trim().length > 0) {
+//       items = policies.split(",");
+//     }
+//     if (items.length === 0) return <span className="text-[10px] text-slate-500">No policies attached.</span>;
+//     return items.map((p, i) => (
+//       <span key={i} className="px-1.5 py-0.5 bg-slate-950 text-[10px] rounded border border-slate-800 text-purple-300 font-mono max-w-[140px] truncate">
+//         {String(p)}
+//       </span>
+//     ));
+//   };
+
+//   return (
+//     <div className="p-2 h-screen bg-slate-950 text-slate-100 flex flex-col gap-2 overflow-hidden select-none">
+      
+//       {/* Top Header Metrics Row */}
+//       <div className="flex items-center justify-between border-b border-slate-900 pb-2 shrink-0">
+//         <div className="flex items-center gap-6">
+//           <h1 className="text-base font-bold tracking-tight text-slate-200">AI Compliance Review Copilot</h1>
+          
+//           <div className="flex bg-slate-900 p-0.5 rounded border border-slate-800 gap-0.5">
+//             <button onClick={() => workflow.setView("active")} className={`px-4 py-1 text-xs font-semibold rounded transition-all ${workflow.activeView === 'active' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'}`}>
+//               Active ({workflow.urgentCases.length + workflow.queuedCases.length})
+//             </button>
+//             <button onClick={() => workflow.setView("reviewed")} className={`px-4 py-1 text-xs font-semibold rounded transition-all ${workflow.activeView === 'reviewed' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'}`}>
+//               Reviewed ({workflow.reviewedCasesList.length})
+//             </button>
+//             <button onClick={() => workflow.setView("passed")} className={`px-4 py-1 text-xs font-semibold rounded transition-all ${workflow.activeView === 'passed' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'}`}>
+//               Passed ({workflow.passedCasesList.length})
+//             </button>
+//           </div>
+//         </div>
+        
+//         {/* Top Right Master Counters Row */}
+//         <div className="flex items-center gap-2">
+//           <div className="bg-rose-950/20 border border-rose-500/20 rounded px-2.5 py-1 flex items-center gap-1.5 text-xs font-medium">
+//             <span className="text-rose-400">Urgent:</span>
+//             <span className="font-bold text-rose-200">{workflow.urgentCases.length}</span>
+//           </div>
+//           <div className="bg-amber-950/20 border border-amber-500/20 rounded px-2.5 py-1 flex items-center gap-1.5 text-xs font-medium">
+//             <span className="text-amber-400">Review:</span>
+//             <span className="font-bold text-amber-200">{workflow.queuedCases.length}</span>
+//           </div>
+//           <div className="bg-emerald-950/20 border border-emerald-500/20 rounded px-2.5 py-1 flex items-center gap-1.5 text-xs font-medium">
+//             <span className="text-emerald-400">Reviewed Today:</span>
+//             <span className="font-bold text-emerald-200">{workflow.reviewedTodayCount}</span>
+//           </div>
+//           <div className="bg-indigo-950/20 border border-indigo-500/20 rounded px-2.5 py-1 flex items-center gap-1.5 text-xs font-medium">
+//             <span className="text-indigo-400">Passed:</span>
+//             <span className="font-bold text-indigo-200">{workflow.passedCasesList.length}</span>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Primary Split Workspace: Upper View 40% / Lower Workspace 60% */}
+//       <div className="flex-1 grid grid-rows-[40fr_60fr] gap-2 min-h-0">
+        
+//         {/* UPPER VIEW SEGMENT */}
+//         <div className="min-h-0">
+//           {workflow.activeView === "active" && (
+//             <div className="grid grid-cols-2 gap-2 h-full min-h-0">
+              
+//               {/* Table 1: Urgent Table */}
+//               <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col min-h-0">
+//                 <div className="flex items-center gap-1 border-b border-slate-800 pb-0.5 mb-1 shrink-0">
+//                   <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
+//                   <h2 className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Urgent Action Required</h2>
+//                 </div>
+//                 <div className="flex-1 overflow-x-auto overflow-y-auto border border-slate-800/30 rounded dynamic-scroll min-h-0">
+//                   {workflow.urgentCases.length === 0 ? <p className="text-xs text-slate-500 p-2 italic">No urgent cases outstanding.</p> : (
+//                     <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
+//                       <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
+//                         <tr>
+//                           <th style={{ width: urgentWidths.tradeId }} className="p-1 relative group">Trade ID
+//                             <div onMouseDown={(e) => handleMouseDown('urgent', 'tradeId', e)} onDoubleClick={() => handleDoubleClick('urgent')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
+//                           </th>
+//                           <th style={{ width: urgentWidths.risk }} className="p-1 text-right relative group">Risk Score
+//                             <div onMouseDown={(e) => handleMouseDown('urgent', 'risk', e)} onDoubleClick={() => handleDoubleClick('urgent')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
+//                           </th>
+//                           <th style={{ width: urgentWidths.conf }} className="p-1 text-right relative group">Conf.
+//                             <div onMouseDown={(e) => handleMouseDown('urgent', 'conf', e)} onDoubleClick={() => handleDoubleClick('urgent')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
+//                           </th>
+//                           <th style={{ width: urgentWidths.reason }} className="p-1 pl-2 relative group">Flag Reason</th>
+//                         </tr>
+//                       </thead>
+//                       <tbody className="divide-y divide-slate-800/30">
+//                         {workflow.urgentCases.map((c, i) => {
+//                           const isSelected = workflow.selectedCase?.trade_id === c?.trade_id;
+//                           return (
+//                             <tr key={`${c.trade_id}-${i}`} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${isSelected ? 'bg-rose-950/40 font-semibold border-l-2 border-rose-500 text-rose-200' : 'hover:bg-slate-800/20 text-slate-300'}`}>
+//                               <td className="p-1 font-mono truncate">{c.trade_id}</td>
+//                               <td className="p-1 text-right font-mono text-rose-400">{(1 - (Number(c.compliance_probability) || 1)).toFixed(2)}</td>
+//                               <td className="p-1 text-right font-mono text-slate-400">{(Number(c.confidence_score) || 0).toFixed(2)}</td>
+//                               <td className="p-1 pl-2 truncate text-[10px]">{c.flag_reason}</td>
+//                             </tr>
+//                           );
+//                         })}
+//                       </tbody>
+//                     </table>
+//                   )}
+//                 </div>
+//               </div>
+
+//               {/* Table 2: Review Table */}
+//               <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col min-h-0">
+//                 <div className="flex items-center gap-1 border-b border-slate-800 pb-0.5 mb-1 shrink-0">
+//                   <Clock className="w-3.5 h-3.5 text-amber-400" />
+//                   <h2 className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Review</h2>
+//                 </div>
+//                 <div className="flex-1 overflow-x-auto overflow-y-auto border border-slate-800/30 rounded dynamic-scroll min-h-0">
+//                   {workflow.queuedCases.length === 0 ? <p className="text-xs text-slate-500 p-1 italic">Review queue empty.</p> : (
+//                     <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
+//                       <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
+//                         <tr>
+//                           <th style={{ width: queuedWidths.tradeId }} className="p-1 relative group">Trade ID
+//                             <div onMouseDown={(e) => handleMouseDown('queued', 'tradeId', e)} onDoubleClick={() => handleDoubleClick('queued')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
+//                           </th>
+//                           <th style={{ width: queuedWidths.priority }} className="p-1 text-right relative group text-amber-400">Priority</th>
+//                           <th style={{ width: queuedWidths.risk }} className="p-1 text-right relative group">Risk Score</th>
+//                           <th style={{ width: queuedWidths.conf }} className="p-1 text-right relative group">Conf.</th>
+//                           <th style={{ width: queuedWidths.reason }} className="p-1 pl-2 relative group">Flag Reason</th>
+//                         </tr>
+//                       </thead>
+//                       <tbody className="divide-y divide-slate-800/30">
+//                         {workflow.queuedCases.map((c, i) => {
+//                           const isSelected = workflow.selectedCase?.trade_id === c?.trade_id;
+//                           return (
+//                             <tr key={`${c.trade_id}-${i}`} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${isSelected ? 'bg-purple-950/40 font-semibold border-l-2 border-purple-500 text-purple-200' : 'hover:bg-slate-800/20 text-slate-300'}`}>
+//                               <td className="p-1 font-mono truncate">{c.trade_id}</td>
+//                               <td className="p-1 text-right font-mono font-bold text-amber-400">{c.priority_score ?? "0"}</td>
+//                               <td className="p-1 text-right font-mono text-rose-400">{(1 - (Number(c.compliance_probability) || 1)).toFixed(2)}</td>
+//                               <td className="p-1 text-right font-mono text-slate-400">{(Number(c.confidence_score) || 0).toFixed(2)}</td>
+//                               <td className="p-1 pl-2 truncate text-[10px]">{c.flag_reason}</td>
+//                             </tr>
+//                           );
+//                         })}
+//                       </tbody>
+//                     </table>
+//                   )}
+//                 </div>
+//               </div>
+
+//             </div>
+//           )}
+
+//           {/* Table 3: Scrollable Resizable Reviewed View Panel */}
+//           {workflow.activeView === "reviewed" && (
+//             <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col h-full min-h-0">
+//               <div className="flex items-center gap-1 border-b border-slate-800 pb-0.5 mb-1 shrink-0">
+//                 <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+//                 <h2 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">User Reviewed Logs</h2>
+//               </div>
+//               <div className="flex-1 overflow-x-auto overflow-y-auto border border-slate-800/30 rounded dynamic-scroll min-h-0">
+//                 {workflow.reviewedCasesList.length === 0 ? <p className="text-slate-500 text-xs p-3 italic text-center">No logs audited yet.</p> : (
+//                   <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
+//                     <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
+//                       <tr>
+//                         <th style={{ width: reviewedWidths.tradeId }} className="p-1 relative group">Trade ID
+//                           <div onMouseDown={(e) => handleMouseDown('reviewed', 'tradeId', e)} onDoubleClick={() => handleDoubleClick('reviewed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
+//                         </th>
+//                         <th style={{ width: reviewedWidths.type }} className="p-1 relative group">Investment Type
+//                           <div onMouseDown={(e) => handleMouseDown('reviewed', 'type', e)} onDoubleClick={() => handleDoubleClick('reviewed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
+//                         </th>
+//                         <th style={{ width: reviewedWidths.amount }} className="p-1 text-right relative group">Amount
+//                           <div onMouseDown={(e) => handleMouseDown('reviewed', 'amount', e)} onDoubleClick={() => handleDoubleClick('reviewed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
+//                         </th>
+//                         <th style={{ width: reviewedWidths.status }} className="p-1 text-center relative group">Outcome
+//                           <div onMouseDown={(e) => handleMouseDown('reviewed', 'status', e)} onDoubleClick={() => handleDoubleClick('reviewed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
+//                         </th>
+//                         <th style={{ width: reviewedWidths.notes }} className="p-1 pl-3 relative group">Auditor Justification Notes</th>
+//                       </tr>
+//                     </thead>
+//                     <tbody className="divide-y divide-slate-800/30">
+//                       {workflow.reviewedCasesList.map((c, i) => {
+//                         const s = workflow.caseStates[c.trade_id];
+//                         const isSelected = workflow.selectedCase?.trade_id === c?.trade_id;
+//                         return (
+//                           <tr key={`${c.trade_id}-${i}`} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${isSelected ? 'bg-emerald-950/40 font-semibold border-l-2 border-emerald-500 text-emerald-200' : 'hover:bg-slate-800/20 text-slate-300'}`}>
+//                             <td className="p-1 font-mono truncate">{c.trade_id}</td>
+//                             <td className="p-1 truncate">{c.investment_type || "N/A"}</td>
+//                             <td className="p-1 text-right font-mono text-emerald-400 truncate">${Number(c.investment_amount || 0).toLocaleString()}</td>
+//                             <td className="p-1 text-center truncate">
+//                               <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${s?.userAction === 'Approved' ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/30' : s?.userAction === 'Rejected' ? 'bg-rose-950 text-rose-400 border border-rose-900/30' : 'bg-amber-950 text-amber-400 border border-amber-900/30'}`}>
+//                                 {s?.userAction || 'Processed'}
+//                               </span>
+//                             </td>
+//                             <td className="p-1 pl-3 italic text-slate-400 truncate">{s?.notes || "—"}</td>
+//                           </tr>
+//                         );
+//                       })}
+//                     </tbody>
+//                   </table>
+//                 )}
+//               </div>
+//             </div>
+//           )}
+
+//           {/* Table 4: Scrollable Resizable Passed View Panel */}
+//           {workflow.activeView === "passed" && (
+//             <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col h-full min-h-0">
+//               <div className="flex items-center gap-1 border-b border-slate-800 pb-0.5 mb-1 shrink-0">
+//                 <CheckCircle className="w-3.5 h-3.5 text-indigo-400" />
+//                 <h2 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">System Automatic Clearance Log</h2>
+//               </div>
+//               <div className="flex-1 overflow-x-auto overflow-y-auto border border-slate-800/30 rounded dynamic-scroll min-h-0">
+//                 {workflow.passedCasesList.length === 0 ? <p className="text-slate-500 text-xs p-3 italic text-center">No auto-passed logs found.</p> : (
+//                   <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
+//                     <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
+//                       <tr>
+//                         <th style={{ width: passedWidths.tradeId }} className="p-1 relative group">Trade ID
+//                           <div onMouseDown={(e) => handleMouseDown('passed', 'tradeId', e)} onDoubleClick={() => handleDoubleClick('passed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
+//                         </th>
+//                         <th style={{ width: passedWidths.asset }} className="p-1 relative group">Asset Class
+//                           <div onMouseDown={(e) => handleMouseDown('passed', 'asset', e)} onDoubleClick={() => handleDoubleClick('passed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
+//                         </th>
+//                         <th style={{ width: passedWidths.value }} className="p-1 text-right relative group">Notional Value
+//                           <div onMouseDown={(e) => handleMouseDown('passed', 'value', e)} onDoubleClick={() => handleDoubleClick('passed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
+//                         </th>
+//                         <th style={{ width: passedWidths.confidence }} className="p-1 text-right relative group">Confidence Score
+//                           <div onMouseDown={(e) => handleMouseDown('passed', 'confidence', e)} onDoubleClick={() => handleDoubleClick('passed')} className="absolute right-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/30 cursor-col-resize" />
+//                         </th>
+//                         <th style={{ width: passedWidths.status }} className="p-1 text-center relative group">Clearance Status</th>
+//                       </tr>
+//                     </thead>
+//                     <tbody className="divide-y divide-slate-800/30">
+//                       {workflow.passedCasesList.map((c, i) => {
+//                         const isSelected = workflow.selectedCase?.trade_id === c?.trade_id;
+//                         return (
+//                           <tr key={`${c.trade_id}-${i}`} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${isSelected ? 'bg-indigo-950/40 font-semibold border-l-2 border-indigo-500 text-indigo-200' : 'hover:bg-slate-800/20 text-slate-300'}`}>
+//                             <td className="p-1 font-mono truncate">{c.trade_id}</td>
+//                             <td className="p-1 truncate">{c.investment_type || "N/A"}</td>
+//                             <td className="p-1 text-right font-mono truncate">${Number(c.notional_value || 0).toLocaleString()}</td>
+//                             <td className="p-1 text-right font-mono text-sky-400 truncate">{(Number(c.confidence_score) || 1).toFixed(4)}</td>
+//                             <td className="p-1 text-center truncate">
+//                               <span className="text-[9px] font-bold bg-emerald-950/30 text-emerald-400 px-2 py-0.5 rounded border border-emerald-900/20">Passed Engine</span>
+//                             </td>
+//                           </tr>
+//                         );
+//                       })}
+//                     </tbody>
+//                   </table>
+//                 )}
+//               </div>
+//             </div>
+//           )}
+//         </div>
+
+//         {/* LOWER WORKSPACE AREA (Expansive 60% Form Layout Framework) */}
+//         <div className="bg-slate-900 border border-slate-800 rounded-md p-3 flex flex-col min-h-0 justify-between shadow-2xl">
+//           {workflow.selectedCase ? (() => {
+//             const c = workflow.selectedCase;
+//             const currentState = workflow.caseStates[c.trade_id] || { reviewStatus: "Not reviewed", notes: "" };
+            
+//             // Safe variable mappings protecting lowercase rendering routes
+//             const parsedProb = Number(c.compliance_probability);
+//             const riskVal = isNaN(parsedProb) ? 0.000 : 1 - parsedProb;
+//             const isRecCompliant = String(currentState.overriddenLabel || c.compliance_label || "").toLowerCase() === "compliant";
+//             const isAutoPassed = workflow.activeView === "passed";
+
+//             // Clean number extractions out of dirty CSV string profiles
+//             const rawAmount = Number(String(c.investment_amount || "").replace(/[^0-9.-]/g, ""));
+//             const displayAmount = isNaN(rawAmount) ? "0" : rawAmount.toLocaleString();
+
+//             const rawNotional = Number(String(c.notional_value || "").replace(/[^0-9.-]/g, ""));
+//             const displayNotional = isNaN(rawNotional) ? "0" : rawNotional.toLocaleString();
+
+//             const rawIncome = Number(String(c.client_income || "").replace(/[^0-9.-]/g, ""));
+//             const displayIncome = isNaN(rawIncome) || rawIncome === 0 ? "—" : `${Math.round(rawIncome / 1000)}k`;
+
+//             return (
+//               <div className="flex flex-col h-full justify-between min-h-0 space-y-3">
+                
+//                 {/* Workspace Module header block */}
+//                 <div className="flex items-center justify-between border-b border-slate-800 pb-2 shrink-0">
+//                   <div className="flex items-center gap-2">
+//                     <span className="text-[9px] font-black uppercase bg-purple-950/40 px-2 py-0.5 rounded border border-purple-900/50 text-purple-400 tracking-wider">Selected Case Audit Space</span>
+//                     <span className="text-xs font-mono font-bold text-slate-100 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">{c.trade_id}</span>
+//                   </div>
+
+//                   {/* Restored Score metrics block badge back to the top-right position */}
+//                   <div className="flex items-center gap-2 bg-slate-950/60 px-2.5 py-1 rounded-md border border-slate-800/80 text-[10px] font-mono">
+//                     <div className="flex items-center gap-1.5 border-r border-slate-800 pr-2">
+//                       <span className="text-slate-500 font-sans text-[9px] font-bold uppercase">AI Rec:</span>
+//                       <span className={`px-1 rounded text-[9px] font-black ${isRecCompliant ? "bg-emerald-950 text-emerald-400" : "bg-rose-950 text-rose-400"}`}>
+//                         {isRecCompliant ? "COMPLIANT" : "FLAGGED"}
+//                       </span>
+//                     </div>
+//                     <div className="flex items-center gap-1.5 border-r border-slate-800 pr-2 pl-1">
+//                       <span className="text-slate-500 font-sans text-[9px] font-bold uppercase">Risk:</span>
+//                       <span className="text-rose-400 font-bold">{riskVal.toFixed(3)}</span>
+//                     </div>
+//                     <div className="flex items-center gap-1.5 pl-1">
+//                       <span className="text-slate-500 font-sans text-[9px] font-bold uppercase">Conf:</span>
+//                       <span className="text-sky-400 font-bold">{Number(c.confidence_score || 0).toFixed(3)}</span>
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 {/* Expanded 3 Column Matrix Grid Layout (Spaced for high-density zero overlap readability) */}
+//                 <div className="grid grid-cols-3 gap-3 flex-1 min-h-0 py-1">
+                  
+//                   {/* MODULE A: Trade Details */}
+//                   <div className="bg-slate-950/30 border border-slate-800/60 p-3 rounded-lg flex flex-col justify-between">
+//                     <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2 text-purple-400 text-[10px] font-black uppercase tracking-widest shrink-0">
+//                       <Briefcase className="w-3.5 h-3.5"/>
+//                       <span>Trade Details</span>
+//                     </div>
+//                     <div className="text-xs grid grid-cols-2 gap-x-3 gap-y-3 flex-1 items-center text-slate-300">
+//                       <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Type</span><div className="truncate font-semibold text-slate-200">{c.investment_type || "N/A"}</div></div>
+//                       <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Amount</span><div className="truncate font-mono font-black text-emerald-400">${displayAmount}</div></div>
+//                       <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Notional</span><div className="truncate font-mono font-medium text-slate-400">${displayNotional}</div></div>
+//                       <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Timestamp</span><div className="truncate font-mono text-[10px] text-slate-400">{c.timestamp || "—"}</div></div>
+//                     </div>
+//                   </div>
+
+//                   {/* MODULE B: Client Profile */}
+//                   <div className="bg-slate-950/30 border border-slate-800/60 p-3 rounded-lg flex flex-col justify-between">
+//                     <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2 text-sky-400 text-[10px] font-black uppercase tracking-widest shrink-0">
+//                       <User className="w-3.5 h-3.5"/>
+//                       <span>Client Profile</span>
+//                     </div>
+//                     <div className="text-xs grid grid-cols-2 gap-x-3 gap-y-3 flex-1 items-center text-slate-300">
+//                       <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Age / Income</span><div className="truncate font-mono font-semibold text-slate-200">{c.client_age ?? "—"} / ${displayIncome}</div></div>
+//                       <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Risk Profile</span><div className="truncate font-black text-amber-400">{c.risk_tolerance || "—"}</div></div>
+//                       <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Experience</span><div className="truncate text-slate-400">{c.investment_experience || "—"}</div></div>
+//                       <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Objective & Horizon</span><div className="truncate text-slate-400 font-medium">{c.investment_objective || "—"} {c?.investment_time_horizon ? `(${c.investment_time_horizon})` : ""}</div></div>
+//                     </div>
+//                   </div>
+
+//                   {/* MODULE C: Advisor Info */}
+//                   <div className="bg-slate-950/30 border border-slate-800/60 p-3 rounded-lg flex flex-col justify-between">
+//                     <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2 text-amber-400 text-[10px] font-black uppercase tracking-widest shrink-0">
+//                       <FileText className="w-3.5 h-3.5"/>
+//                       <span>Advisor Info</span>
+//                     </div>
+//                     <div className="text-xs grid grid-cols-2 gap-x-3 gap-y-3 flex-1 items-center text-slate-300">
+//                       <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Advisor ID</span><div className="truncate font-mono font-semibold text-slate-200">{c.advisor_id || "—"}</div></div>
+//                       <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Exp / Risk History</span><div className="truncate text-slate-400">{c.advisor_experience || "—"} / <span className="text-rose-400 font-mono font-bold">{c.advisor_history_risk ?? 0}</span></div></div>
+//                       <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Rationale File</span><div className={`px-2 py-0.5 text-[9px] font-black rounded-md w-fit tracking-wider ${c.has_rationale ? "bg-emerald-950 text-emerald-400 border border-emerald-900/30" : "bg-slate-900 text-slate-500"}`}>{c.has_rationale ? "FILED" : "MISSING"}</div></div>
+//                       <div><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Desk Context</span><div className="truncate text-slate-400 text-[11px] italic font-serif leading-tight">{c.advisor_notes || "None"}</div></div>
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 {/* Policy Compliance Framework Bar Row */}
+//                 <div className="border-t border-slate-800/80 pt-2 shrink-0 items-center bg-slate-950/40 p-2 rounded-lg text-xs flex justify-between gap-4">
+//                   <div className="flex items-center gap-2 truncate max-w-xl">
+//                     <HelpCircle className={`w-4 h-4 shrink-0 ${isAutoPassed ? "text-emerald-400" : "text-rose-400"}`}/>
+//                     <span className="text-[9px] uppercase text-slate-500 font-black tracking-wider shrink-0">Exception Rule:</span>
+//                     <span className={`font-semibold truncate text-[11px] ${isAutoPassed ? "text-emerald-300" : "text-rose-300"}`}>
+//                       {isAutoPassed ? "Trade met all baseline validation parameters. No active human review required." : (c.flag_reason || "None.")}
+//                     </span>
+//                   </div>
+//                   <div className="flex items-center gap-1.5 overflow-hidden truncate">
+//                     <span className="text-[9px] uppercase text-slate-600 font-black tracking-wider shrink-0">Attached Regulations:</span>
+//                     <div className="flex gap-1 items-center truncate">
+//                       {c.retrieved_policies && (Array.isArray(c.retrieved_policies) || typeof c.retrieved_policies === 'string') ? (
+//                         renderPolicies(c.retrieved_policies)
+//                       ) : (
+//                         <span className="text-[10px] text-slate-600 italic tracking-wide">No regulations attached</span>
+//                       )}
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 {/* Execution Signature Action Form Tray */}
+//                 <div className="pt-1 flex gap-3 items-end shrink-0 border-t border-slate-800/40">
+//                   <div className="flex-1 flex flex-col">
+//                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Reviewer Sign-off Justification Matrix</label>
+//                     <input type="text" value={currentNotes} onChange={(e) => handleNotesChange(e.target.value)} placeholder="Type definitive legal compliance assessment or operational arguments..." className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-all shadow-inner h-8" />
+//                   </div>
+//                   <div className="flex gap-2 h-8">
+//                     <button onClick={() => workflow.executeAction(c.trade_id, "Reviewed", "Rejected", currentNotes)} className="bg-rose-600 hover:bg-rose-500 text-white font-black text-[10px] px-4 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-md transition-colors"><X className="w-3.5 h-3.5"/>Reject Trade</button>
+//                     <button onClick={() => workflow.executeAction(c.trade_id, "Reviewed", "Approved", currentNotes)} className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-[10px] px-4 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-md transition-colors"><Check className="w-3.5 h-3.5"/>Approve Trade</button>
+//                     <button onClick={() => workflow.executeAction(c.trade_id, "Escalated", "Escalated", currentNotes)} className="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-black text-[10px] px-4 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-md transition-colors"><CornerUpRight className="w-3.5 h-3.5"/>Escalate Review</button>
+//                   </div>
+//                 </div>
+
+//               </div>
+//             );
+//           })() : (
+//             <div className="h-full flex flex-col items-center justify-center text-slate-500 text-xs font-semibold border border-dashed border-slate-800 rounded p-6 text-center bg-slate-950/20">
+//               <CheckCircle className="w-10 h-10 text-emerald-500/30 mb-2" />
+//               <span className="text-slate-400 font-bold uppercase tracking-wider text-[11px]">All Tasks Cleared</span>
+//               <p className="text-[10px] text-slate-600 font-normal max-w-xs mt-1">Select an item from any active stream or historical tab above to evaluate details.</p>
+//             </div>
+//           )}
+//         </div>
+
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default Dashboard;
 
 // /* VERSION 13 */
 
