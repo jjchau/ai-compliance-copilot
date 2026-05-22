@@ -30,11 +30,11 @@ def make_raw_trade(trade_id: str):
 
 
 def test_load_review_cases_builds_one_case_per_raw_record(monkeypatch):
-    import src.api.data_loader as data_loader_mod
+    import src.data.data_loader as data_loader_mod
     import src.orchestration.review_pipeline as pipeline_mod
 
     raw_cases = [make_raw_trade('T001'), make_raw_trade('T002')]
-    monkeypatch.setattr(data_loader_mod, 'cases', raw_cases)
+    monkeypatch.setattr(data_loader_mod, 'raw_cases', raw_cases)
 
     def build_case_side_effect(trade):
         return {'trade_id': trade.trade_id}
@@ -58,11 +58,11 @@ def test_load_review_cases_builds_one_case_per_raw_record(monkeypatch):
 
 
 def test_import_reloads_cases_and_case_lookup(monkeypatch):
-    import src.api.data_loader as data_loader_mod
+    import src.data.data_loader as data_loader_mod
     import src.orchestration.review_pipeline as pipeline_mod
 
     raw_cases = [make_raw_trade('T123'), make_raw_trade('T456')]
-    monkeypatch.setattr(data_loader_mod, 'cases', raw_cases)
+    monkeypatch.setattr(data_loader_mod, 'raw_cases', raw_cases)
 
     case_one = {'trade_id': 'T123', 'status': 'mocked'}
     case_two = {'trade_id': 'T456', 'status': 'mocked'}

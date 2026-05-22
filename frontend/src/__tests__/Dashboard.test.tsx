@@ -89,6 +89,8 @@ describe('Dashboard', () => {
     const input = screen.getByPlaceholderText(/Type definitive legal compliance assessment/i);
 
     await userEvent.type(input, 'Updated note');
+    await userEvent.tab();
+
     expect(mockWorkflow.updateNotes).toHaveBeenCalledWith('T1', 'Updated note');
     expect(screen.getByText(/Policy A/i)).toBeInTheDocument();
     expect(screen.getByText(/Policy B/i)).toBeInTheDocument();
