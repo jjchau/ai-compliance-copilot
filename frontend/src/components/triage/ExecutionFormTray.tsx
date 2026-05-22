@@ -17,24 +17,14 @@ interface ExecutionFormTrayProps {
 export const ExecutionFormTray: React.FC<ExecutionFormTrayProps> = ({
   tradeId,
   initialNotes,
-  isAutoPassed,
   onUpdateNotes,
   onExecuteAction,
 }) => {
   const [localNotes, setLocalNotes] = useState<string>(initialNotes);
 
-  // Sync internal input state only when the selected trade row changes
   useEffect(() => {
     setLocalNotes(initialNotes);
   }, [tradeId, initialNotes]);
-
-  if (isAutoPassed) {
-    return (
-      <div className="pt-2 pb-1 border-t border-slate-800/40 text-center text-slate-500 text-[10px] font-medium tracking-wide uppercase">
-        🛡️ This trade was automatically passed via straight-through processing (STP). Modifications disabled.
-      </div>
-    );
-  }
 
   return (
     <div className="pt-1 flex gap-3 items-end shrink-0 border-t border-slate-800/40">
@@ -53,7 +43,7 @@ export const ExecutionFormTray: React.FC<ExecutionFormTrayProps> = ({
       </div>
       <div className="flex gap-2 h-8">
         <button
-          onClick={() => onExecuteAction(tradeId, "Reviewed", "Refused" as any, localNotes)} // Maps to your reducer's Rejected flow
+          onClick={() => onExecuteAction(tradeId, "Reviewed", "Rejected" as any, localNotes)}
           className="bg-rose-600 hover:bg-rose-500 text-white font-black text-[10px] px-4 rounded flex items-center gap-1.5 uppercase tracking-wider shadow-md transition-colors"
         >
           <X className="w-3.5 h-3.5" />

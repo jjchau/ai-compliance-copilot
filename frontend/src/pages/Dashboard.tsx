@@ -62,30 +62,48 @@ export default function Dashboard() {
   return (
     <div className="p-2 h-screen bg-slate-950 text-slate-100 flex flex-col gap-2 overflow-hidden select-none">
       {/* Top Header Metrics Row */}
-      <div className="flex items-center justify-between border-b border-slate-900 pb-2 shrink-0">
-        <div className="flex items-center gap-6">
-          <h1 className="text-base font-bold tracking-tight text-slate-200">AI Compliance Review Copilot</h1>
-          <div className="flex bg-slate-900 p-0.5 rounded border border-slate-800 gap-0.5">
-            <button onClick={() => workflow.setView("active")} className={`px-4 py-1 text-xs font-semibold rounded transition-all ${workflow.activeView === "active" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"}`}>
+      <div className="flex items-center justify-between border-b border-slate-900 pb-1.5 shrink-0">
+        <div className="flex items-center gap-4">
+          <h1 className="text-sm font-black uppercase tracking-wider text-slate-200 m-0 leading-none">
+            AI Compliance Review Copilot
+          </h1>
+          
+          {/* Tightened View Navigation Tabs */}
+          <div className="flex bg-slate-900 p-0.5 rounded border border-slate-800 gap-0.5 scale-95 origin-left">
+            <button 
+              onClick={() => workflow.setView("active")} 
+              className={`px-3 py-0.5 text-[11px] font-semibold rounded transition-all ${workflow.activeView === "active" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"}`}
+            >
               Active ({workflow.urgentCases.length + workflow.queuedCases.length})
             </button>
-            <button onClick={() => workflow.setView("reviewed")} className={`px-4 py-1 text-xs font-semibold rounded transition-all ${workflow.activeView === "reviewed" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"}`}>
+            <button 
+              onClick={() => workflow.setView("reviewed")} 
+              className={`px-3 py-0.5 text-[11px] font-semibold rounded transition-all ${workflow.activeView === "reviewed" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"}`}
+            >
               Reviewed ({workflow.reviewedCasesList.length})
             </button>
-            <button onClick={() => workflow.setView("passed")} className={`px-4 py-1 text-xs font-semibold rounded transition-all ${workflow.activeView === "passed" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"}`}>
+            <button 
+              onClick={() => workflow.setView("passed")} 
+              className={`px-3 py-0.5 text-[11px] font-semibold rounded transition-all ${workflow.activeView === "passed" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"}`}
+            >
               Passed ({workflow.passedCasesList.length})
             </button>
           </div>
         </div>
 
-        {/* Counter Badges */}
-        <div className="flex items-center gap-2">
-          <div className="bg-rose-950/20 border border-rose-500/20 rounded px-2.5 py-1 text-xs font-medium"><span className="text-rose-400">Urgent:</span> <span className="font-bold text-rose-200">{workflow.urgentCases.length}</span></div>
-          <div className="bg-amber-950/20 border border-amber-500/20 rounded px-2.5 py-1 text-xs font-medium"><span className="text-amber-400">Review:</span> <span className="font-bold text-amber-200">{workflow.queuedCases.length}</span></div>
-          <div className="bg-emerald-950/20 border border-emerald-500/20 rounded px-2.5 py-1 text-xs font-medium"><span className="text-emerald-400">Reviewed Today:</span> <span className="font-bold text-emerald-200">{workflow.reviewedTodayCount}</span></div>
+        {/* Denser Counter Badges */}
+        <div className="flex items-center gap-1.5 transform scale-95 origin-right">
+          <div className="bg-rose-950/20 border border-rose-500/20 rounded px-2 py-0.5 text-[11px] font-medium">
+            <span className="text-rose-400">Urgent:</span> <span className="font-bold text-rose-200">{workflow.urgentCases.length}</span>
+          </div>
+          <div className="bg-amber-950/20 border border-amber-500/20 rounded px-2 py-0.5 text-[11px] font-medium">
+            <span className="text-amber-400">Review:</span> <span className="font-bold text-amber-200">{workflow.queuedCases.length}</span>
+          </div>
+          <div className="bg-emerald-950/20 border border-emerald-500/20 rounded px-2 py-0.5 text-[11px] font-medium">
+            <span className="text-emerald-400">Reviewed Today:</span> <span className="font-bold text-emerald-200">{workflow.reviewedTodayCount}</span>
+          </div>
         </div>
       </div>
-
       {/* Primary Split Workspace */}
       <div className="flex-1 grid grid-rows-[40fr_60fr] gap-2 min-h-0">
         
@@ -99,7 +117,7 @@ export default function Dashboard() {
                   <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
                   <h2 className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Urgent Action Required</h2>
                 </div>
-                <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
+                <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0 custom-scrollbar">
                   {workflow.urgentCases.length === 0 ? <p className="text-xs text-slate-500 p-2 italic">No urgent cases outstanding.</p> : (
                     <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                       <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
@@ -131,7 +149,7 @@ export default function Dashboard() {
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
                   <h2 className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Review Queue</h2>
                 </div>
-                <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
+                <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0 custom-scrollbar">
                   {workflow.queuedCases.length === 0 ? <p className="text-xs text-slate-500 p-1 italic">Review queue empty.</p> : (
                     <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                       <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
@@ -164,7 +182,7 @@ export default function Dashboard() {
           {/* Table C: Historical Audited Logs */}
           {workflow.activeView === "reviewed" && (
             <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col h-full min-h-0">
-              <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
+              <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0 custom-scrollbar">
                 {workflow.reviewedCasesList.length === 0 ? <p className="text-slate-500 text-xs p-3 italic text-center">No logs audited yet.</p> : (
                   <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                     <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
@@ -201,7 +219,7 @@ export default function Dashboard() {
           {/* Table D: Straight-Through System Passed Logs */}
           {workflow.activeView === "passed" && (
             <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col h-full min-h-0">
-              <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
+              <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0 custom-scrollbar">
                 {workflow.passedCasesList.length === 0 ? <p className="text-slate-500 text-xs p-3 italic text-center">No auto-passed logs found.</p> : (
                   <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                     <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">

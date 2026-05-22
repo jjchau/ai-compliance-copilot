@@ -222,3 +222,42 @@ code {
     color: var(--foreground);
   }
 }
+
+@layer utilities {
+  /* WebKit Engines (Chrome, Safari, Edge, Brave) */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 9999px;
+    transition: background-color 0.2s ease-in-out;
+  }
+
+  /* Reveal thumb on container hover */
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.35); /* Slate-500 muted tint */
+  }
+
+  /* Darken thumb when explicitly clicking/hovering directly over the bar itself */
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.6) !important; /* Indigo accent glow */
+  }
+
+  /* Gecko Engine (Firefox) Layout Rules */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.2s ease-in-out;
+  }
+
+  .custom-scrollbar:hover {
+    scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+  }
+}
