@@ -113,7 +113,7 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
         },
       };
 
-    case "EXECUTE_ACTION": {
+case "EXECUTE_ACTION": {
       const { tradeId, status, actionType, notes } = action.payload;
       const isReReview = state.caseStates[tradeId]?.reviewStatus !== "Not reviewed";
       
@@ -129,44 +129,61 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
 
       let nextFocus: TradeCase | null = null;
 
-      // Only calculate next focus auto-advance if we are modifying an item inside the Active tab streams
-      if (state.activeView === "active" && !isReReview) {
-        const remainingUrgent = state.cases.filter(
-          (c) => c?.escalation_level === "urgent" && updatedCaseStates[c.trade_id]?.reviewStatus === "Not reviewed" && c.trade_id !== tradeId
+      // 1. Calculate the active list based on the activeView *before* filtering out the processed item
+      let currentPool: TradeCase[] = [];
+      if (state.activeView === "active") {
+        const targetCase = state.cases.find((c) => c.trade_id === tradeId);
+        const wasUrgent = targetCase?.escalation_level === "urgent";
+        
+        if (wasUrgent) {
+          currentPool = state.cases.filter(
+            (c) => c?.escalation_level === "urgent" && state.caseStates[c.trade_id]?.reviewStatus === "Not reviewed"
+          );
+        } else {
+          currentPool = state.cases
+            .filter((c) => (c?.escalation_level === "priority" || c?.escalation_level === "queue") && state.caseStates[c.trade_id]?.reviewStatus === "Not reviewed")
+            .sort((a, b) => (Number(b?.priority_score) || 0) - (Number(a?.priority_score) || 0));
+        }
+      } else if (state.activeView === "passed") {
+        currentPool = state.cases.filter(
+          (c) => c?.escalation_level !== "urgent" && 
+                 c?.escalation_level !== "priority" && 
+                 c?.escalation_level !== "queue" &&
+                 state.caseStates[c.trade_id]?.reviewStatus === "Not reviewed"
         );
+      } else if (state.activeView === "reviewed") {
+        currentPool = state.cases.filter(
+          (c) => state.caseStates[c.trade_id]?.reviewStatus === "Reviewed" || 
+                 state.caseStates[c.trade_id]?.reviewStatus === "Escalated"
+        );
+      }
+
+      // 2. Identify target selection index coordinates
+      const currentIndex = currentPool.findIndex((c) => c.trade_id === tradeId);
+
+      if (currentIndex !== -1 && currentPool.length > 1) {
+        // Filter out the item that is moving to separate it from next lookup targets
+        const dynamicPoolWithoutCurrent = currentPool.filter((c) => c.trade_id !== tradeId);
+        
+        // Advance selection to the next item in line, or fall back to the new last item
+        const targetIndex = Math.min(currentIndex, dynamicPoolWithoutCurrent.length - 1);
+        nextFocus = dynamicPoolWithoutCurrent[targetIndex >= 0 ? targetIndex : 0];
+      } else if (state.activeView === "active") {
+        // Cross-over fallback optimization: If urgent pool runs dry, fall back to focusing the priority queue row
         const remainingQueued = state.cases
           .filter((c) => (c?.escalation_level === "priority" || c?.escalation_level === "queue") && updatedCaseStates[c.trade_id]?.reviewStatus === "Not reviewed" && c.trade_id !== tradeId)
           .sort((a, b) => (Number(b?.priority_score) || 0) - (Number(a?.priority_score) || 0));
+        
+        const remainingUrgent = state.cases.filter(
+          (c) => c?.escalation_level === "urgent" && updatedCaseStates[c.trade_id]?.reviewStatus === "Not reviewed" && c.trade_id !== tradeId
+        );
 
         const targetCase = state.cases.find((c) => c.trade_id === tradeId);
-        const wasUrgent = targetCase?.escalation_level === "urgent";
-
-        if (wasUrgent) {
-          const pool = state.cases.filter((c) => c?.escalation_level === "urgent" && state.caseStates[c.trade_id]?.reviewStatus === "Not reviewed");
-          const currentIndex = pool.findIndex((c) => c.trade_id === tradeId);
-          const dynamicUrgentPool = pool.filter((c) => c.trade_id !== tradeId);
-
-          if (dynamicUrgentPool.length > 0) {
-            const idx = Math.min(currentIndex, dynamicUrgentPool.length - 1);
-            nextFocus = dynamicUrgentPool[idx >= 0 ? idx : 0];
-          } else if (remainingQueued.length > 0) {
-            nextFocus = remainingQueued[0];
-          }
-        } else {
-          const pool = state.cases.filter((c) => (c?.escalation_level === "priority" || c?.escalation_level === "queue") && state.caseStates[c.trade_id]?.reviewStatus === "Not reviewed").sort((a, b) => (Number(b?.priority_score) || 0) - (Number(a?.priority_score) || 0));
-          const currentIndex = pool.findIndex((c) => c.trade_id === tradeId);
-          const dynamicQueuedPool = pool.filter((c) => c.trade_id !== tradeId);
-
-          if (dynamicQueuedPool.length > 0) {
-            const idx = Math.min(currentIndex, dynamicQueuedPool.length - 1);
-            nextFocus = dynamicQueuedPool[idx >= 0 ? idx : 0];
-          } else if (remainingUrgent.length > 0) {
-            nextFocus = remainingUrgent[0];
-          }
+        if (targetCase?.escalation_level === "urgent" && remainingQueued.length > 0) {
+          nextFocus = remainingQueued[0];
+        } else if (targetCase?.escalation_level !== "urgent" && remainingUrgent.length > 0) {
+          nextFocus = remainingUrgent[0];
         }
-      } else {
-        // If reviewing inside Reviewed or Passed tab list, maintain focus on current item
-        nextFocus = state.cases.find((c) => c.trade_id === tradeId) || null;
       }
 
       return {
@@ -176,7 +193,7 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
         reviewedTodayCount: isReReview ? state.reviewedTodayCount : state.reviewedTodayCount + 1,
       };
     }
-
+    
     default:
       return state;
   }
@@ -213,17 +230,34 @@ export function useTriageWorkflow() {
     dispatch({ type: "UPDATE_NOTES", payload: { tradeId, notes } });
   }, []);
 
-  const executeAction = useCallback((tradeId: string, status: "Reviewed" | "Escalated", actionType: "Rejected" | "Approved" | "Escalated", notes: string) => {
-    dispatch({ type: "EXECUTE_ACTION", payload: { tradeId, status, actionType, notes } });
-  }, []);
+  const executeAction = useCallback((
+      tradeId: string, 
+      status: "Reviewed" | "Escalated", 
+      actionType: "Rejected" | "Approved" | "Escalated", 
+      notes: string
+    ) => {
+      dispatch({ 
+        type: "EXECUTE_ACTION", 
+        payload: { tradeId, status, actionType, notes } 
+      });
+    }, []);
 
   const urgentCases = state.cases.filter((c) => c?.escalation_level === "urgent" && state.caseStates[c.trade_id]?.reviewStatus === "Not reviewed");
   const queuedCases = state.cases
     .filter((c) => (c?.escalation_level === "priority" || c?.escalation_level === "queue") && state.caseStates[c.trade_id]?.reviewStatus === "Not reviewed")
     .sort((a, b) => (Number(b?.priority_score) || 0) - (Number(a?.priority_score) || 0));
 
-  const reviewedCasesList = state.cases.filter((c) => state.caseStates[c.trade_id]?.reviewStatus === "Reviewed" || state.caseStates[c.trade_id]?.reviewStatus === "Escalated");
-  const passedCasesList = state.cases.filter((c) => c?.escalation_level !== "urgent" && c?.escalation_level !== "priority" && c?.escalation_level !== "queue");
+  const reviewedCasesList = state.cases.filter(
+    (c) => state.caseStates[c.trade_id]?.reviewStatus === "Reviewed" || 
+          state.caseStates[c.trade_id]?.reviewStatus === "Escalated"
+  );
+
+  const passedCasesList = state.cases.filter(
+    (c) => c?.escalation_level !== "urgent" && 
+          c?.escalation_level !== "priority" && 
+          c?.escalation_level !== "queue" &&
+          (!state.caseStates[c.trade_id] || state.caseStates[c.trade_id].reviewStatus === "Not reviewed")
+  );
 
   return {
     ...state,
