@@ -62,9 +62,9 @@ export default function Dashboard() {
   return (
     <div className="p-2 h-screen bg-slate-950 text-slate-100 flex flex-col gap-2 overflow-hidden select-none">
       {/* Top Header Metrics Row */}
-      <div className="flex items-center justify-between border-b border-slate-900 pb-1.5 shrink-0">
+      <div className="flex items-center justify-between border-b border-slate-900 pb-1 shrink-0">
         <div className="flex items-center gap-4">
-          <h1 className="text-sm font-black uppercase tracking-wider text-slate-200 m-0 leading-none">
+          <h1 className="text-sm font-black uppercase tracking-wider text-slate-200 m-4 leading-none">
             AI Compliance Review Copilot
           </h1>
           
@@ -104,6 +104,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
       {/* Primary Split Workspace */}
       <div className="flex-1 grid grid-rows-[40fr_60fr] gap-2 min-h-0">
         
@@ -117,23 +118,24 @@ export default function Dashboard() {
                   <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
                   <h2 className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Urgent Action Required</h2>
                 </div>
-                <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0 custom-scrollbar">
+                <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
                   {workflow.urgentCases.length === 0 ? <p className="text-xs text-slate-500 p-2 italic">No urgent cases outstanding.</p> : (
                     <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                       <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
                         <tr>
                           <th style={{ width: urgentWidths.tradeId }} className="p-1 relative group">Trade ID<div onMouseDown={(e) => handleMouseDown("urgent", "tradeId", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
                           <th style={{ width: urgentWidths.risk }} className="p-1 text-right relative group">Risk Score<div onMouseDown={(e) => handleMouseDown("urgent", "risk", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
-                          <th style={{ width: urgentWidths.conf }} className="p-1 text-right relative group">Conf.<div onMouseDown={(e) => handleMouseDown("urgent", "conf", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
-                          <th style={{ width: urgentWidths.reason }} className="p-1 pl-2">Flag Reason</th>
+                          <th style={{ width: urgentWidths.conf }} className="p-1 text-right relative group">Confidence<div onMouseDown={(e) => handleMouseDown("urgent", "conf", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
+                          <th style={{ width: urgentWidths.reason }} className="p-1 pl-2">Flag Reasons</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/30">
                         {workflow.urgentCases.map((c) => (
                           <tr key={c.trade_id} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${workflow.selectedCase?.trade_id === c.trade_id ? "bg-rose-950/40 font-semibold border-l-2 border-rose-500 text-rose-200" : "hover:bg-slate-800/20 text-slate-300"}`}>
                             <td className="p-1 font-mono truncate">{c.trade_id}</td>
-                            <td className="p-1 text-right font-mono text-rose-400">{(1 - (Number(c.compliance_probability) || 1)).toFixed(2)}</td>
-                            <td className="p-1 text-right font-mono text-slate-400">{(Number(c.confidence_score) || 0).toFixed(2)}</td>
+                            {/* <td className="p-1 text-right font-mono text-rose-400">{(1 - (Number(c.compliance_probability) || 1)).toFixed(2)}</td> */}
+                            <td className="p-1 text-right font-mono text-rose-400">{(Number(c.risk_score))}</td>
+                            <td className="p-1 text-right font-mono text-sky-400">{(Number(c.confidence_score) || 0).toFixed(2)}</td>
                             <td className="p-1 pl-2 truncate text-[10px]">{c.flag_reason}</td>
                           </tr>
                         ))}
@@ -149,16 +151,16 @@ export default function Dashboard() {
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
                   <h2 className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Review Queue</h2>
                 </div>
-                <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0 custom-scrollbar">
+                <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
                   {workflow.queuedCases.length === 0 ? <p className="text-xs text-slate-500 p-1 italic">Review queue empty.</p> : (
                     <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                       <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
                         <tr>
                           <th style={{ width: queuedWidths.tradeId }} className="p-1 relative group">Trade ID<div onMouseDown={(e) => handleMouseDown("queued", "tradeId", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
-                          <th style={{ width: queuedWidths.priority }} className="p-1 text-right text-amber-400">Priority</th>
+                          <th style={{ width: queuedWidths.priority }} className="p-1 text-right">Priority</th>
                           <th style={{ width: queuedWidths.risk }} className="p-1 text-right">Risk Score</th>
-                          <th style={{ width: queuedWidths.conf }} className="p-1 text-right">Conf.</th>
-                          <th style={{ width: queuedWidths.reason }} className="p-1 pl-2">Flag Reason</th>
+                          <th style={{ width: queuedWidths.conf }} className="p-1 text-right">Confidence</th>
+                          <th style={{ width: queuedWidths.reason }} className="p-1 pl-2">Flag Reasons</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/30">
@@ -166,8 +168,8 @@ export default function Dashboard() {
                           <tr key={c.trade_id} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${workflow.selectedCase?.trade_id === c.trade_id ? "bg-purple-950/40 font-semibold border-l-2 border-purple-500 text-purple-200" : "hover:bg-slate-800/20 text-slate-300"}`}>
                             <td className="p-1 font-mono truncate">{c.trade_id}</td>
                             <td className="p-1 text-right font-mono font-bold text-amber-400">{c.priority_score ?? "0"}</td>
-                            <td className="p-1 text-right font-mono text-rose-400">{(1 - (Number(c.compliance_probability) || 1)).toFixed(2)}</td>
-                            <td className="p-1 text-right font-mono text-slate-400">{(Number(c.confidence_score) || 0).toFixed(2)}</td>
+                            <td className="p-1 text-right font-mono text-rose-400">{(Number(c.risk_score))}</td>
+                            <td className="p-1 text-right font-mono text-sky-400">{(Number(c.confidence_score) || 0).toFixed(2)}</td>
                             <td className="p-1 pl-2 truncate text-[10px]">{c.flag_reason}</td>
                           </tr>
                         ))}
@@ -182,7 +184,7 @@ export default function Dashboard() {
           {/* Table C: Historical Audited Logs */}
           {workflow.activeView === "reviewed" && (
             <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col h-full min-h-0">
-              <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0 custom-scrollbar">
+              <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
                 {workflow.reviewedCasesList.length === 0 ? <p className="text-slate-500 text-xs p-3 italic text-center">No logs audited yet.</p> : (
                   <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                     <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
@@ -190,8 +192,8 @@ export default function Dashboard() {
                         <th style={{ width: reviewedWidths.tradeId }} className="p-1 relative group">Trade ID<div onMouseDown={(e) => handleMouseDown("reviewed", "tradeId", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
                         <th style={{ width: reviewedWidths.type }} className="p-1">Investment Type</th>
                         <th style={{ width: reviewedWidths.amount }} className="p-1 text-right">Amount</th>
-                        <th style={{ width: reviewedWidths.status }} className="p-1 text-center">Outcome</th>
-                        <th style={{ width: reviewedWidths.notes }} className="p-1 pl-3">Auditor Notes</th>
+                        <th style={{ width: reviewedWidths.status }} className="p-1 text-center">Review Outcome</th>
+                        <th style={{ width: reviewedWidths.notes }} className="p-1 pl-3">Reviewer Notes</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/30">
@@ -219,16 +221,16 @@ export default function Dashboard() {
           {/* Table D: Straight-Through System Passed Logs */}
           {workflow.activeView === "passed" && (
             <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col h-full min-h-0">
-              <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0 custom-scrollbar">
+              <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
                 {workflow.passedCasesList.length === 0 ? <p className="text-slate-500 text-xs p-3 italic text-center">No auto-passed logs found.</p> : (
                   <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                     <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
                       <tr>
                         <th style={{ width: passedWidths.tradeId }} className="p-1 relative group">Trade ID<div onMouseDown={(e) => handleMouseDown("passed", "tradeId", e)} className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize group-hover:bg-purple-500/30" /></th>
-                        <th style={{ width: passedWidths.asset }} className="p-1">Asset Class</th>
-                        <th style={{ width: passedWidths.value }} className="p-1 text-right">Notional Value</th>
-                        <th style={{ width: passedWidths.confidence }} className="p-1 text-right">Confidence Score</th>
-                        <th style={{ width: passedWidths.status }} className="p-1 text-center">Clearance Status</th>
+                        <th style={{ width: passedWidths.asset }} className="p-1">Investment Type</th>
+                        <th style={{ width: passedWidths.value }} className="p-1 text-right">Risk Score</th>
+                        <th style={{ width: passedWidths.confidence }} className="p-1 text-right">Confidence</th>
+                        <th style={{ width: passedWidths.status }} className="p-1 text-center">Flag type</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/30">
@@ -236,9 +238,9 @@ export default function Dashboard() {
                         <tr key={c.trade_id} onClick={() => workflow.selectCase(c)} className={`cursor-pointer text-[11px] ${workflow.selectedCase?.trade_id === c.trade_id ? "bg-indigo-950/40 font-semibold border-l-2 border-indigo-500 text-indigo-200" : "hover:bg-slate-800/20 text-slate-300"}`}>
                           <td className="p-1 font-mono truncate">{c.trade_id}</td>
                           <td className="p-1 truncate">{c.investment_type || "N/A"}</td>
-                          <td className="p-1 text-right font-mono truncate">${Number(c.notional_value || 0).toLocaleString()}</td>
-                          <td className="p-1 text-right font-mono text-sky-400">{(Number(c.confidence_score) || 1).toFixed(4)}</td>
-                          <td className="p-1 text-center"><span className="text-[9px] font-bold bg-emerald-950/30 text-emerald-400 px-2 py-0.5 rounded border border-emerald-900/20">Passed Engine</span></td>
+                          <td className="p-1 text-right font-mono text-rose-400 truncate">{Number(c.risk_score).toLocaleString()}</td>
+                          <td className="p-1 text-right font-mono text-sky-400">{(Number(c.confidence_score) || 1).toFixed(2)}</td>
+                          <td className="p-1 text-center"><span className="text-[9px] font-bold bg-emerald-950/30 text-emerald-400 px-2 py-0.5 rounded border border-emerald-900/20">{String(c.escalation_level)}</span></td>
                         </tr>
                       ))}
                     </tbody>

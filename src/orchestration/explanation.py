@@ -7,13 +7,15 @@ def generate_explanation(trade: Trade, retrieved_policies: List[str]) -> str:
     explanations = []
 
     for policy_id in retrieved_policies:
-        signal_check = POLICY_SIGNAL_CHECKS.get(policy_id)
+        # signal_check = POLICY_SIGNAL_CHECKS.get(policy_id)
         
-        if signal_check and signal_check(trade):
-            explanations.append(POLICY_EXPLANATIONS.get(policy_id, "Unknown issue"))
+        # if signal_check and signal_check(trade):
+        #     explanations.append(POLICY_EXPLANATIONS.get(policy_id, "Unknown issue"))
+    
+        explanations.append(POLICY_EXPLANATIONS.get(policy_id, "Unknown issue"))
 
     if not explanations:
-        return "No significant compliance concerns detected."
+        return "Retrieved policies did not produce significant concerns."
 
     return "; ".join(explanations) + "."
     

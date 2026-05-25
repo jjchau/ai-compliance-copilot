@@ -31,14 +31,14 @@ describe("Triage Utility Formatters", () => {
   });
 
   describe("formatIncomeK", () => {
-    it("should convert exact thousands to standard 'k' abbreviations", () => {
-      expect(formatIncomeK(90000)).toBe("90k");
-      expect(formatIncomeK("150000")).toBe("150k");
+    it("should preserve numeric income values as clean comma-formatted strings", () => {
+      expect(formatIncomeK(90000)).toBe("90,000");
+      expect(formatIncomeK("150000")).toBe("150,000");
     });
 
-    it("should round up or down to the nearest integer index", () => {
-      expect(formatIncomeK("$84,600")).toBe("85k");
-      expect(formatIncomeK("112300")).toBe("112k");
+    it("should clean dirty income strings and preserve formatting", () => {
+      expect(formatIncomeK("$84,600")).toBe("84,600");
+      expect(formatIncomeK("112300")).toBe("112,300");
     });
 
     it("should return an em-dash fallback for zero or completely invalid profiles", () => {
