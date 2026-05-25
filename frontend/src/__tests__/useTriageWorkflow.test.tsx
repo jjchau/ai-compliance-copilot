@@ -4,6 +4,7 @@ import { describe, it, vi, expect, beforeEach } from 'vitest';
 
 vi.mock('../api/cases', () => ({
   getCases: vi.fn(),
+  submitReview: vi.fn(),
 }));
 
 import { useTriageWorkflow } from '../hooks/useTriageWorkflow';
@@ -27,9 +28,12 @@ function HookTest() {
 
 describe('useTriageWorkflow', () => {
   const mockGetCases = vi.mocked(casesApi.getCases);
+  const mockSubmitReview = vi.mocked(casesApi.submitReview);
 
   beforeEach(() => {
     mockGetCases.mockReset();
+    mockSubmitReview.mockReset();
+    mockSubmitReview.mockResolvedValue({});
   });
 
   it('loads cases and exposes workflow state and actions', async () => {
@@ -55,6 +59,7 @@ describe('useTriageWorkflow', () => {
     expect(screen.getByTestId('notes')).toHaveTextContent('updated');
 
     await userEvent.click(screen.getByText('Execute Action'));
+    expect(mockSubmitReview).toHaveBeenCalledWith('T1', 'Approved', 'approved note', 'non-compliant');
     expect(screen.getByTestId('reviewed-today')).toHaveTextContent('1');
   });
 });

@@ -1,5 +1,5 @@
 import { useReducer, useEffect, useCallback } from "react";
-import { getCases } from "../api/cases";
+import { getCases, submitReview } from "../api/cases";
 
 export interface TradeCase {
   trade_id: string;
@@ -16,20 +16,22 @@ export interface TradeCase {
   risk_tolerance?: string;
   investment_experience?: string;
   investment_objective?: string;
+  investment_time_horizon?: string;
   advisor_id?: string;
   advisor_experience?: string;
-  advisor_history_risk?: number;
+  advisor_history_risk?: string;
   has_rationale?: boolean;
   advisor_notes?: string;
-  retrieved_policies?: any;
-  compliance_label?: string;
+  retrieved_policies?: string[];
+  compliance_label?: boolean;
   priority_score?: number;
+  risk_score?: number;
 }
 
 export interface CaseAuditState {
   reviewStatus: "Reviewed" | "Not reviewed" | "Escalated";
   notes: string;
-  overriddenLabel?: string;
+  reviewerLabel?: boolean;
   userAction?: "Rejected" | "Approved" | "Escalated";
 }
 
@@ -57,7 +59,7 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
           initialStates[c.trade_id] = {
             reviewStatus: "Not reviewed",
             notes: "",
-            overriddenLabel: c.compliance_label || "Non-compliant",
+            reviewerLabel: c.compliance_label || false,
           };
         }
       });
@@ -230,17 +232,32 @@ export function useTriageWorkflow() {
     dispatch({ type: "UPDATE_NOTES", payload: { tradeId, notes } });
   }, []);
 
-  const executeAction = useCallback((
-      tradeId: string, 
-      status: "Reviewed" | "Escalated", 
-      actionType: "Rejected" | "Approved" | "Escalated", 
-      notes: string
-    ) => {
-      dispatch({ 
-        type: "EXECUTE_ACTION", 
-        payload: { tradeId, status, actionType, notes } 
-      });
-    }, []);
+  const executeAction = useCallback(async (
+    tradeId: string, 
+    status: "Reviewed" | "Escalated", 
+    actionType: "Rejected" | "Approved" | "Escalated", 
+    notes: string
+  ) => {
+    const targetCase = state.cases.find(c => c.trade_id === tradeId);
+    const aiRec = String(targetCase?.compliance_label || "Non-compliant").toLowerCase();
+
+    try {
+      // Stays exactly as ChatGPT recommended, but successfully sends the new payload fields
+      await submitReview(
+        tradeId,
+        actionType,
+        notes,
+        aiRec
+      );
+    } catch (error) {
+      console.error("Critical: Frontend could not commit review log entry upstream:", error);
+    }
+
+    dispatch({ 
+      type: "EXECUTE_ACTION", 
+      payload: { tradeId, status, actionType, notes } 
+    });
+  }, [state.cases]);
 
   const urgentCases = state.cases.filter((c) => c?.escalation_level === "urgent" && state.caseStates[c.trade_id]?.reviewStatus === "Not reviewed");
   const queuedCases = state.cases

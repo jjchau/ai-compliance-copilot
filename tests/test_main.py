@@ -235,8 +235,11 @@ class TestGetCaseByIdEndpoint:
     def test_submit_review_returns_success(self, client):
         """Test that review submission succeeds for a valid case."""
         review_body = {
+            "ai_recommendation": "approve",
+            "review_action": "approve",
+            "case_status": "reviewed",
+            "review_outcome": "compliant",
             "reviewer": "Auditor",
-            "action": "approve",
             "notes": "Looks compliant"
         }
         with patch('builtins.open', mock_open()) as mocked_file, \
@@ -249,15 +252,18 @@ class TestGetCaseByIdEndpoint:
         assert data["status"] == "review posted successfully"
         assert data["review"]["trade_id"] == "T001"
         assert data["review"]["reviewer"] == "Auditor"
-        assert data["review"]["action"] == "approve"
+        assert data["review"]["reviewer_action"] == "approve"
         assert data["review"]["notes"] == "Looks compliant"
         assert data["review"]["timestamp"] == "2026-05-13T12:00:00"
 
     def test_submit_review_invalid_case_returns_404(self, client):
         """Test that review submission returns 404 for missing trade_id."""
         review_body = {
+            "ai_recommendation": "approve",
+            "review_action": "approve",
+            "case_status": "reviewed",
+            "review_outcome": "compliant",
             "reviewer": "Auditor",
-            "action": "approve",
             "notes": "Looks compliant"
         }
         response = client.post("/cases/UNKNOWN/review", json=review_body)
@@ -267,6 +273,10 @@ class TestGetCaseByIdEndpoint:
     def test_submit_review_invalid_body_returns_422(self, client):
         """Test that review submission returns validation error for missing fields."""
         review_body = {
+            "ai_recommendation": "approve",
+            # missing review_action to trigger validation error
+            "case_status": "reviewed",
+            "review_outcome": "compliant",
             "reviewer": "Auditor",
             "notes": "Missing action"
         }

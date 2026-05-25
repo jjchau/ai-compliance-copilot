@@ -31,7 +31,7 @@ def get_cases(escalation: str | None = None):
     # If a specific escalation filter is passed, filter and return the flat list directly
     if escalation in ["urgent", "priority", "queue"]:
         return [case for case in cases if case["escalation_level"] == escalation]
-        
+
     # Default: Return the entire flat list of cases directly
     return cases
     
@@ -48,11 +48,14 @@ def submit_review(trade_id: str, review: ReviewSubmission):
         raise HTTPException(status_code=404, detail="Case not found")
 
     log_entry = {
+        "timestamp": datetime.now().isoformat(),
         "trade_id": trade_id,
+        "ai_recommendation": review.ai_recommendation,
+        "reviewer_action": review.review_action,
+        "case_status": review.case_status,
+        "review_outcome": review.review_outcome,
         "reviewer": review.reviewer,
-        "action": review.action,
-        "notes": review.notes,
-        "timestamp": datetime.now().isoformat()
+        "notes": review.notes
     }
 
     with open("logs/reviewer_actions.jsonl", "a") as f:
