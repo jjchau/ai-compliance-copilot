@@ -3,17 +3,25 @@
  * incoming from backend CSV structures.
  */
 
-export const formatCurrency = (value: string | number | undefined | null): string => {
-  if (value === undefined || value === null) return "0";
-  const cleaned = Number(String(value).replace(/[^0-9.-]/g, ""));
-  return isNaN(cleaned) ? "0" : cleaned.toLocaleString();
-};
+/**
+ * Formats dirty or clean numbers/strings into comma-separated currency representations.
+ */
+export function formatCurrency(val: any): string {
+  if (val === null || val === undefined) return "0";
+  // Strip characters like commas, spaces, currency symbols
+  const clean = String(val).replace(/[$\s,A-Z]/gi, "");
+  const num = parseFloat(clean);
+  if (isNaN(num)) return "0";
+  return num.toLocaleString("en-US", { maximumFractionDigits: 2 });
+}
 
-export const formatIncomeK = (value: string | number | undefined | null): string => {
-  if (value === undefined || value === null) return "—";
-  const cleaned = Number(String(value).replace(/[^0-9.-]/g, ""));
-  return isNaN(cleaned) || cleaned === 0 ? "—" : `${Math.round(cleaned / 1000)}k`;
-};
+/**
+ * Updated: Formats the raw client income with clean commas instead of truncating to 'K'
+ */
+export function formatIncomeK(val: any): string {
+  if (val === null || val === undefined || val === 0 || val === "0") return "—";
+  return formatCurrency(val);
+}
 
 export const formatFloatString = (value: string | number | undefined | null, decimals = 3): string => {
   const parsed = Number(value);

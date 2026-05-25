@@ -30,14 +30,14 @@ export const ExecutionFormTray: React.FC<ExecutionFormTrayProps> = ({
     <div className="pt-1 flex gap-3 items-end shrink-0 border-t border-slate-800/40">
       <div className="flex-1 flex flex-col">
         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
-          Reviewer Sign-off Justification Matrix
+          Reviewer Comments on Compliance Assessment
         </label>
         <input
           type="text"
           value={localNotes}
           onChange={(e) => setLocalNotes(e.target.value)}
           onBlur={() => onUpdateNotes(tradeId, localNotes)}
-          placeholder="Type definitive legal compliance assessment or operational arguments..."
+          placeholder="Type definitive legal/regulatory compliance assessment reasoning ..."
           className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-all shadow-inner h-8"
         />
       </div>

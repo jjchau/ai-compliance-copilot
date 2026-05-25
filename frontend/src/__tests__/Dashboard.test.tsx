@@ -61,6 +61,7 @@ describe('Dashboard', () => {
       trade_id: 'T1',
       compliance_probability: 0.9,
       confidence_score: 0.95,
+      risk_score: 0.88,
       flag_reason: 'Test reason',
       investment_type: 'Stocks',
       investment_amount: 1000,
@@ -82,11 +83,11 @@ describe('Dashboard', () => {
       escalation_level: 'queue'
     };
     mockWorkflow.caseStates = {
-      T1: { reviewStatus: 'Not reviewed', notes: '', overriddenLabel: 'Compliant' },
+      T1: { reviewStatus: 'Not reviewed', notes: '' },
     };
 
     render(<Dashboard />);
-    const input = screen.getByPlaceholderText(/Type definitive legal compliance assessment/i);
+    const input = screen.getByPlaceholderText(/Type definitive legal\/regulatory compliance assessment reasoning/i);
 
     await userEvent.type(input, 'Updated note');
     await userEvent.tab();
