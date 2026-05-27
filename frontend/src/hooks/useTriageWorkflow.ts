@@ -1,31 +1,72 @@
 import { useReducer, useEffect, useCallback } from "react";
 import { getCases, submitReview } from "../api/cases";
 
+// export interface TradeCase {
+//   trade_id: string;
+//   escalation_level: "urgent" | "priority" | "queue" | string;
+//   compliance_probability?: number;
+//   confidence_score?: number;
+//   flag_reason?: string;
+//   investment_type?: string;
+//   investment_amount?: number;
+//   notional_value?: number;
+//   timestamp?: string;
+//   client_age?: number;
+//   client_income?: number;
+//   risk_tolerance?: string;
+//   investment_experience?: string;
+//   investment_objective?: string;
+//   investment_time_horizon?: string;
+//   advisor_id?: string;
+//   advisor_experience?: string;
+//   advisor_history_risk?: string;
+//   has_rationale?: boolean;
+//   advisor_notes?: string;
+//   retrieved_policies?: string[];
+//   compliance_label?: boolean;
+//   priority_score?: number;
+//   risk_score?: number;
+// }
 export interface TradeCase {
   trade_id: string;
-  escalation_level: "urgent" | "priority" | "queue" | string;
-  compliance_probability?: number;
+
+  escalation_level: "urgent" | "priority" | "queue" | "none";
+
+  // prediction_label?: boolean;
+  // prediction_confidence?: number;
+
   confidence_score?: number;
+
+  risk_score?: number;
+
+  // temporary compatibility
+  compliance_label?: boolean;
+  compliance_probability?: number;
+
   flag_reason?: string;
+
   investment_type?: string;
   investment_amount?: number;
-  notional_value?: number;
-  timestamp?: string;
+
   client_age?: number;
   client_income?: number;
+
   risk_tolerance?: string;
   investment_experience?: string;
+
   investment_objective?: string;
   investment_time_horizon?: string;
+
   advisor_id?: string;
   advisor_experience?: string;
   advisor_history_risk?: string;
+
   has_rationale?: boolean;
   advisor_notes?: string;
+
   retrieved_policies?: string[];
-  compliance_label?: boolean;
+
   priority_score?: number;
-  risk_score?: number;
 }
 
 export interface CaseAuditState {
@@ -59,7 +100,7 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
           initialStates[c.trade_id] = {
             reviewStatus: "Not reviewed",
             notes: "",
-            reviewerLabel: c.compliance_label || false,
+            reviewerLabel: c.compliance_label ?? false,
           };
         }
       });
@@ -87,7 +128,7 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
         .filter((c) => (c?.escalation_level === "priority" || c?.escalation_level === "queue") && state.caseStates[c.trade_id]?.reviewStatus === "Not reviewed")
         .sort((a, b) => (Number(b?.priority_score) || 0) - (Number(a?.priority_score) || 0));
       const reviewed = state.cases.filter((c) => state.caseStates[c.trade_id]?.reviewStatus === "Reviewed" || state.caseStates[c.trade_id]?.reviewStatus === "Escalated");
-      const passed = state.cases.filter((c) => c?.escalation_level !== "urgent" && c?.escalation_level !== "priority" && c?.escalation_level !== "queue");
+      const passed = state.cases.filter((c) => c?.escalation_level === "none");
 
       if (action.payload === "active") {
         nextFocus = urgent.length > 0 ? urgent[0] : queued.length > 0 ? queued[0] : null;
@@ -148,9 +189,7 @@ case "EXECUTE_ACTION": {
         }
       } else if (state.activeView === "passed") {
         currentPool = state.cases.filter(
-          (c) => c?.escalation_level !== "urgent" && 
-                 c?.escalation_level !== "priority" && 
-                 c?.escalation_level !== "queue" &&
+          (c) => c?.escalation_level === "none" &&
                  state.caseStates[c.trade_id]?.reviewStatus === "Not reviewed"
         );
       } else if (state.activeView === "reviewed") {
@@ -239,7 +278,7 @@ export function useTriageWorkflow() {
     notes: string
   ) => {
     const targetCase = state.cases.find(c => c.trade_id === tradeId);
-    const aiRec = String(targetCase?.compliance_label || "Non-compliant").toLowerCase();
+    const aiRec = String(targetCase?.compliance_label ? "compliant" : "non-compliant").toLowerCase();
 
     try {
       // Stays exactly as ChatGPT recommended, but successfully sends the new payload fields
@@ -270,9 +309,7 @@ export function useTriageWorkflow() {
   );
 
   const passedCasesList = state.cases.filter(
-    (c) => c?.escalation_level !== "urgent" && 
-          c?.escalation_level !== "priority" && 
-          c?.escalation_level !== "queue" &&
+    (c) => c?.escalation_level === "none" && 
           (!state.caseStates[c.trade_id] || state.caseStates[c.trade_id].reviewStatus === "Not reviewed")
   );
 
