@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 from src.services.review_case_service import cases, case_lookup
 from src.api.models import ReviewSubmission
+from src.logging.review_logger import log_reviewer_action
 
 app = FastAPI(title="AI Compliance Copilot API")
 
@@ -54,19 +55,6 @@ def submit_review(trade_id: str, review: ReviewSubmission):
             review.ai_recommendation != review.review_outcome
         )
 
-    log_entry = {
-        "timestamp": datetime.now().isoformat(),
-        "trade_id": trade_id,
-        "ai_recommendation": review.ai_recommendation,  # Consider removing in future since this is not a reviewer action, and we can look it up on the backend case object if needed
-        "reviewer_action": review.review_action,
-        "case_status": review.case_status,
-        "review_outcome": review.review_outcome,
-        "reviewer": review.reviewer,
-        "notes": review.notes,
-        "reviewer_disagreement": reviewer_disagreement
-    }
+    log_reviewer_action(trade_id=trade_id, review=review, reviewer_disagreement=reviewer_disagreement)
 
-    with open("logs/reviewer_actions.jsonl", "a") as f:
-        f.write(json.dumps(log_entry) + "\n")
-
-    return {"status": "review posted successfully", "review": log_entry}
+    return {"status": "review posted successfully", "trade_id": trade_id}
