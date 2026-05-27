@@ -29,7 +29,7 @@ def root():
 @app.get("/cases")
 def get_cases(escalation: str | None = None):
     # If a specific escalation filter is passed, filter and return the flat list directly
-    if escalation in ["urgent", "priority", "queue"]:
+    if escalation in ["urgent", "priority", "queue", "none"]:
         return [case for case in cases if case["escalation_level"] == escalation]
 
     # Default: Return the entire flat list of cases directly
@@ -47,15 +47,23 @@ def submit_review(trade_id: str, review: ReviewSubmission):
     if trade_id not in case_lookup:
         raise HTTPException(status_code=404, detail="Case not found")
 
+    reviewer_disagreement = False
+
+    if review.review_outcome is not None:
+        reviewer_disagreement = (
+            review.ai_recommendation != review.review_outcome
+        )
+
     log_entry = {
         "timestamp": datetime.now().isoformat(),
         "trade_id": trade_id,
-        "ai_recommendation": review.ai_recommendation,
+        "ai_recommendation": review.ai_recommendation,  # Consider removing in future since this is not a reviewer action, and we can look it up on the backend case object if needed
         "reviewer_action": review.review_action,
         "case_status": review.case_status,
         "review_outcome": review.review_outcome,
         "reviewer": review.reviewer,
-        "notes": review.notes
+        "notes": review.notes,
+        "reviewer_disagreement": reviewer_disagreement
     }
 
     with open("logs/reviewer_actions.jsonl", "a") as f:

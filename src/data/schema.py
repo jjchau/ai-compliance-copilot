@@ -55,23 +55,7 @@ class Trade(BaseModel):
 class LabeledTrade(Trade):
     # Ground truth
     true_compliance: bool
-    """
-    # COMPUTE THESE IN RUN-TIME SCORING LOGIC:
-    risk_score: float
-    #e.g. risk_score = compute_risk_score(trade) 
-    #
-    # def compute_risk_score(case: Case) -> float:
-    #...
 
-    # def assign_risk_tier(score: float) -> str
-    
-    Conflicting_signals: bool
-    #e.g.
-    # conflict_flag = detect_conflict(trade)
-    #
-    # def detect_conflict(trade: Trade) -> bool:
-    #...
-    """
     # Metadata
     case_type: Literal[
         "Suitability Violation",

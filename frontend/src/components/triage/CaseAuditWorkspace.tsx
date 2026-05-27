@@ -32,11 +32,15 @@ export const CaseAuditWorkspace: React.FC<CaseAuditWorkspaceProps> = ({
 
   const c = selectedCase;
   const currentState = caseStates[c.trade_id] || { reviewStatus: "Not reviewed", notes: "" };
-  const isAutoPassed = activeView === "passed";
+  // const isAutoPassed = activeView === "passed";
+  const isAutoPassed = c.escalation_level === "none";
   
   // Updated: Accounts for "passed" labels along with "compliant"
-  const currentLabel = currentState.reviewerLabel || c.compliance_label || false;
-  const isRecCompliant = isAutoPassed || currentLabel;
+  // const currentLabel = currentState.reviewerLabel || c.prediction_label || false;
+  const currentLabel = currentState.reviewerLabel ?? c.compliance_label ?? false;
+  // const isRecCompliant = isAutoPassed || currentLabel;
+  const isRecCompliant = currentLabel;
+
   
   // --- HUMAN REVIEW STATUS BADGE CONFIGURATION ---
   let humanStatusText = "NOT YET MANUALLY REVIEWED";
@@ -55,38 +59,47 @@ export const CaseAuditWorkspace: React.FC<CaseAuditWorkspaceProps> = ({
       {/* Workspace Header Panel */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-2 shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-[12px] font-black uppercase bg-purple-950/40 px-2 py-0.5 rounded border border-purple-900/50 text-purple-400 tracking-wider">
+          <span className="text-[11px] font-black uppercase bg-purple-950/40 px-2 py-0.5 rounded border border-purple-900/50 text-purple-400 tracking-wider">
             Selected Case Details
           </span>
-          <span className="text-xs font-mono font-bold text-slate-100 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+          <span className="text-[11px] font-mono font-bold text-slate-100 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
             {c.trade_id}
           </span>
           
           {/* HUMAN REVIEW STATUS BADGE */}
-          <span className={`font-mono text-[12px] font-black tracking-widest px-2 py-0.5 rounded border uppercase transition-colors ${humanStatusColor}`}>
+          <span className={`font-mono text-[11px] font-black tracking-widest px-2 py-0.5 rounded border uppercase transition-colors ${humanStatusColor}`}>
             {humanStatusText}
           </span>
         </div>
 
         <div className="flex items-center gap-2 bg-slate-950/60 px-2.5 py-1 rounded-md border border-slate-800/80 text-[10px] font-mono">
           <div className="flex items-center gap-1.5 border-r border-slate-800 pr-2">
-            <span className="text-amber-500 font-sans text-[12px] font-bold uppercase">AI Assessment:</span>
-            <span className={`px-1 rounded text-[12px] font-black ${isRecCompliant ? "bg-emerald-950 text-emerald-400" : "bg-rose-950 text-rose-400"}`}>
-              {isAutoPassed
-                ? "COMPLIANT" 
-                : ["urgent", "priority", "queue"].includes(c?.escalation_level?.toLowerCase())
-                  ? c.escalation_level.toUpperCase() 
-                  : "COMPLIANT"
-              }
+            <span className="text-slate-500 font-sans text-[11px] font-bold uppercase">AI Recommendation:</span>
+            <span className="text-rose-400 text-[11px] font-bold">
+              {currentLabel ? 
+              <span className="text-emerald-400 text-[11px] font-bold">COMPLIANT</span> : 
+              <span className="text-rose-400 text-[11px] font-bold">NON-COMPLIANT</span>}
             </span>
           </div>
           <div className="flex items-center gap-1.5 border-r border-slate-800 pr-2 pl-1">
-            <span className="text-slate-500 font-sans text-[12px] font-bold uppercase">Risk:</span>
-            <span className="text-rose-400 text-[12px] font-bold">{Number(c.risk_score)}</span>
+            <span className="text-slate-500 font-sans text-[11px] font-bold uppercase">Prediction Confidence:</span>
+            <span className="text-lime-400 text-[11px] font-bold">{Number(c.compliance_probability).toFixed(2)}</span>
           </div>
-          <div className="flex items-center gap-1.5 pl-1">
-            <span className="text-slate-500 font-sans text-[12px] font-bold uppercase">Confidence:</span>
-            <span className="text-sky-400 text-[12px] font-bold">{Number(c.confidence_score).toFixed(2)}</span>
+          <div className="flex items-center gap-1.5 border-r border-slate-800 pr-2 pl-1">
+            <span className="text-slate-500 font-sans text-[11px] font-bold uppercase">Risk Score:</span>
+            <span className="text-fuchsia-400 text-[11px] font-bold">{Number(c.risk_score)}</span>
+          </div>
+          <div className="flex items-center gap-1.5 border-r border-slate-800 pr-2 pl-1">
+            <span className="text-slate-500 font-sans text-[11px] font-bold uppercase">Assessment Reliability:</span>
+            <span className="text-sky-400 text-[11px] font-bold">{Number(c.confidence_score).toFixed(2)}</span>
+          </div>
+          <div className="flex items-center gap-1.5 border-r border-slate-800 pl-1">
+            <span className="text-slate-500 font-sans text-[11px] font-bold uppercase">Workflow Routing:</span>
+            <span className={`px-1 rounded text-[11px] font-black ${isAutoPassed ? "bg-emerald-950 text-emerald-400" : "bg-rose-950 text-rose-400"}`}>
+              {c.escalation_level==="none"
+              ? "AUTO-PASSED"
+              : c.escalation_level.toUpperCase()}
+             </span>
           </div>
         </div>
       </div>
@@ -95,26 +108,26 @@ export const CaseAuditWorkspace: React.FC<CaseAuditWorkspaceProps> = ({
       <div className="grid grid-cols-3 gap-3 flex-1 min-h-0 py-1">
         {/* MODULE A: Trade Details */}
         <div className="bg-slate-950/30 border border-slate-800/60 p-3 rounded-lg flex flex-col justify-between min-w-0">
-          <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2 text-purple-400 text-[10px] font-black uppercase tracking-widest shrink-0">
+          <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2 text-slate-400 text-[10px] font-black uppercase tracking-widest shrink-0">
             <Briefcase className="w-3.5 h-3.5" />
             <span>Trade Details</span>
           </div>
           <div className="text-xs grid grid-cols-2 gap-x-3 gap-y-3 flex-1 items-center text-slate-300 min-w-0">
             <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Type</span><div className="truncate font-semibold text-slate-200">{c.investment_type || "N/A"}</div></div>
-            <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Amount</span><div className="truncate font-mono font-black text-emerald-400">${formatCurrency(c.investment_amount)}</div></div>
+            <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Amount</span><div className="truncate font-mono font-black text-amber-400">${formatCurrency(c.investment_amount)}</div></div>
             <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Timestamp</span><div className="truncate font-mono text-[10px] text-slate-400">{c.timestamp || (c as any).trade_timestamp ||  "—"}</div></div>
           </div>
         </div>
 
         {/* MODULE B: Client Profile */}
         <div className="bg-slate-950/30 border border-slate-800/60 p-3 rounded-lg flex flex-col justify-between min-w-0">
-          <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2 text-sky-400 text-[10px] font-black uppercase tracking-widest shrink-0">
+          <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2 text-slate-400 text-[10px] font-black uppercase tracking-widest shrink-0">
             <User className="w-3.5 h-3.5" />
             <span>Client Profile</span>
           </div>
           <div className="text-xs grid grid-cols-2 gap-x-3 gap-y-3 flex-1 items-center text-slate-300 min-w-0">
             <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Age / Income</span><div className="truncate font-mono font-semibold text-slate-200">{c.client_age ?? "—"} / ${formatIncomeK(c.client_income)}</div></div>
-            <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Risk Tolerance</span><div className="truncate font-black text-amber-400">{c.risk_tolerance || "—"}</div></div>
+            <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Risk Tolerance</span><div className="truncate font-black text-slate-400">{c.risk_tolerance || "—"}</div></div>
             <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Investment Experience</span><div className="truncate text-slate-400">{c.investment_experience || "—"}</div></div>
             <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Objective / Horizon</span><div className="truncate text-slate-400 font-medium">{c.investment_objective || "—"} {c?.investment_time_horizon ? ` / ${c.investment_time_horizon}` : ""}</div></div>
           </div>
@@ -122,13 +135,13 @@ export const CaseAuditWorkspace: React.FC<CaseAuditWorkspaceProps> = ({
 
         {/* MODULE C: Advisor Info */}
         <div className="bg-slate-950/30 border border-slate-800/60 p-3 rounded-lg flex flex-col justify-between min-w-0">
-          <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2 text-amber-400 text-[10px] font-black uppercase tracking-widest shrink-0">
+          <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2 text-slate-400 text-[10px] font-black uppercase tracking-widest shrink-0">
             <FileText className="w-3.5 h-3.5" />
             <span>Advisor Info</span>
           </div>
           <div className="text-xs grid grid-cols-2 gap-x-3 gap-y-3 flex-1 items-center text-slate-300 min-w-0">
             <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Advisor ID</span><div className="truncate font-mono font-semibold text-slate-200">{c.advisor_id || "—"}</div></div>
-            <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Experience / Risk History</span><div className="truncate text-slate-400">{c.advisor_experience || "—"} / <span className="text-rose-400 font-mono font-bold">{c.advisor_history_risk ?? 0}</span></div></div>
+            <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Experience / Risk History</span><div className="truncate text-slate-400">{c.advisor_experience || "—"} / <span className="text-slate-400 font-mono font-bold">{c.advisor_history_risk ?? 0}</span></div></div>
             <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Rationale File</span><div className={`px-2 py-0.5 text-[9px] font-black rounded-md w-fit tracking-wider ${c.has_rationale ? "bg-emerald-950 text-emerald-400 border border-emerald-900/30" : "bg-slate-900 text-slate-500"}`}>{c.has_rationale ? "FILED" : "MISSING"}</div></div>
             <div className="min-w-0"><span className="text-slate-500 text-[9px] uppercase font-bold tracking-wider block mb-0.5">Advisor Notes</span><div className="truncate text-slate-400 text-[11px] italic font-serif leading-tight">{c.advisor_notes || "(None)"}</div></div>
           </div>
@@ -142,10 +155,17 @@ export const CaseAuditWorkspace: React.FC<CaseAuditWorkspaceProps> = ({
           <div className="flex flex-col min-w-0 overflow-hidden">
             <span className="text-[9px] uppercase text-slate-500 font-black tracking-wider block mb-0.5 shrink-0">AI Reasoning Summary</span>
             <div className="text-[11px] font-semibold text-slate-200 overflow-y-auto pr-1 leading-relaxed max-h-[38px] break-words whitespace-normal custom-scrollbar">
-              {isAutoPassed 
-                ? "Trade met baseline validation parameters. System automatically designated this event as cleared without needing active human intervention." 
-                : (c.flag_reason || "No explicit exception reasons generated.")
-              }
+              {/* {c.prediction_label 
+                ? "Prediction: Compliant. No policy violations or elevated risk indicators were identified."
+                : "Prediction: Non-compliant. Potential policy or suitability concerns detected."
+              } */}
+              {`Prediction: ${
+                  c.compliance_label
+                    ? "Compliant"
+                    : "Non-compliant"
+                }.
+
+              ${c.flag_reason || "No explanation generated."}`}
             </div>
           </div>
         </div>
