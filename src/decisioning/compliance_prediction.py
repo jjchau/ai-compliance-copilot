@@ -11,6 +11,7 @@ Author: Jason Chau
 Date: 2026-04-17
 """
 
+from typing import Dict, Union
 from src.data.schema import Trade
 from src.decisioning.violation_rules import (
     is_kyc_violation,
@@ -31,7 +32,7 @@ DETECTION_RATES = {
     "noise": 0.05
 }
 
-def predict_compliance(trade: Trade) -> dict:
+def predict_compliance(trade: Trade) -> Dict[str, Union[float, bool]]:
     """
     Heuristic-based compliance prediction that outputs probability + label.
     Designed to simulate imperfect model behavior (FN/FP/noise).

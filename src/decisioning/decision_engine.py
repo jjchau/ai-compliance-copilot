@@ -19,6 +19,7 @@ from src.scoring.confidence_scoring import compute_confidence_score
 from src.decisioning.policy_rules import assess_escalation
 from typing import Optional
 
+# For legacy rule-based compliance prediction, called from sprint 1 notebook. See build_review_case() for retrieval-based compliance prediction.
 def evaluate_trade(trade):
     compliance_prediction = predict_compliance(trade)
 
