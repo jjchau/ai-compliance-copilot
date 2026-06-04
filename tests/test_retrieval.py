@@ -23,7 +23,7 @@ def make_trade(**kwargs):
         advisor_id='A1',
         advisor_experience='Mid',
         advisor_history_risk='Low',
-        has_rationale=True,
+        advisor_rationale='Advisor has provided rationale.',
         kyc_completeness='Complete',
     )
     base.update(kwargs)
@@ -251,7 +251,7 @@ class TestRetrievePoliciesDocumentationSignals:
         """Test that missing rationale triggers POLICY_DOC_001."""
         mock_random.return_value = 0.3
         
-        trade = make_trade(has_rationale=False)
+        trade = make_trade(advisor_rationale=None)
         result = retrieve_policies(trade)
         
         assert 'POLICY_DOC_001' in result
@@ -261,7 +261,7 @@ class TestRetrievePoliciesDocumentationSignals:
         """Test that present rationale doesn't trigger POLICY_DOC_001."""
         mock_random.return_value = 0.3
         
-        trade = make_trade(has_rationale=True)
+        trade = make_trade(advisor_rationale='Advisor has provided rationale.')
         result = retrieve_policies(trade)
         
         assert 'POLICY_DOC_001' not in result
@@ -347,7 +347,7 @@ class TestRetrievePoliciesMultipleSignals:
             kyc_completeness='Missing',
             risk_tolerance='Low',
             investment_time_horizon='Short',
-            has_rationale=False,
+            advisor_rationale=None,
             investment_experience='Beginner'
         )
         result = retrieve_policies(trade)
@@ -372,7 +372,7 @@ class TestRetrievePoliciesMultipleSignals:
             kyc_completeness='Complete',
             risk_tolerance='High',
             investment_time_horizon='Long',
-            has_rationale=True,
+            advisor_rationale='Advisor included rationale.',
             investment_experience='Advanced'
         )
         result = retrieve_policies(trade)
@@ -429,7 +429,7 @@ class TestRetrievePoliciesEdgeCases:
         """Test that same trade with same random seed gives same result."""
         trade = make_trade(
             kyc_completeness='Missing',
-            has_rationale=False
+            advisor_rationale=None
         )
         
         # Can't truly test randomness without seeding, but can verify consistency of logic
@@ -465,7 +465,7 @@ class TestRetrievePoliciesIntegration:
             make_trade(kyc_completeness='Missing'),
             make_trade(risk_tolerance='Low'),
             make_trade(investment_time_horizon='Short'),
-            make_trade(has_rationale=False),
+            make_trade(advisor_rationale=None),
             make_trade(investment_experience='Beginner'),
         ]
         
@@ -483,7 +483,7 @@ class TestRetrievePoliciesIntegration:
             kyc_completeness='Missing',
             risk_tolerance='Low',
             investment_time_horizon='Short',
-            has_rationale=False,
+            advisor_rationale=None,
             investment_experience='Beginner'
         )
         result = retrieve_policies(trade)

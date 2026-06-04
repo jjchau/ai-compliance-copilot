@@ -95,7 +95,7 @@ def generate_base_case() -> Trade:
         advisor_id=advisor_id,
         advisor_experience=random.choice(ADVISOR_EXPERIENCE),
         advisor_history_risk=advisor_profiles[advisor_id],
-        has_rationale=random.choice([True, False]),
+        advisor_rationale=None if random.random() < 0.2 else "Advisor rationale aligned with client profile.",
         advisor_notes=None if random.random() < 0.2 else "Sample note",
         kyc_completeness=random.choices(KYC_COMPLETENESS, KYC_COMPLETENESS_DISTRIBUTION, k=1)[0]
     )

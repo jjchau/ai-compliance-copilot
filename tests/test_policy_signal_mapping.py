@@ -51,7 +51,7 @@ class TestPolicySignalMapping:
             advisor_id='A123',
             advisor_experience='Mid',
             advisor_history_risk='Low',
-            has_rationale=True,
+            advisor_rationale='Advisor rationale provided.',
             kyc_completeness='Complete'
         )
         

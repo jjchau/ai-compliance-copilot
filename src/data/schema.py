@@ -46,7 +46,7 @@ class Trade(BaseModel):
     advisor_id: str
     advisor_experience: Literal['Junior', 'Mid', 'Senior']
     advisor_history_risk: Literal['Low', 'Medium', 'High']
-    has_rationale: bool
+    advisor_rationale: Optional[str] = None
     advisor_notes: Optional[str] = None
 
     # Data quality

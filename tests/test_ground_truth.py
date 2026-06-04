@@ -18,7 +18,7 @@ def make_trade(**kwargs):
         advisor_id='A1',
         advisor_experience='Mid',
         advisor_history_risk='Low',
-        has_rationale=True,
+        advisor_rationale='Advisor provided rationale.',
         kyc_completeness='Complete',
     )
     base.update(kwargs)
@@ -50,7 +50,7 @@ def test_get_relevant_policies_detects_uncertain_kyc():
 
 
 def test_get_relevant_policies_detects_missing_rationale():
-    trade = make_trade(has_rationale=False)
+    trade = make_trade(advisor_rationale=None)
     result = get_relevant_policies(trade)
 
     assert 'POLICY_DOC_001' in result

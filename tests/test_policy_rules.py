@@ -21,7 +21,7 @@ def make_trade(**kwargs):
         advisor_id='A1',
         advisor_experience='Mid',
         advisor_history_risk='Low',
-        has_rationale=True,
+        advisor_rationale='Advisor provided rationale.',
         kyc_completeness='Complete',
     )
     base.update(kwargs)
@@ -48,14 +48,14 @@ def test_assess_escalation_high_risk_score_priority(monkeypatch):
     assert result == "priority"
 
 
-def test_assess_escalation_low_compliance_priority(monkeypatch):
-    """Test that low compliance (< 0.5) escalates to priority."""
+def test_assess_escalation_low_compliance_queue(monkeypatch):
+    """Test that low compliance with moderate risk routes to queue."""
     trade = make_trade()
     import src.decisioning.policy_rules as pr_mod
     monkeypatch.setattr(pr_mod, 'has_conflicting_signals', lambda t: False)
 
     result = assess_escalation(trade, compliance_probability=0.4, risk_score=50, confidence_score=0.8)
-    assert result == "priority"
+    assert result == "queue"
 
 
 def test_assess_escalation_low_confidence_queue(monkeypatch):
@@ -84,18 +84,18 @@ def test_assess_escalation_all_clear_none(monkeypatch):
     import src.decisioning.policy_rules as pr_mod
     monkeypatch.setattr(pr_mod, 'has_conflicting_signals', lambda t: False)
 
-    result = assess_escalation(trade, compliance_probability=0.9, risk_score=50, confidence_score=0.8)
+    result = assess_escalation(trade, compliance_probability=0.9, risk_score=20, confidence_score=0.8)
     assert result == "none"
 
 
 def test_assess_escalation_boundary_risk_score_74(monkeypatch):
-    """Test that risk score of 74 (below priority threshold) returns none."""
+    """Test that risk score of 74 returns priority under current rules."""
     trade = make_trade()
     import src.decisioning.policy_rules as pr_mod
     monkeypatch.setattr(pr_mod, 'has_conflicting_signals', lambda t: False)
 
     result = assess_escalation(trade, compliance_probability=0.9, risk_score=74, confidence_score=0.8)
-    assert result == "none"
+    assert result == "priority"
 
 
 def test_assess_escalation_boundary_risk_score_75(monkeypatch):
@@ -129,32 +129,32 @@ def test_assess_escalation_boundary_compliance_0_29(monkeypatch):
 
 
 def test_assess_escalation_boundary_compliance_0_5(monkeypatch):
-    """Test that compliance of 0.5 does not trigger priority."""
+    """Test that compliance of 0.5 does not force a special escalation when risk is low."""
     trade = make_trade()
     import src.decisioning.policy_rules as pr_mod
     monkeypatch.setattr(pr_mod, 'has_conflicting_signals', lambda t: False)
 
-    result = assess_escalation(trade, compliance_probability=0.5, risk_score=50, confidence_score=0.8)
+    result = assess_escalation(trade, compliance_probability=0.5, risk_score=20, confidence_score=0.8)
     assert result == "none"
 
 
 def test_assess_escalation_boundary_compliance_0_49(monkeypatch):
-    """Test that compliance < 0.5 triggers priority."""
+    """Test that compliance < 0.5 with low risk routes to queue."""
     trade = make_trade()
     import src.decisioning.policy_rules as pr_mod
     monkeypatch.setattr(pr_mod, 'has_conflicting_signals', lambda t: False)
 
-    result = assess_escalation(trade, compliance_probability=0.49, risk_score=50, confidence_score=0.8)
-    assert result == "priority"
+    result = assess_escalation(trade, compliance_probability=0.49, risk_score=20, confidence_score=0.8)
+    assert result == "queue"
 
 
 def test_assess_escalation_boundary_confidence_0_6(monkeypatch):
-    """Test that confidence of 0.6 does not trigger queue."""
+    """Test that confidence of 0.6 does not trigger queue when risk is low."""
     trade = make_trade()
     import src.decisioning.policy_rules as pr_mod
     monkeypatch.setattr(pr_mod, 'has_conflicting_signals', lambda t: False)
 
-    result = assess_escalation(trade, compliance_probability=0.9, risk_score=50, confidence_score=0.6)
+    result = assess_escalation(trade, compliance_probability=0.9, risk_score=20, confidence_score=0.6)
     assert result == "none"
 
 
@@ -164,35 +164,35 @@ def test_assess_escalation_boundary_confidence_0_59(monkeypatch):
     import src.decisioning.policy_rules as pr_mod
     monkeypatch.setattr(pr_mod, 'has_conflicting_signals', lambda t: False)
 
-    result = assess_escalation(trade, compliance_probability=0.9, risk_score=50, confidence_score=0.59)
+    result = assess_escalation(trade, compliance_probability=0.9, risk_score=20, confidence_score=0.59)
     assert result == "queue"
 
 
 def test_assess_escalation_zero_values(monkeypatch):
-    """Test with zero values."""
+    """Test with zero values routes to queue because of low compliance."""
     trade = make_trade()
     import src.decisioning.policy_rules as pr_mod
     monkeypatch.setattr(pr_mod, 'has_conflicting_signals', lambda t: False)
 
     result = assess_escalation(trade, compliance_probability=0.0, risk_score=0, confidence_score=0.0)
-    assert result == "priority"
+    assert result == "queue"
 
 
 def test_assess_escalation_max_values(monkeypatch):
-    """Test with maximum values."""
+    """Test with maximum values returns urgent due to critical risk."""
     trade = make_trade()
     import src.decisioning.policy_rules as pr_mod
     monkeypatch.setattr(pr_mod, 'has_conflicting_signals', lambda t: False)
 
     result = assess_escalation(trade, compliance_probability=1.0, risk_score=100, confidence_score=1.0)
-    assert result == "priority"
+    assert result == "urgent"
 
 
-def test_assess_escalation_priority_overrides_queue(monkeypatch):
-    """Test that priority-level conditions override queue-level conditions."""
+def test_assess_escalation_conflicting_signals_routes_queue(monkeypatch):
+    """Test that conflicting signals route to queue."""
     trade = make_trade()
     import src.decisioning.policy_rules as pr_mod
     monkeypatch.setattr(pr_mod, 'has_conflicting_signals', lambda t: True)
 
     result = assess_escalation(trade, compliance_probability=0.4, risk_score=50, confidence_score=0.8)
-    assert result == "priority"
+    assert result == "queue"

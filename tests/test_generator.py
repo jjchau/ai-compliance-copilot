@@ -72,10 +72,10 @@ class TestGenerateBaseCase:
             trade = generate_base_case()
             assert trade.advisor_history_risk == advisor_profiles[trade.advisor_id]
 
-    def test_has_rationale_is_boolean(self):
+    def test_advisor_rationale_is_string_or_none(self):
         for _ in range(10):
             trade = generate_base_case()
-            assert isinstance(trade.has_rationale, bool)
+            assert trade.advisor_rationale is None or isinstance(trade.advisor_rationale, str)
 
     def test_advisor_notes_valid(self):
         for _ in range(10):

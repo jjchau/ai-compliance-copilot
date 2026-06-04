@@ -45,7 +45,7 @@ class TestBuildReviewCase:
             advisor_id='A123',
             advisor_experience='Mid',
             advisor_history_risk='Low',
-            has_rationale=True,
+            advisor_rationale='Advisor rationale provided.',
             kyc_completeness='Complete'
         )
         
@@ -74,7 +74,7 @@ class TestBuildReviewCase:
         assert result["conflict_signals"] == []
         
         # Verify explanation
-        assert result["flag_reason"] == "Test explanation"
+        assert result["flag_reasons"] == "Test explanation"
 
     @patch('src.orchestration.review_pipeline.retrieve_policies')
     @patch('src.orchestration.review_pipeline.predict_with_retrieval')
@@ -106,7 +106,7 @@ class TestBuildReviewCase:
             advisor_id='A456',
             advisor_experience='Junior',
             advisor_history_risk='Low',
-            has_rationale=True,
+            advisor_rationale='Advisor rationale provided.',
             kyc_completeness='Complete'
         )
         
@@ -149,7 +149,7 @@ class TestBuildReviewCase:
             advisor_id='A789',
             advisor_experience='Junior',
             advisor_history_risk='High',
-            has_rationale=False,
+            advisor_rationale=None,
             kyc_completeness='Missing'
         )
         
@@ -157,7 +157,7 @@ class TestBuildReviewCase:
         
         assert result["has_conflicting_signals"] is True
         assert result["conflict_signals"] == ["risk_too_high", "experience_insufficient"]
-        assert result["flag_reason"] == "Multiple compliance issues detected"
+        assert result["flag_reasons"] == "Multiple compliance issues detected"
 
     @patch('src.orchestration.review_pipeline.retrieve_policies')
     @patch('src.orchestration.review_pipeline.predict_with_retrieval')
@@ -190,7 +190,7 @@ class TestBuildReviewCase:
             advisor_id='A999',
             advisor_experience='Senior',
             advisor_history_risk='Low',
-            has_rationale=True,
+            advisor_rationale='Advisor rationale provided.',
             kyc_completeness='Complete'
         )
         

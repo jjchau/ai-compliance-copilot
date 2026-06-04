@@ -61,7 +61,7 @@ class TestGenerateExplanation:
             advisor_id='A123',
             advisor_experience='Mid',
             advisor_history_risk='Low',
-            has_rationale=False,  # This should map to POLICY_DOC_001
+            advisor_rationale=None,  # This should map to POLICY_DOC_001
             kyc_completeness='Complete'
         )
         result = generate_explanation(trade, ["POLICY_DOC_001"])

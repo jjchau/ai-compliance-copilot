@@ -225,3 +225,9 @@ data/processed/
 
 # PowerPoint files
 *.pptx
+
+# Temporary stuff (helper scripts, project metadata, etc.)
+temp/
+
+# ChromaDB folder and files for RAG vector embeddings
+data/chroma/

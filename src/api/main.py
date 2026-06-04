@@ -1,8 +1,7 @@
+from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
-import json
-from src.services.review_case_service import cases, case_lookup
+from src.services.review_case_service import get_all_enriched_cases, get_single_case_from_db
 from src.api.models import ReviewSubmission
 from src.logging.review_logger import log_reviewer_action
 
@@ -29,23 +28,27 @@ def root():
 
 @app.get("/cases")
 def get_cases(escalation: str | None = None):
-    # If a specific escalation filter is passed, filter and return the flat list directly
-    if escalation in ["urgent", "priority", "queue", "none"]:
-        return [case for case in cases if case["escalation_level"] == escalation]
-
-    # Default: Return the entire flat list of cases directly
-    return cases
+    """
+    Returns the complete list of cases instantly. 
+    Fully populated with escalation_levels ready for dynamic frontend layout sorting.
+    """
+    return get_all_enriched_cases(escalation_filter=escalation)
     
 @app.get("/cases/{trade_id}")
 def get_case(trade_id: str):
-    case = case_lookup.get(trade_id)
-    if case is None:
+    """
+    Returns individual case records instantly with stable, cached data structures.
+    """
+    case_data = get_single_case_from_db(trade_id)
+    if case_data is None:
         raise HTTPException(status_code=404, detail="Case not found")
-    return {"case": case}
+    return {"case": case_data}
 
 @app.post("/cases/{trade_id}/review")
 def submit_review(trade_id: str, review: ReviewSubmission):
-    if trade_id not in case_lookup:
+    # Query the service layer instead of the deleted in-memory case_lookup dictionary
+    case = get_single_case_from_db(trade_id)
+    if case is None:
         raise HTTPException(status_code=404, detail="Case not found")
 
     reviewer_disagreement = False
@@ -55,6 +58,23 @@ def submit_review(trade_id: str, review: ReviewSubmission):
             review.ai_recommendation != review.review_outcome
         )
 
-    log_reviewer_action(trade_id=trade_id, review=review, reviewer_disagreement=reviewer_disagreement)
+    log_reviewer_action(
+        trade_id=trade_id,
+        review=review,
+        reviewer_disagreement=reviewer_disagreement
+    )
 
-    return {"status": "review posted successfully", "trade_id": trade_id}
+    review_payload = {
+        "trade_id": trade_id,
+        "ai_recommendation": review.ai_recommendation,
+        "review_action": review.review_action,
+        "reviewer_action": review.review_action,
+        "case_status": review.case_status,
+        "review_outcome": review.review_outcome,
+        "reviewer": review.reviewer,
+        "notes": review.notes,
+        "reviewer_disagreement": reviewer_disagreement,
+        "timestamp": datetime.now().isoformat()
+    }
+
+    return {"status": "review posted successfully", "review": review_payload}

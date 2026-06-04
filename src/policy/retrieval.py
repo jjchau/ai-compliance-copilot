@@ -58,7 +58,7 @@ def retrieve_policies(trade: Trade) -> List[str]:
         if random.random() < RETRIEVAL_CONFIG["recall_rate"]:
             retrieved.add("POLICY_RISK_001")
 
-    if not trade.has_rationale:
+    if not trade.advisor_rationale:
         if random.random() < RETRIEVAL_CONFIG["recall_rate"]:
             retrieved.add("POLICY_DOC_001")
 
