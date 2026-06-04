@@ -58,7 +58,7 @@ def compute_confidence_score(trade: Trade) -> Dict[str, float]:
     if is_kyc_uncertain(trade):
         data_completeness -= 0.2
 
-    if not trade.has_rationale:
+    if not trade.advisor_rationale:
         data_completeness -= 0.1
 
     data_completeness = max(0.0, min(data_completeness, 1.0))

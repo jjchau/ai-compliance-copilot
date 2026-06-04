@@ -10,7 +10,7 @@ from src.decisioning.risk_signals import (
     is_overexposure,
     is_advisor_history_high_risk
 )
-from src. decisioning.documentation_signals import is_missing_rationale
+from src.decisioning.documentation_signals import is_missing_rationale
 from src.decisioning.conflict_detection import has_conflicting_signals
 
 POLICY_SIGNAL_CHECKS = {

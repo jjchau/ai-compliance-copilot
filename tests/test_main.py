@@ -52,14 +52,17 @@ def client():
         sys.modules.pop(module_name, None)
 
     old_service_module = sys.modules.get('src.services.review_case_service')
-    sys.modules['src.services.review_case_service'] = MagicMock(cases=mock_cases, case_lookup=mock_case_lookup)
+    def get_all_cases_side_effect(escalation_filter=None):
+        if escalation_filter is None:
+            return mock_cases
+        return [case for case in mock_cases if case['escalation_level'] == escalation_filter]
+
+    service_mock = MagicMock()
+    service_mock.get_all_enriched_cases.side_effect = get_all_cases_side_effect
+    service_mock.get_single_case_from_db.side_effect = lambda trade_id: mock_case_lookup.get(trade_id)
+    sys.modules['src.services.review_case_service'] = service_mock
     try:
         main_module = importlib.import_module('src.api.main')
-
-        # Directly patch the app's data
-        main_module.cases = mock_cases
-        main_module.case_lookup = mock_case_lookup
-
         return TestClient(main_module.app)
     finally:
         if old_service_module is None:
@@ -147,11 +150,17 @@ class TestGetCasesEndpoint:
             sys.modules.pop(module_name, None)
 
         old_service_module = sys.modules.get('src.services.review_case_service')
-        sys.modules['src.services.review_case_service'] = MagicMock(cases=patched_cases, case_lookup=patched_lookup)
+        def get_all_cases_side_effect(escalation_filter=None):
+            if escalation_filter is None:
+                return patched_cases
+            return [case for case in patched_cases if case['escalation_level'] == escalation_filter]
+
+        service_mock = MagicMock()
+        service_mock.get_all_enriched_cases.side_effect = get_all_cases_side_effect
+        service_mock.get_single_case_from_db.side_effect = lambda trade_id: patched_lookup.get(trade_id)
+        sys.modules['src.services.review_case_service'] = service_mock
         try:
             main_module = importlib.import_module('src.api.main')
-            main_module.cases = patched_cases
-            main_module.case_lookup = patched_lookup
             client_override = TestClient(main_module.app)
         finally:
             if old_service_module is None:
@@ -315,19 +324,19 @@ class TestAPIIntegration:
 
     def test_api_handles_empty_cases(self):
         """Test API behavior with empty cases list."""
-        with patch('src.api.main.cases', []), \
-             patch('src.api.main.case_lookup', {}):
+        with patch('src.api.main.get_all_enriched_cases', return_value=[]), \
+             patch('src.api.main.get_single_case_from_db', return_value=None):
             from src.api.main import app
             client = TestClient(app)
-            
+
             # Root should still work
             assert client.get("/").status_code == 200
-            
+
             # /cases should return empty list
             response = client.get("/cases")
             assert response.status_code == 200
             assert response.json() == []
-            
+
             # /cases/{trade_id} should return 404
             assert client.get("/cases/T001").status_code == 404
 

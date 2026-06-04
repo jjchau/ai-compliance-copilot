@@ -21,7 +21,7 @@ def make_trade(**kwargs):
         advisor_id='A1',
         advisor_experience='Mid',
         advisor_history_risk='Low',
-        has_rationale=True,
+        advisor_rationale='Advisor provided rationale.',
         kyc_completeness='Complete',
     )
     base.update(kwargs)

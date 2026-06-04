@@ -9,18 +9,18 @@ from src.decisioning.documentation_signals import is_missing_rationale
 
 
 class TestIsMissingRationale:
-    def test_returns_true_when_has_rationale_is_false(self):
+    def test_returns_true_when_advisor_rationale_is_missing(self):
         """Test that is_missing_rationale returns True when trade has no rationale."""
         trade = Mock(spec=Trade)
-        trade.has_rationale = False
+        trade.advisor_rationale = None
         
         result = is_missing_rationale(trade)
         assert result is True
 
-    def test_returns_false_when_has_rationale_is_true(self):
+    def test_returns_false_when_advisor_rationale_is_present(self):
         """Test that is_missing_rationale returns False when trade has rationale."""
         trade = Mock(spec=Trade)
-        trade.has_rationale = True
+        trade.advisor_rationale = 'This trade has documented rationale.'
         
         result = is_missing_rationale(trade)
         assert result is False
@@ -39,7 +39,7 @@ class TestIsMissingRationale:
             advisor_id='A123',
             advisor_experience='Mid',
             advisor_history_risk='Low',
-            has_rationale=False,
+            advisor_rationale=None,
             kyc_completeness='Complete'
         )
         
@@ -60,7 +60,7 @@ class TestIsMissingRationale:
             advisor_id='A123',
             advisor_experience='Mid',
             advisor_history_risk='Low',
-            has_rationale=True,
+            advisor_rationale='This is a documented rationale.',
             kyc_completeness='Complete'
         )
         

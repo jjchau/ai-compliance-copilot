@@ -23,7 +23,7 @@ def test_trade_model_defaults_and_fields():
         advisor_id='A123',
         advisor_experience='Mid',
         advisor_history_risk='Low',
-        has_rationale=True,
+        advisor_rationale='The trade supports the stated client objective.',
         kyc_completeness='Complete',
     )
 
@@ -47,7 +47,7 @@ def test_labeled_trade_inherits_trade_fields():
         advisor_id='A456',
         advisor_experience='Senior',
         advisor_history_risk='Medium',
-        has_rationale=False,
+        advisor_rationale='Rationale supports a compliant allocation in the client profile.',
         kyc_completeness='Complete',
         true_compliance=True,
         case_type='Aligned Recommendation',
@@ -74,6 +74,6 @@ def test_trade_model_invalid_literal_value():
             advisor_id='A789',
             advisor_experience='Junior',
             advisor_history_risk='Low',
-            has_rationale=True,
+            advisor_rationale='Valid rationale text.',
             kyc_completeness='Complete',
         )

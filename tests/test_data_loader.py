@@ -154,7 +154,7 @@ class TestDataLoaderImport:
             'advisor_id': ['A123', 'A456'],
             'advisor_experience': ['Mid', 'Senior'],
             'advisor_history_risk': ['Low', 'Medium'],
-            'has_rationale': [True, False],
+            'advisor_rationale': ['Advisor rationale text.', None],
             'kyc_completeness': ['Complete', 'Incomplete']
         })
         mock_read_csv.return_value = mock_df

@@ -24,59 +24,71 @@ def make_raw_trade(trade_id: str):
         'advisor_id': 'A1',
         'advisor_experience': 'Mid',
         'advisor_history_risk': 'Low',
-        'has_rationale': True,
+        'advisor_rationale': 'Advisor provided rationale.',
         'kyc_completeness': 'Complete',
     }
 
 
-def test_load_review_cases_builds_one_case_per_raw_record(monkeypatch):
-    import src.data.data_loader as data_loader_mod
-    import src.orchestration.review_pipeline as pipeline_mod
-
-    raw_cases = [make_raw_trade('T001'), make_raw_trade('T002')]
-    monkeypatch.setattr(data_loader_mod, 'raw_cases', raw_cases)
-
-    def build_case_side_effect(trade):
-        return {'trade_id': trade.trade_id}
-
-    mock_build_review_case = MagicMock(side_effect=build_case_side_effect)
-    monkeypatch.setattr(pipeline_mod, 'build_review_case', mock_build_review_case)
-
-    sys.modules.pop('src.services.review_case_service', None)
-    import importlib
-    service_mod = importlib.import_module('src.services.review_case_service')
-    mock_build_review_case.reset_mock()
-
-    review_cases = service_mod.load_review_cases()
-
-    assert review_cases == [{'trade_id': 'T001'}, {'trade_id': 'T002'}]
-    assert mock_build_review_case.call_count == 2
-    assert isinstance(mock_build_review_case.call_args_list[0].args[0], Trade)
-    assert mock_build_review_case.call_args_list[0].args[0].trade_id == 'T001'
-    assert isinstance(mock_build_review_case.call_args_list[1].args[0], Trade)
-    assert mock_build_review_case.call_args_list[1].args[0].trade_id == 'T002'
-
-
-def test_import_reloads_cases_and_case_lookup(monkeypatch):
-    import src.data.data_loader as data_loader_mod
-    import src.orchestration.review_pipeline as pipeline_mod
-
-    raw_cases = [make_raw_trade('T123'), make_raw_trade('T456')]
-    monkeypatch.setattr(data_loader_mod, 'raw_cases', raw_cases)
-
-    case_one = {'trade_id': 'T123', 'status': 'mocked'}
-    case_two = {'trade_id': 'T456', 'status': 'mocked'}
-    mock_build_review_case = MagicMock(side_effect=[case_one, case_two])
-    monkeypatch.setattr(pipeline_mod, 'build_review_case', mock_build_review_case)
-
+def test_serialize_case_strips_privileged_fields():
     import src.services.review_case_service as service_mod
-    importlib.reload(service_mod)
 
-    assert service_mod.cases == [case_one, case_two]
-    assert service_mod.case_lookup == {
-        'T123': case_one,
-        'T456': case_two,
+    raw_case = {
+        'trade_id': 'T001',
+        'compliance_label': 1,
+        'true_compliance': 'sensitive',
+        'case_type': 'secret',
+        'relevant_policies': ['POLICY_RISK_001'],
+        'retrieved_policies': '["POLICY_KYC_001"]',
+        'retrieved_chunks': '["chunk1"]',
+        'escalation_level': 'PRIORITY'
     }
-    assert mock_build_review_case.call_count == 2
-    assert mock_build_review_case.call_args_list[0].args[0].trade_id == 'T123'
-    assert mock_build_review_case.call_args_list[1].args[0].trade_id == 'T456'
+
+    serialized = service_mod._serialize_case(raw_case.copy())
+
+    assert serialized['trade_id'] == 'T001'
+    assert serialized['compliance_label'] is True
+    assert 'true_compliance' not in serialized
+    assert 'case_type' not in serialized
+    assert 'relevant_policies' not in serialized
+    assert serialized['retrieved_policies'] == ['POLICY_KYC_001']
+    assert serialized['retrieved_chunks'] == ['chunk1']
+    assert serialized['escalation_level'] == 'priority'
+
+
+def test_get_single_case_from_db_returns_serialized_case(monkeypatch):
+    import sqlite3
+    import src.services.review_case_service as service_mod
+
+    expected_row = {
+        'trade_id': 'T123',
+        'compliance_label': 0,
+        'retrieved_policies': '["POLICY_KYC_001"]',
+        'retrieved_chunks': '["chunk1"]',
+        'escalation_level': 'PRIORITY'
+    }
+
+    class DummyCursor:
+        def execute(self, query, params):
+            assert query == "SELECT * FROM audited_trades WHERE trade_id = ?"
+            assert params == ('T123',)
+        def fetchone(self):
+            return expected_row
+
+    class DummyConn:
+        def __init__(self):
+            self.row_factory = None
+            self.cursor_obj = DummyCursor()
+        def cursor(self):
+            return self.cursor_obj
+        def close(self):
+            pass
+
+    monkeypatch.setattr(sqlite3, 'connect', lambda db_path: DummyConn())
+
+    result = service_mod.get_single_case_from_db('T123')
+
+    assert result['trade_id'] == 'T123'
+    assert result['compliance_label'] is False
+    assert result['retrieved_policies'] == ['POLICY_KYC_001']
+    assert result['retrieved_chunks'] == ['chunk1']
+    assert result['escalation_level'] == 'priority'

@@ -20,7 +20,7 @@ def make_trade(**kwargs):
         advisor_id='A1',
         advisor_experience='Mid',
         advisor_history_risk='Low',
-        has_rationale=True,
+        advisor_rationale='This rationale explains the trade.',
         kyc_completeness='Complete',
     )
     base.update(kwargs)
@@ -99,7 +99,7 @@ def test_confidence_score_conflicting_ignored(monkeypatch):
 
 
 def test_confidence_score_no_rationale(monkeypatch):
-    trade = make_trade(has_rationale=False)
+    trade = make_trade(advisor_rationale=None)
     import src.scoring.confidence_scoring as cs_mod
     patch_all_signals(monkeypatch, cs_mod)
 
