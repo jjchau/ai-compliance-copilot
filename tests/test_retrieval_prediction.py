@@ -39,11 +39,12 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: True)
+        monkeypatch.setattr(rp_mod, 'is_kyc_uncertain', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
         
-        result = predict_with_retrieval(trade, ["POLICY_KYC_001"])
-        
+        result = predict_with_retrieval(trade, ["POL-002-KYC"])
+
         assert result["compliance_probability"] == 0.2  # 1.0 - 0.8
         assert result["compliance_label"] is False
 
@@ -55,11 +56,12 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: False)
+        monkeypatch.setattr(rp_mod, 'is_kyc_uncertain', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
         
-        result = predict_with_retrieval(trade, ["POLICY_SUIT_001"])
-        
+        result = predict_with_retrieval(trade, ["POL-001-SUITABILITY"])
+
         assert result["compliance_probability"] == 0.4  # 1.0 - 0.6
         assert result["compliance_label"] is False
 
@@ -71,12 +73,15 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: False)
+        monkeypatch.setattr(rp_mod, 'is_kyc_uncertain', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: False)
         
-        result = predict_with_retrieval(trade, ["POLICY_EXP_001"])
-        
-        assert result["compliance_probability"] == 0.5  # 1.0 - 0.5
+        # Experience signal is exposed via the suitability/high-risk product policies
+        result = predict_with_retrieval(trade, ["POL-001-SUITABILITY"])
+
+        # SIGNAL_WEIGHTS['experience'] == 0.30
+        assert result["compliance_probability"] == 0.7  # 1.0 - 0.3
         assert result["compliance_label"] is False
 
     def test_soft_signals_with_policies(self, monkeypatch):
@@ -87,12 +92,15 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: False)
+        monkeypatch.setattr(rp_mod, 'is_kyc_uncertain', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: True)
         
-        result = predict_with_retrieval(trade, ["POLICY_SUIT_002", "POLICY_SUIT_003"])
-        
-        assert result["compliance_probability"] == 0.6  # 1.0 - (0.2 + 0.2)
+        # Use the suitability policy which exposes horizon/objective soft signals
+        result = predict_with_retrieval(trade, ["POL-001-SUITABILITY"])
+
+        # SIGNAL_WEIGHTS['horizon'] == 0.15, ['objective'] == 0.20 -> total 0.35
+        assert result["compliance_probability"] == 0.65  # 1.0 - 0.35
         assert result["compliance_label"] is False
 
     def test_multiple_violations_score_capped(self, monkeypatch):
@@ -103,16 +111,17 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: True)
+        monkeypatch.setattr(rp_mod, 'is_kyc_uncertain', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: True)
         
         result = predict_with_retrieval(trade, [
-            "POLICY_SUIT_001", "POLICY_EXP_001", "POLICY_KYC_001",
-            "POLICY_SUIT_002", "POLICY_SUIT_003"
+            "POL-001-SUITABILITY", "POL-002-KYC", "POL-006-HIGH-RISK-PRODUCTS",
+            "POL-001-SUITABILITY", "POL-001-SUITABILITY"
         ])
-        
-        # Score = 0.6 + 0.5 + 0.8 + 0.2 + 0.2 = 2.3, but capped at 1.0
-        assert result["compliance_probability"] == 0.0  # 1.0 - 1.0
+
+        # Score will be >= 1.0 and is capped -> compliance_probability == 0.0
+        assert result["compliance_probability"] == 0.0
         assert result["compliance_label"] is False
 
     def test_violations_without_relevant_policies(self, monkeypatch):
@@ -123,6 +132,7 @@ class TestPredictWithRetrieval:
         monkeypatch.setattr(rp_mod, 'is_suitability_violation', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_experience_violation', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_kyc_violation', lambda t: True)
+        monkeypatch.setattr(rp_mod, 'is_kyc_uncertain', lambda t: False)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: True)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_objective', lambda t: True)
         
@@ -151,6 +161,7 @@ class TestPredictWithRetrieval:
         
         # Test just below threshold (score = 0.1, prob = 0.9)
         monkeypatch.setattr(rp_mod, 'is_investment_too_aggressive_for_horizon', lambda t: True)
-        result = predict_with_retrieval(trade, ["POLICY_SUIT_003"])
-        assert result["compliance_probability"] == 0.8  # 1.0 - 0.2
+        result = predict_with_retrieval(trade, ["POL-001-SUITABILITY"])
+        # horizon signal weight 0.15 -> compliance_probability = 0.85
+        assert result["compliance_probability"] == 0.85
         assert result["compliance_label"] is False

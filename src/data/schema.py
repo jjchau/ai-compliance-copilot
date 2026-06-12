@@ -17,6 +17,16 @@ from uuid import uuid4
 from datetime import datetime, timedelta
 import random
 
+RiskTolerance = Literal["Low", "Medium", "High"]
+InvestmentExperience = Literal["Beginner", "Intermediate", "Advanced"]
+AdvisorExperience = Literal["Junior", "Mid", "Senior"]
+AdvisorHistoryRisk = Literal["Low", "Medium", "High"]
+
+SeverityTier = Literal["Low", "Medium", "High"]
+WorkflowBucket = Literal["Auto_pass", "Queue", "Priority", "Urgent"]
+
+
+
 def random_timestamp():
     now = datetime.now()
     start = now - timedelta(days=30)
@@ -33,8 +43,8 @@ class Trade(BaseModel):
     # Client
     client_age: int
     client_income: int
-    risk_tolerance: Literal['Low', 'Medium', 'High']
-    investment_experience: Literal['Beginner', 'Intermediate', 'Advanced']
+    risk_tolerance: RiskTolerance
+    investment_experience: InvestmentExperience
     investment_objective: Literal['Growth', 'Income', 'Preservation', 'Balanced']
     investment_time_horizon: Literal['Short', 'Medium', 'Long']
 
@@ -44,8 +54,8 @@ class Trade(BaseModel):
 
     # Advisor
     advisor_id: str
-    advisor_experience: Literal['Junior', 'Mid', 'Senior']
-    advisor_history_risk: Literal['Low', 'Medium', 'High']
+    advisor_experience: AdvisorExperience
+    advisor_history_risk: AdvisorHistoryRisk
     advisor_rationale: Optional[str] = None
     advisor_notes: Optional[str] = None
 
@@ -64,4 +74,10 @@ class LabeledTrade(Trade):
         "Risk Signal",
         "Aligned Recommendation"
     ]
+
+    scenario_name: str
     difficulty: Literal['Easy', 'Medium', 'Hard'] # Rough mappings: Easy->Clean, Medium->Ambiguous, Hard->Edge
+    severity_tier: SeverityTier
+    expected_workflow_bucket: WorkflowBucket
+    relevant_policies: Optional[list[str]] = None
+    primary_policy: Optional[str] = None

@@ -29,7 +29,7 @@ def load_markdown_documents(policy_dir: str) -> List[Dict[str, str]]:
         with open(path, "r", encoding="utf-8") as f:
             text = f.read()
         documents.append({
-            "policy_id": path.stem, # Captures 'POLICY-001' from filename
+            "policy_id": path.stem, # Captures 'POL-001-SUITABILITY' from filename
             "text": text
         })
     return documents

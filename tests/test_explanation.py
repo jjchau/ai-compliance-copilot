@@ -12,28 +12,28 @@ class TestGenerateExplanation:
     def test_returns_no_concerns_when_no_policies_trigger(self):
         """Test that generate_explanation returns expected combined messages for provided policies."""
         trade = Mock(spec=Trade)
-        result = generate_explanation(trade, ["POLICY_KYC_001", "POLICY_SUIT_001"])
-        assert result == "Missing KYC information; Investment risk exceeds client risk tolerance."
+        result = generate_explanation(trade, ["POL-002-KYC", "POL-001-SUITABILITY"])
+        assert result == "Client profile information may be incomplete or inconsistent; Potential suitability concern identified."
 
     def test_returns_explanation_for_single_triggered_policy(self):
         """Test explanation generation for a single policy ID."""
         trade = Mock(spec=Trade)
-        result = generate_explanation(trade, ["POLICY_KYC_001"])
-        assert result == "Missing KYC information."
+        result = generate_explanation(trade, ["POL-002-KYC"])
+        assert result == "Client profile information may be incomplete or inconsistent."
 
     def test_returns_combined_explanations_for_multiple_policies(self):
         """Test explanation generation for multiple policy IDs."""
         trade = Mock(spec=Trade)
-        result = generate_explanation(trade, ["POLICY_KYC_001", "POLICY_SUIT_001"])
-        assert result == "Missing KYC information; Investment risk exceeds client risk tolerance."
+        result = generate_explanation(trade, ["POL-002-KYC", "POL-001-SUITABILITY"])
+        assert result == "Client profile information may be incomplete or inconsistent; Potential suitability concern identified."
 
     def test_includes_all_provided_policies(self):
         """Under the revised implementation all provided policies are listed."""
         trade = Mock(spec=Trade)
-        result = generate_explanation(trade, ["POLICY_KYC_001", "POLICY_SUIT_001", "POLICY_EXP_001"])
-        assert "Missing KYC information" in result
-        assert "Investment risk exceeds client risk tolerance" in result
-        assert "Complex investment exceeds client experience level" in result
+        result = generate_explanation(trade, ["POL-002-KYC", "POL-001-SUITABILITY", "POL-006-HIGH-RISK-PRODUCTS"])
+        assert "Client profile information may be incomplete or inconsistent" in result
+        assert "Potential suitability concern identified" in result
+        assert "High-risk or complex product requires enhanced review" in result
 
     def test_handles_unknown_policy_ids(self):
         """Test handling of unknown policy IDs."""
@@ -64,8 +64,8 @@ class TestGenerateExplanation:
             advisor_rationale=None,  # This should map to POLICY_DOC_001
             kyc_completeness='Complete'
         )
-        result = generate_explanation(trade, ["POLICY_DOC_001"])
-        assert result == "Missing rationale for trade recommendation."
+        result = generate_explanation(trade, ["POL-007-DOCUMENTATION-STANDARDS"])
+        assert result == "Advisor rationale or documentation may be insufficient."
 
 
 class TestPolicyExplanations:
@@ -74,9 +74,9 @@ class TestPolicyExplanations:
         assert isinstance(POLICY_EXPLANATIONS, dict)
 
     def test_all_expected_policies_have_explanations(self):
-        """Test that all policies in POLICY_SIGNAL_CHECKS have explanations."""
-        from src.policy.policy_signal_mapping import POLICY_SIGNAL_CHECKS
-        for policy_id in POLICY_SIGNAL_CHECKS.keys():
+        """Test that all policies in POLICY_RELEVANCE_CHECKS have explanations."""
+        from src.policy.policy_signal_mapping import POLICY_RELEVANCE_CHECKS
+        for policy_id in POLICY_RELEVANCE_CHECKS.keys():
             assert policy_id in POLICY_EXPLANATIONS, f"Missing explanation for policy: {policy_id}"
 
     def test_explanations_are_strings(self):

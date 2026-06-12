@@ -44,7 +44,9 @@ def is_too_complex_for_experience(trade: Trade) -> bool:
     """
     A complexity mismatch occurs when the client's investment experience is not aligned with the complexity of the investment type. For example, a beginner client investing in complex products like Options may be a strong signal of non-compliance, but it should be considered in the context of other factors such as suitability and risk alignment.
     """
-    return trade.investment_experience == "Beginner" and trade.investment_type == "Options"
+    # Treat only Options as a genuinely complex product for the purposes of
+    # experience mismatch; stocks are generally considered mainstream.
+    return trade.investment_experience == "Beginner" and trade.investment_type in ["Options"]
 
 # --- Horizon ---
 def is_investment_too_aggressive_for_horizon(trade: Trade) -> bool:
@@ -85,3 +87,36 @@ def is_advisor_history_high_risk(trade: Trade) -> bool:
     An advisor history high risk signal occurs when the advisor has a history of compliance issues or regulatory actions, which could increase the risk profile of the trade.
     """
     return trade.advisor_history_risk == "High"
+
+# --- Elderly vulnerable clients ---
+def is_elderly_high_risk_trade(trade: Trade) -> bool:
+    """
+    Senior client purchasing a high-risk investment.
+    """
+
+    return (
+        trade.client_age >= 65
+        and trade.investment_type in ["Stocks", "Options"]
+    )
+
+# --- Weak documentation ---
+def is_documentation_deficient(trade: Trade) -> bool:
+    """
+    Missing or generic advisor rationale.
+    """
+
+    rationale = (trade.advisor_rationale or "").strip().lower()
+
+    weak_phrases = {
+        "growth opportunity",
+        "client approved trade",
+        "client requested purchase",
+        "long-term investment",
+        "client understands risk",
+        "portfolio rebalance"
+    }
+
+    return (
+        len(rationale) < 20
+        or rationale in weak_phrases
+    )

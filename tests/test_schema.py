@@ -52,6 +52,9 @@ def test_labeled_trade_inherits_trade_fields():
         true_compliance=True,
         case_type='Aligned Recommendation',
         difficulty='Easy',
+        scenario_name='Synthetic Test Case',
+        severity_tier='Low',
+        expected_workflow_bucket='Auto_pass',
     )
 
     assert labeled_trade.true_compliance is True

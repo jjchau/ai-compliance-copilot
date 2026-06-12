@@ -1,6 +1,6 @@
 from typing import List
 from src.data.schema import Trade
-from src.policy.policy_signal_mapping import POLICY_SIGNAL_CHECKS
+from src.policy.policy_signal_mapping import POLICY_RELEVANCE_CHECKS
 
 def get_relevant_policies(trade: Trade) -> List[str]:
     """
@@ -11,7 +11,7 @@ def get_relevant_policies(trade: Trade) -> List[str]:
 
     policies = []
 
-    for policy_id, check_fn in POLICY_SIGNAL_CHECKS.items():
+    for policy_id, check_fn in POLICY_RELEVANCE_CHECKS.items():
         if check_fn(trade):
             policies.append(policy_id)
 

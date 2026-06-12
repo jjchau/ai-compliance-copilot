@@ -1,3 +1,14 @@
+"""
+retrieval.py
+
+Purpose:
+    Simulate imperfect policy retrieval based on trade characteristics, with tunable parameters for recall and noise.
+Usage:
+    from src.policy.retrieval import retrieve_policies
+Author: Jason Chau
+Date: 2026-05-01
+"""
+
 import random
 from typing import List
 

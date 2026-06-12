@@ -106,10 +106,18 @@ def generate_labeled_case() -> LabeledTrade:
     true_compliance: bool = compute_true_compliance(base_case)
     case_type: Literal["Suitability Violation", "KYC Missing", "Insufficient Experience", "Risk Signal", "Aligned Recommendation"] = assign_case_type(base_case)
     difficulty: Literal['Easy', 'Medium', 'Hard'] = assign_difficulty(base_case)
-    
-    return LabeledTrade(
-        **base_case.model_dump(),
-        true_compliance=true_compliance,
-        case_type=case_type,
-        difficulty=difficulty
-    )
+	# Populate newly-introduced metadata fields required by `LabeledTrade`.
+	# Use sensible defaults derived from the generated values.
+	scenario_name = "Synthetic Trade"
+	severity_tier = 'High' if not true_compliance else 'Low'
+	expected_workflow_bucket = 'Queue' if not true_compliance else 'Auto_pass'
+
+	return LabeledTrade(
+		**base_case.model_dump(),
+		true_compliance=true_compliance,
+		case_type=case_type,
+		scenario_name=scenario_name,
+		difficulty=difficulty,
+		severity_tier=severity_tier,
+		expected_workflow_bucket=expected_workflow_bucket
+	)

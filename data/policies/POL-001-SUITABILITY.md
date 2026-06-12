@@ -1,180 +1,110 @@
-# POLICY-001 — CLIENT SUITABILITY REVIEW STANDARD
+# POL-001-SUITABILITY — CLIENT SUITABILITY REVIEW STANDARD
 
 Document Owner: Retail Supervision
-Version: 3.4
-Last Updated: January 2025
-Internal Distribution: Advisory, Compliance, Branch Managers, Audit
+Version: 3.5
+Last Updated: June 2026
 
 ---
 
 # 1. Purpose
 
-This policy establishes minimum supervisory expectations regarding suitability assessments conducted for retail investment accounts.
+This policy establishes supervisory expectations for determining whether an investment recommendation is suitable for a specific client.
 
-Advisors are responsible for ensuring all investment recommendations are consistent with:
+Suitability assessments must evaluate alignment between:
 
-* the client’s documented investment objectives,
-* financial circumstances,
-* investment knowledge,
+* investment objectives,
 * risk tolerance,
-* liquidity requirements,
+* investment experience,
 * time horizon,
-* and overall client profile.
-
-Suitability obligations apply regardless of whether recommendations are initiated by:
-
-* advisor recommendation,
-* client request,
-* portfolio rebalance,
-* transfer activity,
-* or unsolicited order discussions.
+* financial circumstances,
+* and the proposed investment.
 
 ---
 
-# 2. General Suitability Principles
+# 2. Risk Tolerance Alignment
 
-Suitability assessments are not limited to determining whether a product can technically be held in an account.
+Recommendations should remain consistent with the client's documented risk tolerance.
 
-Advisors must assess whether the recommendation places the client’s interests first based on the information reasonably available at the time of recommendation.
+Potential suitability concerns include:
 
-Suitability determinations must consider:
-
-* concentration risk,
-* product complexity,
-* account composition,
-* correlation risk,
-* liquidity constraints,
-* client age and retirement stage,
-* income dependency,
-* and loss tolerance.
-
-Suitability reviews must not rely solely on product risk ratings.
-
-Internal product risk scores are supervisory aids and do not replace advisor judgment.
+* low-risk clients purchasing high-risk products,
+* conservative clients purchasing speculative securities,
+* or portfolio risk materially exceeding client risk tolerance.
 
 ---
 
-# 3. High-Risk Product Supervision
+# 3. Investment Objective Alignment
 
-The following transactions require heightened supervisory review:
+Recommendations should support the client's stated objectives.
 
-* leveraged ETFs,
-* inverse ETFs,
-* options trading for inexperienced clients,
-* concentrated small-cap equity purchases,
-* speculative mining issuers,
-* illiquid exempt products,
-* cryptocurrency-related securities,
-* high-volatility thematic securities,
-* junior resource issuers,
-* and concentrated sector allocations.
+Potential suitability concerns include:
 
-Supervisory review is mandatory where:
-
-* client age exceeds 65 and product risk is classified as high risk,
-* account concentration exceeds 30% in a single issuer,
-* speculative products exceed 20% of household liquid net worth,
-* or documented investment knowledge is inconsistent with product complexity.
-
-Escalation to branch supervision is required where suitability concerns cannot be reasonably resolved through additional client documentation.
+* income clients purchasing speculative growth products,
+* capital preservation clients assuming excessive volatility,
+* or objective-product mismatches.
 
 ---
 
-# 4. Client Risk Tolerance Alignment
+# 4. Time Horizon Alignment
 
-Risk tolerance categories must align with:
+Investment recommendations should reflect expected holding periods and liquidity needs.
 
-* client discussions,
-* account documentation,
-* trading activity,
-* and overall portfolio construction.
+Potential suitability concerns include:
 
-Advisors must not alter client risk tolerance classifications solely to accommodate proposed trades.
-
-Changes to client risk tolerance require:
-
-* documented client discussion,
-* updated KYC approval,
-* and supervisory acknowledgment.
-
-Frequent KYC changes immediately preceding high-risk trades may result in supervisory investigation.
+* short-term clients purchasing highly volatile products,
+* short-horizon clients purchasing illiquid investments,
+* or recommendations requiring recovery periods inconsistent with client timelines.
 
 ---
 
-# 5. Elderly and Vulnerable Clients
+# 5. Experience and Product Complexity
 
-Additional care is required for:
+Product complexity should align with client investment knowledge and experience.
 
-* retired clients,
-* senior clients,
-* cognitively vulnerable individuals,
-* and clients demonstrating reduced financial comprehension.
+Additional review may be required where:
 
-Advisors should assess:
-
-* reliance on investment income,
-* liquidity needs,
-* product understanding,
-* and downside impact capacity.
-
-Recommendations involving substantial volatility exposure for retired clients require enhanced rationale documentation.
-
-Branch managers may require direct client contact before approving certain transactions involving elderly clients.
+* inexperienced clients purchase complex products,
+* leveraged products are recommended,
+* derivatives are recommended,
+* or speculative products exceed client understanding.
 
 ---
 
-# 6. Documentation Expectations
+# 6. Concentration and Portfolio Impact
 
-Advisor rationale must:
+Suitability assessments should consider:
 
-* explain why the recommendation is suitable,
-* identify relevant client objectives,
-* describe material risks discussed,
-* and justify elevated concentration or volatility exposure where applicable.
+* issuer concentration,
+* sector concentration,
+* speculative exposure,
+* and overall portfolio composition.
 
-Generic rationale such as:
-
-* “client requested purchase,”
-* “long-term growth,”
-* or “client understands risk”
-  may be deemed insufficient.
-
-Suitability rationale should specifically reference:
-
-* investment horizon,
-* account composition,
-* client experience,
-* and risk capacity.
+Suitability cannot be assessed solely at the individual trade level.
 
 ---
 
 # 7. Escalation Triggers
 
-The following conditions typically require supervisory escalation:
+The following typically require supervisory review:
 
-* high-risk product + low investment knowledge,
-* concentrated speculative positions,
-* missing or contradictory KYC information,
-* inconsistent advisor rationale,
-* absence of documented risk discussion,
-* elderly client speculative trading,
-* substantial losses inconsistent with stated objectives,
-* repeated suitability alerts,
-* or unresolved compliance flags.
-
-Escalated cases may require:
-
-* compliance review,
-* branch manager approval,
-* enhanced documentation,
-* or trade restriction.
+* objective-product conflicts,
+* risk tolerance conflicts,
+* horizon-product conflicts,
+* low-experience/high-complexity combinations,
+* concentration concerns,
+* unresolved suitability alerts,
+* or missing suitability rationale.
 
 ---
 
-# 8. Supervisory Review Notes
+# 8. Documentation Expectations
 
-Suitability supervision is risk-based and not all trades require identical levels of scrutiny.
+Advisor rationale should explain:
 
-However, advisors remain responsible for ensuring recommendations are defensible and appropriately documented.
+* why the recommendation is suitable,
+* how it aligns with objectives,
+* how it aligns with risk tolerance,
+* how it aligns with time horizon,
+* and any mitigating considerations.
 
-Failure to document suitability rationale may itself constitute a supervisory concern even where the trade may otherwise appear suitable.
+Suitability determinations should be clearly defensible based on the client profile.
