@@ -1,161 +1,117 @@
-# POLICY-002 — KYC AND CLIENT PROFILE MAINTENANCE
+# POL-002-KYC — KYC AND CLIENT PROFILE MAINTENANCE
 
 Document Classification: Internal Compliance Guidance
 Department: Client Supervision and Oversight
-Version: 2.9
-Effective Date: February 2025
+Version: 3.0
+Effective Date: June 2026
 
 ---
 
 # 1. Purpose
 
-This document outlines minimum dealer expectations regarding Know Your Client (KYC) collection, maintenance, and supervisory review procedures.
+This policy establishes requirements for collecting, maintaining, validating, and updating Know Your Client (KYC) information.
 
-KYC information forms the foundation of suitability assessment obligations and must remain current, accurate, and reasonably complete.
-
-Advisors are expected to exercise professional judgment when evaluating whether existing client information remains sufficient to support investment recommendations.
+The primary objective of this policy is to ensure client profile information remains complete, accurate, current, and internally consistent.
 
 ---
 
 # 2. Required Client Information
 
-Client profiles must include:
+Client files must contain current information regarding:
 
 * age,
 * employment status,
-* annual income,
-* liquid assets,
-* estimated net worth,
+* income,
+* assets,
+* net worth,
 * investment objectives,
 * investment knowledge,
 * risk tolerance,
 * time horizon,
-* and liquidity considerations.
+* and liquidity needs.
 
-Additional information may be required depending on:
-
-* account activity,
-* product complexity,
-* trading frequency,
-* and client vulnerability indicators.
+Missing or incomplete information may prevent reliable suitability assessments.
 
 ---
 
-# 3. KYC Updating Requirements
+# 3. Information Accuracy
 
-KYC information must be reviewed:
+Advisors are responsible for ensuring client information is:
+
+* accurate,
+* internally consistent,
+* reasonably current,
+* and supported by client discussions.
+
+Contradictory information should be investigated and resolved.
+
+---
+
+# 4. Information Maintenance
+
+KYC reviews should occur:
 
 * at account opening,
-* upon material life events,
-* during significant account changes,
-* following major market events where suitability may be impacted,
-* and at periodic review intervals.
+* following material life events,
+* after significant financial changes,
+* and during periodic reviews.
 
-Examples of material changes include:
+Material changes include:
 
 * retirement,
-* loss of employment,
-* inheritance,
 * divorce,
-* major health changes,
-* significant changes in income,
-* or substantial losses.
-
-Advisors are expected to make reasonable efforts to maintain current client information.
-
----
-
-# 4. Risk Tolerance Guidance
-
-Risk tolerance must reflect both:
-
-* emotional loss tolerance,
-* and financial capacity for loss.
-
-Clients with limited financial capacity may not be suitable for elevated speculative exposure even where stated risk tolerance appears aggressive.
-
-Risk tolerance categories should not be adjusted primarily to facilitate trade approvals.
-
-Frequent changes between conservative and aggressive profiles require supervisory attention.
+* inheritance,
+* loss of employment,
+* significant income changes,
+* or major health events.
 
 ---
 
-# 5. Investment Knowledge Assessment
+# 5. Investment Knowledge Classification
 
-Investment knowledge classifications should reasonably reflect:
+Investment knowledge assessments should reflect:
 
-* client trading history,
+* prior investment activity,
+* demonstrated understanding,
 * educational background,
-* prior product exposure,
-* and demonstrated understanding.
+* and product familiarity.
 
-Clients with limited investment knowledge should generally not be recommended:
-
-* leveraged products,
-* derivatives,
-* highly speculative securities,
-* or concentrated thematic strategies
-  without enhanced documentation.
+Knowledge classifications should not be inflated to facilitate product approvals.
 
 ---
 
-# 6. Time Horizon Expectations
+# 6. KYC Red Flags
 
-Investment time horizon should align with:
+Potential KYC concerns include:
 
-* anticipated liquidity needs,
-* retirement timing,
-* and product volatility.
-
-Short-term liquidity needs may conflict with:
-
-* illiquid products,
-* speculative growth strategies,
-* and concentrated equity exposure.
-
-Advisors should document rationale where significant volatility exposure exists alongside short investment horizons.
-
----
-
-# 7. KYC Red Flags
-
-The following may indicate elevated supervisory concern:
-
-* incomplete client profiles,
+* incomplete profiles,
+* missing fields,
+* unsupported profile changes,
 * contradictory information,
-* excessive use of “high risk” classifications,
-* repetitive KYC amendments,
-* risk tolerance changes preceding speculative trades,
-* or accounts with minimal documented advisor interaction.
-
-Branch supervision may request additional evidence supporting profile updates.
+* repetitive amendments,
+* unexplained risk tolerance increases,
+* or insufficient advisor notes.
 
 ---
 
-# 8. Supervisory Escalation
+# 7. Supervisory Escalation
 
-Cases may be escalated where:
+Additional review may be required where:
 
-* client profile information appears inconsistent,
-* advisor explanations are incomplete,
-* KYC changes appear unsupported,
-* or trade activity conflicts materially with documented objectives.
-
-Escalated files may require:
-
-* enhanced review,
-* client reconfirmation,
-* supervisory interviews,
-* or temporary trade restrictions.
+* client information appears inconsistent,
+* KYC updates lack supporting rationale,
+* material profile changes are undocumented,
+* or profile completeness is insufficient to support recommendations.
 
 ---
 
-# 9. Recordkeeping Expectations
+# 8. Recordkeeping Expectations
 
-Advisors must maintain sufficient notes to demonstrate:
+Advisors must maintain records demonstrating:
 
-* client discussions occurred,
-* material risks were disclosed,
-* and recommendations were made based on current client information.
+* KYC discussions occurred,
+* updates were reviewed,
+* changes were documented,
+* and client information remained current.
 
-Absence of documentation may be interpreted as absence of supervisory process.
+KYC maintenance is a foundational supervisory obligation.

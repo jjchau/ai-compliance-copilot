@@ -99,7 +99,7 @@ if __name__ == "__main__":
         test_query = "Elderly client over age 70 purchasing highly volatile leveraged and inverse ETFs"
         print(f"[*] Running mock case query: '{test_query}'...\n")
         
-        matches = retriever.retrieve_policy_evidence(test_query, top_k=2)
+        matches = retriever.retrieve_policy_evidence(test_query, top_k=10)
         
         print(f"[✓] Retrieved {len(matches)} matching compliance policy sections:\n")
         for idx, match in enumerate(matches):

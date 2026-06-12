@@ -36,50 +36,43 @@ def test_get_relevant_policies_returns_empty_list_for_normal_trade():
 def test_get_relevant_policies_detects_missing_kyc():
     trade = make_trade(kyc_completeness='Missing')
     result = get_relevant_policies(trade)
-
-    assert 'POLICY_KYC_001' in result
+    assert 'POL-002-KYC' in result
     assert all(isinstance(policy, str) for policy in result)
 
 
 def test_get_relevant_policies_detects_uncertain_kyc():
     trade = make_trade(kyc_completeness='Uncertain')
     result = get_relevant_policies(trade)
-
-    assert 'POLICY_KYC_002' in result
+    assert 'POL-002-KYC' in result
     assert all(isinstance(policy, str) for policy in result)
 
 
 def test_get_relevant_policies_detects_missing_rationale():
     trade = make_trade(advisor_rationale=None)
     result = get_relevant_policies(trade)
-
-    assert 'POLICY_DOC_001' in result
+    assert 'POL-007-DOCUMENTATION-STANDARDS' in result
 
 
 def test_get_relevant_policies_detects_overexposure():
     trade = make_trade(client_income=50000, investment_amount=20000)
     result = get_relevant_policies(trade)
-
-    assert 'POLICY_RISK_001' in result
+    assert 'POL-004-CONCENTRATION' in result
 
 
 def test_get_relevant_policies_detects_high_risk_advisor_history():
     trade = make_trade(advisor_history_risk='High')
     result = get_relevant_policies(trade)
-
-    assert 'POLICY_SUP_001' in result
+    assert 'POL-003-SURVEILLANCE' in result
 
 
 def test_get_relevant_policies_detects_experience_violation():
     trade = make_trade(investment_experience='Beginner', investment_type='Options')
     result = get_relevant_policies(trade)
-
-    assert 'POLICY_EXP_001' in result
+    assert 'POL-006-HIGH-RISK-PRODUCTS' in result
 
 
 def test_get_relevant_policies_detects_suitability_violation():
     trade = make_trade(risk_tolerance='Low', investment_type='Stocks')
     result = get_relevant_policies(trade)
-
-    assert 'POLICY_SUIT_001' in result
+    assert 'POL-001-SUITABILITY' in result
 

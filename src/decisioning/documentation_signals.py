@@ -1,3 +1,16 @@
+"""
+documentation_signals.py
+
+Purpose:
+    Wrapper function for determining the presence of documentation-related signals of non-compliance, such as missing rationale.
+
+Usage:
+    from src.decisioning.documentation_signals import is_missing_rationale
+
+Author: Jason Chau
+Date: 2026-05-14
+"""
+
 from src.data.schema import Trade
 
 def is_missing_rationale(trade: Trade) -> bool:

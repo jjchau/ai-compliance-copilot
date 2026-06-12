@@ -9,7 +9,7 @@ from src.orchestration.review_pipeline import build_review_case
 
 
 class TestBuildReviewCase:
-    @patch('src.orchestration.review_pipeline.retrieve_policies')
+    @patch('src.orchestration.review_pipeline.retriever')
     @patch('src.orchestration.review_pipeline.predict_with_retrieval')
     @patch('src.orchestration.review_pipeline.evaluate_prediction')
     @patch('src.orchestration.review_pipeline.has_conflicting_signals')
@@ -20,7 +20,12 @@ class TestBuildReviewCase:
                                         mock_predict, mock_retrieve):
         """Test that build_review_case returns correctly structured dictionary."""
         # Setup mocks
-        mock_retrieve.return_value = ["POLICY_KYC_001", "POLICY_SUIT_001"]
+        # Configure the pipeline retriever mock to return chunks resembling
+        # what ComplianceRetriever.retrieve_policy_evidence would return.
+        mock_retrieve.retrieve_policy_evidence.return_value = [
+            {"policy_id": "POL-002-KYC", "similarity_distance": 0.4, "section_scope": "sec1"},
+            {"policy_id": "POL-001-SUITABILITY", "similarity_distance": 0.45, "section_scope": "sec2"}
+        ]
         mock_predict.return_value = {"compliance_probability": 0.8, "some_other_field": "value"}
         mock_evaluate_prediction.return_value = {
             "compliance_label": True,
@@ -67,7 +72,7 @@ class TestBuildReviewCase:
         assert result["confidence_score"] == 0.85
         
         # Verify retrieved policies
-        assert result["retrieved_policies"] == ["POLICY_KYC_001", "POLICY_SUIT_001"]
+        assert set(result["retrieved_policies"]) == {"POL-002-KYC", "POL-001-SUITABILITY"}
         
         # Verify conflict detection
         assert result["has_conflicting_signals"] is False
@@ -76,7 +81,7 @@ class TestBuildReviewCase:
         # Verify explanation
         assert result["flag_reasons"] == "Test explanation"
 
-    @patch('src.orchestration.review_pipeline.retrieve_policies')
+    @patch('src.orchestration.review_pipeline.retriever')
     @patch('src.orchestration.review_pipeline.predict_with_retrieval')
     @patch('src.orchestration.review_pipeline.evaluate_prediction')
     @patch('src.orchestration.review_pipeline.has_conflicting_signals')
@@ -87,7 +92,9 @@ class TestBuildReviewCase:
                                                    mock_predict, mock_retrieve):
         """Test that build_review_case calls all required components."""
         # Setup mocks
-        mock_retrieve.return_value = ["POLICY_KYC_001"]
+        mock_retrieve.retrieve_policy_evidence.return_value = [
+            {"policy_id": "POL-002-KYC", "similarity_distance": 0.4, "section_scope": "sec1"}
+        ]
         mock_predict.return_value = {"compliance_probability": 0.9}
         mock_evaluate_prediction.return_value = {"compliance_label": True}
         mock_has_conflicting.return_value = True
@@ -113,14 +120,14 @@ class TestBuildReviewCase:
         result = build_review_case(trade)
         
         # Verify all functions were called with correct parameters
-        mock_retrieve.assert_called_once_with(trade)
-        mock_predict.assert_called_once_with(trade, ["POLICY_KYC_001"])
+        assert mock_retrieve.retrieve_policy_evidence.called
+        mock_predict.assert_called_once_with(trade, ["POL-002-KYC"])
         mock_evaluate_prediction.assert_called_once_with(trade, {"compliance_probability": 0.9})
         mock_has_conflicting.assert_called_once_with(trade)
         mock_get_signals.assert_called_once_with(trade)
-        mock_generate_explanation.assert_called_once_with(trade, ["POLICY_KYC_001"])
+        mock_generate_explanation.assert_called_once_with(trade, ["POL-002-KYC"])
 
-    @patch('src.orchestration.review_pipeline.retrieve_policies')
+    @patch('src.orchestration.review_pipeline.retriever')
     @patch('src.orchestration.review_pipeline.predict_with_retrieval')
     @patch('src.orchestration.review_pipeline.evaluate_prediction')
     @patch('src.orchestration.review_pipeline.has_conflicting_signals')
@@ -130,7 +137,9 @@ class TestBuildReviewCase:
                                                        mock_has_conflicting, mock_evaluate_prediction,
                                                        mock_predict, mock_retrieve):
         """Test build_review_case when conflicting signals are detected."""
-        mock_retrieve.return_value = ["POLICY_KYC_001"]
+        mock_retrieve.retrieve_policy_evidence.return_value = [
+            {"policy_id": "POL-002-KYC", "similarity_distance": 0.4, "section_scope": "sec1"}
+        ]
         mock_predict.return_value = {"compliance_probability": 0.6}
         mock_evaluate_prediction.return_value = {"compliance_label": False}
         mock_has_conflicting.return_value = True
@@ -159,7 +168,7 @@ class TestBuildReviewCase:
         assert result["conflict_signals"] == ["risk_too_high", "experience_insufficient"]
         assert result["flag_reasons"] == "Multiple compliance issues detected"
 
-    @patch('src.orchestration.review_pipeline.retrieve_policies')
+    @patch('src.orchestration.review_pipeline.retriever')
     @patch('src.orchestration.review_pipeline.predict_with_retrieval')
     @patch('src.orchestration.review_pipeline.evaluate_prediction')
     @patch('src.orchestration.review_pipeline.has_conflicting_signals')
@@ -169,7 +178,7 @@ class TestBuildReviewCase:
                                                  mock_has_conflicting, mock_evaluate_prediction,
                                                  mock_predict, mock_retrieve):
         """Test that build_review_case preserves the original trade_id."""
-        mock_retrieve.return_value = []
+        mock_retrieve.retrieve_policy_evidence.return_value = []
         mock_predict.return_value = {}
         mock_evaluate_prediction.return_value = {}
         mock_has_conflicting.return_value = False
