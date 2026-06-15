@@ -12,7 +12,19 @@ Date: 2026-06-03
 
 from typing import Literal
 from src.data.schema import Trade
-from src.decisioning.conflict_detection import has_conflicting_signals
+from src.decisioning.risk_signals import (
+    is_overexposure,
+    is_advisor_history_high_risk,
+    is_kyc_uncertain
+)
+from src.decisioning.conflict_detection import (
+    has_conflicting_signals,
+    is_investment_too_aggressive_for_horizon,
+    is_investment_too_aggressive_for_objective
+)
+from src.decisioning.documentation_signals import (
+    is_missing_rationale
+)
 
 ESCALATION_LEVEL = Literal['none', 'queue', 'priority', 'urgent']
 
@@ -35,8 +47,14 @@ def assess_escalation(
     if risk_score >= 65 and compliance_probability < 0.3:
         return "urgent"
 
+    if (
+        trade.investment_type == "Options"
+        and trade.investment_experience == "Beginner"
+    ):
+        return "priority"
+
     # 3. HIGH RISK ELEVATED BACKLOG
-    if risk_score >= 65:
+    if risk_score >= 40:
         return "priority"
 
     # 4. TECHNICAL EXCEPTION
@@ -45,8 +63,18 @@ def assess_escalation(
     if compliance_probability < 0.5 and risk_score < 35:
         return "queue"
 
-    # 5. STANDARD WORKSPACE VERIFICATION
-    if risk_score >= 35 or confidence_score < 0.6 or has_conflicting_signals(trade):
+    # # 5. STANDARD WORKSPACE VERIFICATION
+    # if risk_score >= 35 or confidence_score < 0.6 or has_conflicting_signals(trade):
+    #     return "queue"
+    if (
+        is_overexposure(trade)
+        or is_missing_rationale(trade)
+        #or is_advisor_history_high_risk(trade)
+        or has_conflicting_signals(trade)
+        or is_kyc_uncertain(trade)
+        or is_investment_too_aggressive_for_horizon(trade)
+        or is_investment_too_aggressive_for_objective(trade)
+    ):
         return "queue"
 
     # 6. STRAIGHT-THROUGH PROCESSING
