@@ -20,7 +20,7 @@ from src.orchestration.review_pipeline import build_review_case
 from src.decisioning.labeling import assign_primary_policy
 
 # Configuration parameters
-CSV_INPUT_PATH = "./data/runtime/trades_runtime_v7.csv"
+CSV_INPUT_PATH = "./data/runtime/trades_runtime_v8.csv"
 DB_OUTPUT_PATH = "compliance_audit.db"
 SAFE_SLEEP_DELAY = 12.5    # Baseline pacing to honor 5 Requests-Per-Minute Free Tier constraints
 RATE_LIMIT_DELAY = 65.0    # Cool-down wait time when hitting a 429 Resource Exhausted exception
