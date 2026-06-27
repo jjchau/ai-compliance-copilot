@@ -1,5 +1,5 @@
 """
-explanation.py
+explanation.py - OBSOLETE AFTER ADDING LLM AUDIT REASON GENERATION
 
 Purpose:
     Generate human-readable explanations for why a trade was flagged based on the retrieved policies and their associated signals.

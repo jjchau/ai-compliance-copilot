@@ -13,12 +13,14 @@ Date: 2026-05-31
 """
 
 from src.data.schema import Trade
-from src.decisioning.decision_engine import evaluate_prediction
+from src.decisioning.decision_engine import evaluate_evidence
+from src.decisioning.compliance_scoring import compute_compliance_probability
 from src.decisioning.conflict_detection import (
     has_conflicting_signals,
     get_signals
 )
-from src.decisioning.retrieval_prediction import predict_with_retrieval
+from src.decisioning.llm_engine import GeminiComplianceEngine
+from src.decisioning.schema import *
 from src.logging.ai_logger import log_ai_decision
 from src.api.models import aiAssessment
 from src.orchestration.explanation import generate_explanation
@@ -35,13 +37,44 @@ except Exception as e:
     retriever = None
     print(f"[X] RAG Init Error: {e}")
 
+try:
+    gemini_engine = GeminiComplianceEngine()
+    print("[✓] Gemini LLM Reasoning Engine active in pipeline.")
+except Exception as e:
+    print(f"[X] Gemini LLM Init Error: {e}")
+
+
+def normalize_evidence_with_structured_facts(
+    trade: Trade,
+    evidence: ComplianceEvidenceSchema,
+) -> ComplianceEvidenceSchema:
+    violations = set(evidence.violations)
+    evidence_quality = set(evidence.evidence_quality)
+
+    if trade.kyc_completeness == "Missing":
+        violations.add(ViolationType.KYC_MISSING)
+
+    elif trade.kyc_completeness == "Uncertain":
+        evidence_quality.add(EvidenceQualityType.KYC_UNCERTAIN)
+
+    evidence.violations = list(violations)
+    evidence.evidence_quality = list(evidence_quality)
+
+    return evidence
+
+def build_llm_chunks(retrieved_chunks: list[dict]) -> list[str]:
+    """
+    Converts vector retrieval objects into plain
+    policy text chunks for Gemini.
+    """
+
+    return [chunk["text"] for chunk in retrieved_chunks]
+
 
 def build_retrieval_context(trade: Trade) -> dict:
     """
     Stage 1:
     Retrieval only.
-    No Gemini.
-    No scoring.
     """
 
     query_context = f"""
@@ -55,6 +88,8 @@ def build_retrieval_context(trade: Trade) -> dict:
 
     Investment product: {trade.investment_type}
     Investment amount: {trade.investment_amount}
+    Investment amount as percentage of income: X%
+    Potential concentration or overexposure if amount is large relative to income.
 
     Advisor history risk: {trade.advisor_history_risk}
 
@@ -95,50 +130,36 @@ def build_reasoning_output(
     trade: Trade,
     retrieved_policies: list[str],
     retrieved_chunks: list[dict]
-) -> dict:
+) -> tuple[ComplianceEvidenceSchema, dict]:
     """
     Stage 2:
     Everything AFTER retrieval.
     """
 
-    llm_assessment = predict_with_retrieval(
-        trade,
-        retrieved_policies
-    )
+    llm_chunks = build_llm_chunks(retrieved_chunks)
 
-    compliance_probability = llm_assessment.get(
-        "compliance_probability",
-        1.0
-    )
+    evidence_dict = gemini_engine.evaluate_with_llm(trade, llm_chunks)
+    evidence = ComplianceEvidenceSchema(**evidence_dict)
 
-    compliance_label = llm_assessment.get(
-        "compliance_label",
-        compliance_probability >= 0.9
-    )
+    evidence = normalize_evidence_with_structured_facts(trade, evidence)
 
-    compliance_prediction = {
-        "compliance_probability":
-            compliance_probability,
-        "compliance_label":
-            compliance_label
-    }
+    compliance_prediction = compute_compliance_probability(evidence)
 
-    evaluated_prediction = evaluate_prediction(
-        trade,
-        compliance_prediction
-    )
+    evaluated_prediction = evaluate_evidence(trade, compliance_prediction, evidence)
 
-    flag_reasons = generate_explanation(
-        trade,
-        retrieved_policies
-    )
+    flag_reasons = evidence.audit_reasoning
 
-    return {
-        **evaluated_prediction,
-        "flag_reasons": flag_reasons,
-        "retrieved_policies": retrieved_policies,
-        "retrieved_chunks": retrieved_chunks
-    }
+    return (
+        evidence,
+            {
+                **compliance_prediction,
+                **evaluated_prediction,
+                "evidence": evidence.model_dump(mode="json"),
+                "flag_reasons": flag_reasons,
+                "retrieved_policies": retrieved_policies,
+                "retrieved_chunks": retrieved_chunks
+            }
+        )
 
 def build_review_case(trade: Trade) -> dict:
 
@@ -152,37 +173,38 @@ def build_review_case(trade: Trade) -> dict:
 
     log_ai_decision(
         trade,
+        reasoning[0],
         aiAssessment(
             retrieved_policies=
-                reasoning["retrieved_policies"],
+                reasoning[1]["retrieved_policies"],
 
             compliance_probability=
-                reasoning["compliance_probability"],
+                reasoning[1]["compliance_probability"],
 
             compliance_label=
-                reasoning["compliance_label"],
+                reasoning[1]["compliance_label"],
 
             risk_score=
-                reasoning["risk_score"],
+                reasoning[1]["risk_score"],
 
             confidence_score=
-                reasoning["confidence_score"],
+                reasoning[1]["confidence_score"],
 
             escalation_level=
-                reasoning["escalation_level"],
+                reasoning[1]["escalation_level"],
 
             priority_score=
-                reasoning["priority_score"],
+                reasoning[1]["priority_score"],
 
             flag_reasons=
-                reasoning["flag_reasons"]
+                reasoning[1]["flag_reasons"]
         )
     )
 
     return {
         "trade_id": trade.trade_id,
         **trade.model_dump(),
-        **reasoning,
+        **reasoning[1],
         "has_conflicting_signals":
             has_conflicting_signals(trade),
         "conflict_signals":

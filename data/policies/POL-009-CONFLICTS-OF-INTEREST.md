@@ -104,6 +104,8 @@ The following situations generally require supervisory review:
 
 Escalated reviews may require compliance consultation or enhanced documentation.
 
+Conflict indicators should be evaluated together with suitability, documentation, advisor conduct history, and client impact. A potential conflict alone does not determine the final supervisory outcome where it is adequately disclosed, managed, and not linked to unsuitable recommendations.
+
 ---
 
 # 8. Supervisory Review Notes

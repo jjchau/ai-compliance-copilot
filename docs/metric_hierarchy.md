@@ -2,19 +2,16 @@
 
 ## 1. North Star Metric 
 
-- % cases correctly resolved at the lowest appropriate review level:
-	- $\frac{(\text{\# cases correctly resolved at lowest appropriate level})}{(\text{total \# cases})}$ 
+- **% cases correctly resolved at the lowest safe workflow level**:
+	- $\frac{(\text{\# cases correctly resolved at lowest safe workflow level})}{(\text{total \# cases})}$ 
 		- where:
-			- “lowest appropriate level” is the lowest level that a case can be resolved at without violating policy constraints; a ground truth value for  the lowest appropriate level will be defined per case in simulation. 
+			- “lowest safe workflow level” is the least burdensome review level that a case can be routed to that still protects against compliance risk. 
 	- Data needed: 
-		- Publicly available policy and regulatory compliance documentation 
-		- 10000 simulated cases correctly and incorrectly resolved at different levels (system auto-approved, front-line reviewer, escalation 1, escalation 2) 
-	- Simulation method: 
-		1. Using Python, define ranges or categorical states for all case variables, then create a dictionary of 10000 cases containing randomly sampled values for each variable unless it’s correlated with one or more other variables. Correlated variables: 
-			- high-risk clients → more complex portfolios  
-			- missing data → higher uncertainty  
-			- edge cases clustered in specific categories 
-		2. Use ChatGPT to simulate advisor notes and communications for each case. 
+		- Publicly available policy and regulatory compliance documentation
+		- 1000 simulated cases correctly and incorrectly routed at different levels (system auto-approved, queue, priority, urgent) 
+	- Simulation method:
+		1. Using Python, create "profile factories" for different client and advisor archetypes and "scenario builders" for different compliance outcomes (e.g. aligned recommendation, KYC missing violation, etc.), then specify a distribution of cases generate 1000 cases with randomly sampled variable values fitting within the constraints of the profiles and scenarios sampled under that distribution. 
+		2. Use ChatGPT to craft a small synthetic regulatory policy document corpus based on language sampled from real publicly available policy and regulatory compliance documentation. 
 
 ## 2. Product Success Metrics 
 
@@ -22,13 +19,17 @@ Note: All metrics in this section to be calculated ‘overall’ for all data po
 
 - Decision Quality 
 	- **Compliance classification accuracy**
-	- Precision / Recall for flagging decisions 
-	- False negative rate 
+	- Compliance classification precision / recall
+	- False negative rate for compliance classification
 	- **Expected regulatory risk exposure = $\frac{\sum(FN_i \times Severity)}{N}$**
 		- where:
 			- $FN_i = 1$ if false negative, else $0$
 			- $Severity =$ Severity weighting (e.g. risk tier weights: 1, 5, 10) of $i^{th}$ case
 			- $N =$ # of cases automatically approved 
+	- Workflow routing accuracy
+	- Workflow routing precision / recall
+	- "Urgent" routing recall
+	- "Auto-pass" over-routing
 	- **Expected operational cost** = $\sum(\text{Probability of false positive} × \text{Review cost})$
 	- % cases auto-approved correctly (or **auto-approval accuracy**)
 	- % cases escalated unnecessarily 
@@ -53,22 +54,25 @@ Note: All metrics in this section to be calculated ‘overall’ for all data po
 			- where:
 				- $λ_1$ is the overconfidence penalty weight
 				- $λ_2$ is the underconfidence pentaly weight
+- Top failure modes
 
 ## 3. System performance 
 
 Note: All metrics to be calculated ‘overall’ for all data points, and by risk tier, unless otherwise noted 
 
 - Retrieval 
+	- Top retrieved policies
+	- Retrieval coverage by policy
 	- **Precision@k**
 	- **Recall@k**
 	- Context sufficiency 
 	- **Retrieval correctness**
 - Generation 
-	- **Reasoning faithfulness** 
+	- Reasoning faithfulnes 
 	- Logical consistency
 	- Instruction adherence
-	- **Regulatory constraint adherence**
-	- **Hallucination rate**
+	- Regulatory constraint adherence
+	- Hallucination rate
 	- Context utilization score 
 - Calibration 
 	- **Expected Calibration Error**:  

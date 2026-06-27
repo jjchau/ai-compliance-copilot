@@ -68,6 +68,8 @@ Additional review may be required where:
 * derivatives are recommended,
 * or speculative products exceed client understanding.
 
+Plain-vanilla diversified products such as conventional mutual funds, standard ETFs, bonds, GICs, or T-Bills should not be treated as complex solely because they involve ordinary market risk.
+
 ---
 
 # 6. Concentration and Portfolio Impact
@@ -91,9 +93,11 @@ The following typically require supervisory review:
 * risk tolerance conflicts,
 * horizon-product conflicts,
 * low-experience/high-complexity combinations,
-* concentration concerns,
+* material concentration concerns,
 * unresolved suitability alerts,
-* or missing suitability rationale.
+* or missing suitability rationale where the absence of documentation prevents a reasonable suitability assessment.
+
+Minor documentation weaknesses may reduce confidence without independently requiring escalation where the recommendation is otherwise low-risk and clearly aligned with the client profile.
 
 ---
 
@@ -108,3 +112,7 @@ Advisor rationale should explain:
 * and any mitigating considerations.
 
 Suitability determinations should be clearly defensible based on the client profile.
+
+Documentation quality should be evaluated in context. Generic or limited rationale may reduce confidence in the review record, but should not independently establish a suitability violation where the recommendation is otherwise low-risk, consistent with the client's documented profile, and supported by available KYC information.
+
+Where documentation gaps prevent a reasonable suitability assessment, supervisory review may be required.

@@ -15,7 +15,7 @@ Not all transactions can be evaluated through standard suitability criteria.
 
 Certain client circumstances may justify recommendations that deviate from normal supervisory expectations.
 
-Such situations require enhanced review and documentation.
+Such situations may require enhanced review and documentation where the exception materially affects suitability, risk exposure, client understanding, or supervisory confidence.
 
 ---
 
@@ -90,7 +90,7 @@ Additional review is generally required where:
 * speculative products are involved,
 * significant concentration exists,
 * elderly or vulnerable clients are affected,
-* documentation is incomplete,
+* documentation is materially incomplete and prevents supervisors from understanding the basis for the exception,
 * or previous exception requests have occurred repeatedly.
 
 Escalation may include:

@@ -13,7 +13,7 @@ This policy establishes minimum standards for advisor documentation supporting i
 
 Adequate documentation enables effective supervisory review and supports audit readiness.
 
-Documentation deficiencies may create supervisory concerns regardless of underlying trade suitability.
+Documentation deficiencies may create supervisory concerns even where the underlying trade appears suitable, particularly where the missing documentation prevents effective supervisory review or where other risk indicators are present.
 
 ---
 
@@ -60,6 +60,8 @@ The following examples may be considered insufficient without additional detail:
 
 Documentation should explain why the recommendation is appropriate for the specific client.
 
+The significance of generic documentation should be evaluated in context. Generic rationale is more concerning where the recommendation involves elevated product risk, concentration, uncertain KYC, vulnerable clients, or apparent suitability conflicts.
+
 ---
 
 # 5. Enhanced Documentation Situations
@@ -79,9 +81,9 @@ Advisor notes should specifically address the factors that increase supervisory 
 
 # 6. Missing Documentation
 
-Missing rationale may itself constitute a supervisory concern.
+Missing rationale may constitute a supervisory concern, particularly where the absence of documentation prevents reviewers from confirming suitability or understanding the basis for the recommendation.
 
-Where documentation is incomplete, supervisors may require:
+Where documentation is materially incomplete, supervisors may require:
 
 * advisor clarification,
 * supplemental notes,
@@ -94,16 +96,16 @@ The absence of documentation should not be interpreted as evidence that suitabil
 
 # 7. Escalation Triggers
 
-The following situations generally require additional review:
+The following situations may require additional review, particularly where they prevent a reasonable suitability assessment or occur alongside other risk indicators:
 
 * absent advisor notes,
-* generic rationale,
+* generic rationale for elevated-risk recommendations,
 * contradictory documentation,
-* missing suitability discussion,
+* missing suitability discussion for material or complex trades,
 * unresolved KYC inconsistencies,
 * or repeated documentation deficiencies.
 
-Supervisors may require remediation where documentation standards are not met.
+Minor documentation weaknesses may reduce confidence without independently requiring escalation where the recommendation is otherwise low-risk, clearly aligned with the client profile, and supported by complete KYC information.
 
 ---
 

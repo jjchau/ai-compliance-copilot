@@ -189,6 +189,108 @@ def generate_dataset(num_cases: int = DEFAULT_DATASET_SIZE) -> pd.DataFrame:
 
 
 # ==========================================================
+# Stratified Evaluation Dataset Generation
+# ==========================================================
+
+EVALUATION_SCENARIO_COUNTS = {
+    # ----------------------------------
+    # Auto-pass / clean compliant cases
+    # ----------------------------------
+    "Aligned Recommendation": 50,
+
+    # ----------------------------------
+    # Queue / soft concern cases
+    # ----------------------------------
+    "Risk Signal": 20,
+    "Overexposure": 15,
+    "High Risk Advisor": 10,
+    "Low Priority Exception": 15,
+    "Conflicting Signals": 10,
+
+    # ----------------------------------
+    # Priority / hard violation cases
+    # ----------------------------------
+    "KYC Missing": 20,
+    "Suitability Violation": 20,
+    "Insufficient Experience": 15,
+    "Aggressive Horizon": 10,
+    "Aggressive Objective": 10,
+
+    # ----------------------------------
+    # Urgent / severe supervision cases
+    # ----------------------------------
+    "Retiree Speculation": 5,
+    "Retiree Options": 5,
+    "Compound Violation": 15,
+}
+
+
+def generate_case_for_scenario(scenario_name: str) -> LabeledTrade:
+    """
+    Generates a single labeled trade for a specified scenario.
+    This is used for stratified evaluation datasets where coverage
+    of each scenario matters more than natural scenario frequency.
+    """
+
+    profile_factory = choose_profile_factory()
+    trade = profile_factory()
+
+    scenario_builder = SCENARIO_BUILDERS[scenario_name]
+    trade = scenario_builder(trade)
+
+    trade = enrich_trade_text(trade, scenario_name)
+
+    true_compliance = compute_true_compliance(trade)
+    case_type = assign_case_type(trade)
+    difficulty = assign_difficulty(trade)
+    relevant_policies = get_relevant_policies(trade)
+    primary_policy = assign_primary_policy(trade)
+    severity_tier = assign_severity_tier(trade)
+    expected_workflow_bucket = assign_expected_workflow_bucket(trade)
+
+    return LabeledTrade(
+        **trade.model_dump(),
+        true_compliance=true_compliance,
+        case_type=case_type,
+        scenario_name=scenario_name,
+        difficulty=difficulty,
+        relevant_policies=relevant_policies,
+        primary_policy=primary_policy,
+        severity_tier=severity_tier,
+        expected_workflow_bucket=expected_workflow_bucket
+    )
+
+
+def generate_stratified_evaluation_dataset(
+    scenario_counts: dict[str, int] = EVALUATION_SCENARIO_COUNTS
+) -> pd.DataFrame:
+    """
+    Generates a stratified synthetic evaluation dataset with explicit
+    scenario coverage.
+
+    This is intended for validation and error analysis, not for estimating
+    natural operating workload distribution.
+    """
+
+    rows = []
+
+    for scenario_name, count in scenario_counts.items():
+
+        if scenario_name not in SCENARIO_BUILDERS:
+            raise ValueError(
+                f"Unknown scenario_name: {scenario_name}"
+            )
+
+        for _ in range(count):
+            case = generate_case_for_scenario(scenario_name)
+            rows.append(case.model_dump())
+
+    random.shuffle(rows)
+
+    return pd.DataFrame(rows)
+
+
+# ==========================================================
 # Dataset Statistics
 # ==========================================================
 
@@ -198,13 +300,27 @@ def print_dataset_summary(df):
     print("DATASET SUMMARY")
     print("==============================")
     print(f"\nTotal Cases: {len(df)}")
+
+    print("\nScenario Distribution:")
+    print(df["scenario_name"].value_counts(normalize=True).round(3))
+    print(df["scenario_name"].value_counts())
+
     print("\nCase Type Distribution:")
     print(df["case_type"].value_counts(normalize=True).round(3))
+    print(df["case_type"].value_counts())
+
     print("\nCompliance Distribution:")
     print(df["true_compliance"].value_counts(normalize=True).round(3))
+    print(df["true_compliance"].value_counts())
+
+    print("\nExpected Workflow Distribution:")
+    print(df["expected_workflow_bucket"].value_counts(normalize=True).round(3))
+    print(df["expected_workflow_bucket"].value_counts())
+
     print("\nDifficulty Distribution:")
     print(df["difficulty"].value_counts(normalize=True).round(3))
-
+    print(df["difficulty"].value_counts())
+    
 
 # ==========================================================
 # Export
@@ -230,7 +346,9 @@ if __name__ == "__main__":
 
     random.seed(42)
 
-    df = generate_dataset(num_cases=1000)
+    # df = generate_dataset(num_cases=200)
+    df = generate_stratified_evaluation_dataset()
     print_dataset_summary(df)
 
-    save_dataset(df, "data/runtime/trades_runtime_v8.csv")
+    # save_dataset(df, "data/runtime/trades_runtime_v9.csv")
+    save_dataset(df, "data/runtime/trades_eval_stratified_v1.csv")
