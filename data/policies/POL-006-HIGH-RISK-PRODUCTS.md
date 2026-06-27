@@ -36,20 +36,26 @@ The list is not exhaustive.
 
 Supervisors may designate additional products for enhanced review.
 
+Conventional diversified products such as standard mutual funds, standard non-leveraged ETFs, investment-grade bonds, GICs, and T-Bills are not automatically subject to this policy solely because they involve ordinary market risk.
+
+Such products may become relevant to this policy only where additional facts indicate leverage, inverse exposure, illiquidity, speculative exposure, unusual volatility, embedded complexity, or another elevated-risk feature.
+
 ---
 
 # 3. Client Knowledge Requirements
 
 Product complexity should align with client investment knowledge and experience.
 
-Additional review may be required where:
+Additional review may be required where limited investment experience is combined with product complexity or elevated product risk, including where:
 
-* investment experience is limited,
 * product structure is complex,
 * leverage is involved,
+* inverse exposure is involved,
+* liquidity is limited,
+* speculative exposure is material,
 * or significant volatility is expected.
 
-Product suitability should not be based solely on client willingness to accept risk.
+Limited investment experience alone should not cause a conventional diversified product to be treated as high-risk or complex.
 
 ---
 
@@ -96,6 +102,8 @@ Documentation should address:
 * and product complexity.
 
 Generic statements such as "high growth opportunity" may be insufficient.
+
+Documentation expectations should be applied in proportion to product complexity and client risk. Generic rationale is more concerning where the product is complex, speculative, leveraged, illiquid, concentrated, or otherwise elevated-risk.
 
 ---
 

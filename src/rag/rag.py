@@ -72,7 +72,7 @@ class ComplianceRetriever:
         if not results or not results['ids'] or len(results['ids'][0]) == 0:
             return []
 
-        # Chroma query returns batches. Since we pass one query string, look at index 0.
+        # Chroma query returns batches. Since one query string was passed, look at index 0.
         ids = results['ids'][0]
         documents = results['documents'][0]
         metadatas = results['metadatas'][0]

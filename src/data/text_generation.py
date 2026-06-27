@@ -216,7 +216,7 @@ NOTES = {
 # ==========================================================
 
 MISSING_RATIONALE_TEXT = (
-    "No specific execution rationale documented."
+    ""
 )
 
 WEAK_RATIONALE_TEXT = (

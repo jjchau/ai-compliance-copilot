@@ -12,35 +12,23 @@ Date: 2026-04-21
 """
 
 from src.data.schema import Trade
-from src.decisioning.compliance_prediction import predict_compliance
-#from src.decisioning.violation_rules import is_kyc_violation
+from src.decisioning.llm_engine import ComplianceEvidenceSchema
 from src.scoring.risk_scoring import compute_risk_score
 from src.scoring.confidence_scoring import compute_confidence_score
 from src.decisioning.policy_rules import assess_escalation
 from typing import Optional
 
-# For legacy rule-based compliance prediction, called from sprint 1 notebook. See build_review_case() for retrieval-based compliance prediction.
-def evaluate_trade(trade):
-    compliance_prediction = predict_compliance(trade)
-
-    return evaluate_prediction(
-        trade,
-        compliance_prediction
-    )
-
-def evaluate_prediction(trade: Trade, compliance_result: dict) -> dict:
-    compliance_probability = compliance_result["compliance_probability"]
-    compliance_label = compliance_result["compliance_label"]
-    risk_score = compute_risk_score(trade)
-    confidence_score = compute_confidence_score(trade)["overall"]
-    escalation_level = assess_escalation(trade, compliance_probability, risk_score, confidence_score)
+def evaluate_evidence(trade: Trade, compliance_prediction: dict[str, float | bool], evidence: ComplianceEvidenceSchema) -> dict[str, int | float | dict[str, float] | str | None ]:
+    risk_score = compute_risk_score(trade, evidence)
+    confidence_breakdown = compute_confidence_score(trade, evidence)
+    confidence_score = confidence_breakdown["overall"]
+    escalation_level = assess_escalation(trade, compliance_prediction["compliance_probability"], evidence, risk_score, confidence_score)
     priority_score = compute_priority_score(trade, risk_score, confidence_score, escalation_level)
 
     return {
-        "compliance_probability": compliance_probability,
-        "compliance_label": compliance_label,
         "risk_score": risk_score,
         "confidence_score": confidence_score,
+        "confidence_breakdown": confidence_breakdown,
         "escalation_level": escalation_level,
         "priority_score": priority_score
     }
@@ -66,6 +54,33 @@ def compute_priority_score(trade: Trade, risk_score: float, confidence_score: fl
         return base_score
         
     return 0.0
+
+# # For legacy rule-based compliance prediction, called from sprint 1 notebook. See build_review_case() for retrieval-based compliance prediction.
+# def evaluate_trade(trade):
+#     compliance_prediction = predict_compliance(trade)
+
+#     return evaluate_prediction(
+#         trade,
+#         compliance_prediction
+#     )
+
+# # For legacy retrieval + rule-based reasoning.
+# def evaluate_prediction(trade: Trade, compliance_result: dict) -> dict:
+#     compliance_probability = compliance_result["compliance_probability"]
+#     compliance_label = compliance_result["compliance_label"]
+#     risk_score = compute_risk_score(trade)
+#     confidence_score = compute_confidence_score(trade)["overall"]
+#     escalation_level = assess_escalation(trade, compliance_probability, risk_score, confidence_score)
+#     priority_score = compute_priority_score(trade, risk_score, confidence_score, escalation_level)
+
+#     return {
+#         "compliance_probability": compliance_probability,
+#         "compliance_label": compliance_label,
+#         "risk_score": risk_score,
+#         "confidence_score": confidence_score,
+#         "escalation_level": escalation_level,
+#         "priority_score": priority_score
+#     }
 
 # def compute_priority_score(trade: Trade, risk_score: float, confidence_score: float, escalation_level: str) -> Optional[float]:
 #     base_score = (
