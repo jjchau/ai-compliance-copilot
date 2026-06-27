@@ -92,6 +92,8 @@ Potential KYC concerns include:
 * unexplained risk tolerance increases,
 * or insufficient advisor notes.
 
+Incomplete or missing KYC information should be distinguished from uncertainty or weak supporting notes. Missing required KYC fields may prevent suitability assessment, while uncertain or weakly supported KYC information may require review without independently establishing a suitability violation.
+
 ---
 
 # 7. Supervisory Escalation

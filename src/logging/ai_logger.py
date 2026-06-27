@@ -16,9 +16,10 @@ from src.api.models import aiAssessment
 from src.logging.logger import append_jsonl
 from pathlib import Path
 from src.config.paths import LOG_DIR
+from src.decisioning.schema import ComplianceEvidenceSchema
 
 # def log_ai_decision(case: dict) -> None:
-def log_ai_decision(trade: Trade, ai_assessment: aiAssessment) -> None:
+def log_ai_decision(trade: Trade, evidence: ComplianceEvidenceSchema, ai_assessment: aiAssessment) -> None:
     """
     Logs an AI-generated trade assessment.
     """
@@ -26,6 +27,7 @@ def log_ai_decision(trade: Trade, ai_assessment: aiAssessment) -> None:
     log_entry = {
         "timestamp": trade.trade_timestamp.isoformat(),
         "trade_id": trade.trade_id,
+        "evidence": evidence.model_dump(mode="json"),
         "compliance_label": ai_assessment.compliance_label,
         "compliance_probability": ai_assessment.compliance_probability,
         "risk_score": ai_assessment.risk_score,

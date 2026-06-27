@@ -83,6 +83,8 @@ However, growth objectives do not automatically justify:
 
 Suitability considerations remain applicable regardless of growth orientation.
 
+Recommendations that are more conservative than a client's stated growth objective are not automatically unsuitable. Conservative recommendations may be appropriate where they reflect liquidity needs, temporary positioning, client direction, risk management, market conditions, or other documented considerations.
+
 ---
 
 # 6. Objective Changes
@@ -114,7 +116,7 @@ Documentation should specifically address situations where recommendations appea
 
 # 8. Escalation Triggers
 
-Additional review is generally required where:
+Additional review is generally required where material objective-product conflicts exist, such as:
 
 * capital preservation objectives coexist with speculative investments,
 * income objectives coexist with significant volatility exposure,

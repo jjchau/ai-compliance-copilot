@@ -1,6 +1,5 @@
 """
-retrieval_prediction.py
-
+retrieval_prediction.py - OBSOLETE AFTER LLM REASONING IMPLEMENTATION
 Purpose:
     Predict compliance status based on retrieved policies and trade characteristics.
 

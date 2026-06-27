@@ -45,26 +45,33 @@ Auto-passed cases remain subject to:
 * retrospective review,
 * and audit examination.
 
+Minor documentation imperfections or soft contextual indicators may still be auto-passed where estimated suitability risk is low, KYC is complete, and no material concern signal is present.
+
 ---
 
 ## QUEUE REVIEW
 
-Moderate-risk alerts may enter standard supervisory review queues where:
+Queue review applies where a trade appears potentially compliant but requires human confirmation due to:
 
-* additional advisor rationale is required,
-* product suitability requires confirmation,
-* or documentation quality is incomplete.
+* moderate risk indicators,
+* uncertain KYC,
+* incomplete documentation that limits suitability confirmation,
+* overexposure concerns,
+* or soft supervisory indicators.
 
 ---
 
 ## PRIORITY REVIEW
 
-Priority review applies where:
+Priority review applies where hard compliance violations or significant suitability concerns are present,including:
 
-* multiple risk indicators are present,
-* concentration exposure is elevated,
-* suitability concerns are significant,
-* or prior advisor conduct history increases supervisory concern.
+* missing KYC,
+* risk tolerance mismatch,
+* experience-complexity mismatch,
+* elevated concentration exposure,
+* or multiple cumulative concern signals.
+
+Advisor conduct history may increase review priority when combined with current trade-level concerns, repeated alerts, or documentation weaknesses. Advisor history alone should not determine priority routing.
 
 Priority items should generally be reviewed before standard queue items.
 
@@ -72,17 +79,20 @@ Priority items should generally be reviewed before standard queue items.
 
 ## URGENT ESCALATION
 
-Urgent review applies where:
+Urgent review applies where severe or compounding risk indicators suggest elevated potential client harm, such as:
 
-* potential client harm appears elevated,
-* documentation is materially deficient,
-* elderly client vulnerability exists,
-* or significant suitability mismatches are identified.
+* multiple hard suitability violations,
+* missing KYC combined with high-risk or unsuitable products,
+* elderly or vulnerable client exposure to speculative or complex products,
+* materially deficient documentation combined with elevated client harm risk,
+* or severe concentration / liquidity risk.
+
+No single indicator independently requires urgent escalation unless the risk of client harm is clearly elevated.
 
 Urgent cases may require:
 
 * immediate supervisory review,
-* trade reversal consideration,
+* trade cancellation or reversal consideration, where permitted,
 * or temporary account restrictions.
 
 ---
@@ -107,9 +117,11 @@ No single indicator independently determines final escalation level.
 
 # 4. Missing Documentation
 
-Missing rationale documentation is considered a material supervisory weakness.
+Missing rationale documentation is considered a supervisory weakness.
 
-Trades lacking supporting rationale may be escalated even where the investment itself appears potentially suitable.
+Trades lacking supporting rationale may be escalated where the missing documentation prevents reviewers from confirming suitability, or where other risk indicators are present.
+
+Minor documentation weaknesses may reduce confidence without independently requiring escalation.
 
 Supervisors should determine whether:
 

@@ -41,7 +41,7 @@ Supervisory review should consider whether recommendations expose senior clients
 
 Potential indicators of vulnerability include:
 
-* age above 65,
+* advanced age, particularly where accompanied by retirement dependency or reduced financial resilience,
 * cognitive decline,
 * memory concerns,
 * diminished financial literacy,
@@ -51,9 +51,9 @@ Potential indicators of vulnerability include:
 * isolation,
 * or recent major life events.
 
-The existence of a vulnerability indicator does not imply incapacity.
+The existence of a vulnerability indicator does not imply incapacity, and age alone should not independently establish a suitability concern.
 
-However, it may require enhanced review and documentation.
+Enhanced review or documentation may be required where vulnerability indicators are combined with elevated-risk recommendations, liquidity concerns, concentration exposure, signs of diminished understanding, or unusual transaction patterns.
 
 ---
 
@@ -96,6 +96,8 @@ The following situations generally require supervisory review:
 * concerns regarding third-party influence,
 * unusual withdrawals followed by speculative purchases,
 * or possible financial exploitation.
+
+Senior or vulnerable status should be evaluated together with product risk, liquidity needs, concentration, client understanding, and financial resilience. Senior age alone should not independently require escalation where the recommendation is low-risk, suitable, and adequately documented.
 
 ---
 

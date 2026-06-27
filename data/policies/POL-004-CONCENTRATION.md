@@ -50,6 +50,8 @@ Certain clients may knowingly maintain concentrated positions due to:
 
 In these circumstances, enhanced documentation may be required.
 
+Where full portfolio data is unavailable, supervisors may consider transaction size relative to known financial circumstances, including annual income, assets, liquidity needs, or available account information, as a proxy indicator of potential overexposure.
+
 ---
 
 # 3. Single-Issuer Concentration
@@ -65,6 +67,8 @@ The following thresholds generally require additional review:
 * or concentrated positions involving high-volatility issuers.
 
 Supervisors may require additional rationale where concentration materially increases portfolio risk.
+
+Large transactions relative to annual income or known liquid assets may require review where the exposure could materially affect the client's financial capacity, even if full portfolio concentration data is unavailable.
 
 ---
 

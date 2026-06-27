@@ -20,7 +20,7 @@ from src.orchestration.review_pipeline import build_review_case
 from src.decisioning.labeling import assign_primary_policy
 
 # Configuration parameters
-CSV_INPUT_PATH = "./data/runtime/trades_runtime_v8.csv"
+CSV_INPUT_PATH = "./data/runtime/trades_eval_stratified_v1.csv"
 DB_OUTPUT_PATH = "compliance_audit.db"
 SAFE_SLEEP_DELAY = 12.5    # Baseline pacing to honor 5 Requests-Per-Minute Free Tier constraints
 RATE_LIMIT_DELAY = 65.0    # Cool-down wait time when hitting a 429 Resource Exhausted exception
@@ -108,6 +108,7 @@ def main():
     for current_count, (index, row) in enumerate(df.iterrows(), start=1):
         # Dictionary comprehension forces keys to 'str' type, clearing static type warnings
         trade_dict = {str(k): v for k, v in row.to_dict().items()}
+        trade_dict = {k: None if pd.isna(v) else v for k, v in trade_dict.items()}
         trade_id = str(trade_dict.get("trade_id"))
 
         # 1. STATE INSPECTION PROGRESS CHECK (Automatic Skip Check)
@@ -121,11 +122,15 @@ def main():
         attempt_number = 0
 
         # Deserialize list fields loaded from CSV
-        if isinstance(trade_dict.get("relevant_policies"), str):
-            trade_dict["relevant_policies"] = ast.literal_eval(trade_dict["relevant_policies"])
+        relevant_policies = trade_dict.get("relevant_policies")
 
+        if relevant_policies is None:
+            trade_dict["relevant_policies"] = []
+        elif isinstance(relevant_policies, str):
+            trade_dict["relevant_policies"] = ast.literal_eval(relevant_policies)
+                
         # Convert pandas NaN to None
-        if pd.isna(trade_dict.get("primary_policy")):
+        if trade_dict.get("primary_policy") is None:
             trade_dict["primary_policy"] = assign_primary_policy(Trade(**trade_dict))
 
         # 2. INFINITE RETRY ENGINE LOOP FOR RATE LIMIT OVERLOADS

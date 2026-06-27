@@ -250,7 +250,7 @@ export const CaseAuditWorkspace: React.FC<CaseAuditWorkspaceProps> = ({
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-1.5 text-purple-400">
             <Scale className="w-3.5 h-3.5" />
-            <span className="text-[10px] font-black uppercase tracking-wider">Retrieved Attached Regulations</span>
+            <span className="text-[10px] font-black uppercase tracking-wider">Retrieved Policies</span>
           </div>
           <div className="flex flex-wrap gap-1 items-start content-start overflow-y-auto max-h-[48px] bg-slate-900/30 p-2 rounded border border-slate-800/50 w-full custom-scrollbar">
             {c.retrieved_policies && (Array.isArray(c.retrieved_policies) || typeof c.retrieved_policies === "string") ? (
@@ -266,7 +266,7 @@ export const CaseAuditWorkspace: React.FC<CaseAuditWorkspaceProps> = ({
           <div className="flex items-center justify-between text-emerald-400 border-b border-slate-800/80 pb-1">
             <div className="flex items-center gap-1.5">
               <Database className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-black uppercase tracking-wider">Vector Corpus Source Evidence Text Blocks</span>
+              <span className="text-[10px] font-black uppercase tracking-wider">Policy Text Blocks</span>
             </div>
             <span className="text-[9px] font-mono bg-emerald-950/40 px-1.5 py-0.2 rounded border border-emerald-900/40 text-emerald-500 font-bold">
               COUNT: {rawChunks.length}
@@ -285,7 +285,7 @@ export const CaseAuditWorkspace: React.FC<CaseAuditWorkspaceProps> = ({
                   <div key={index} className="p-2.5 rounded bg-slate-950/90 border border-slate-800 text-[11px] font-mono leading-relaxed relative group hover:border-slate-700/60 transition-colors">
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 border-b border-slate-900 pb-1 text-slate-500 text-[9px] font-bold">
                       <div className="flex items-center gap-2">
-                        <span className="text-purple-400/80 font-mono">SECTION CORPUS ANALYSIS MODULE</span>
+                        {/* <span className="text-purple-400/80 font-mono">SECTION CORPUS ANALYSIS MODULE</span> */}
                         {policyId && (
                           <span className="flex items-center gap-1 text-amber-500 bg-amber-950/20 px-1 rounded border border-amber-900/30">
                             <Bookmark className="w-2.5 h-2.5" /> {policyId}
