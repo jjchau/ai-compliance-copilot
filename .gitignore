@@ -211,7 +211,12 @@ __marimo__/
 
 # Log files
 logs/
-*.jsonl
+logs/*.jsonl
+
+# Pickle files
+*.pkl
+
+# Database files
 *.db
 
 # Generated data / artifacts
@@ -220,8 +225,17 @@ data/processed/
 *.csv
 *.parquet
 
+# Keep curated evaluation datasets
+!data/evaluation/
+!data/evaluation/*.csv
+
+# Keep curated benchmark summaries
+!artifacts/retrieval_benchmarks/
+!artifacts/retrieval_benchmarks/*.csv
+
 # Notebooks checkpoints
 .ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
 
 # PowerPoint files
 *.pptx
@@ -231,3 +245,6 @@ temp/
 
 # ChromaDB folder and files for RAG vector embeddings
 data/chroma/
+
+# Local historical files for project evolution traceability
+project_history/

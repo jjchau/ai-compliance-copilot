@@ -1,0 +1,22 @@
+query_variant,selection_strategy,Aggressive Horizon,Aggressive Objective,Aligned Recommendation,Compound Violation,Conflicting Signals,High Risk Advisor,Insufficient Experience,KYC Missing,Low Priority Exception,Overexposure,Retiree Options,Retiree Speculation,Risk Signal,Suitability Violation
+baseline,first_per_policy_4,0.0,0.0,0.64,1.0,1.0,0.3,0.5333333333333333,1.0,1.0,0.26666666666666666,0.6,0.0,1.0,0.15
+baseline,first_per_policy_5,0.0,0.2,0.64,1.0,1.0,0.3,0.9333333333333333,1.0,1.0,0.4,1.0,0.0,1.0,0.15
+baseline,first_per_policy_6,1.0,1.0,0.8,1.0,1.0,0.3,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+baseline,raw_top_10,0.0,0.5,0.64,1.0,1.0,0.3,0.9333333333333333,1.0,1.0,0.5333333333333333,1.0,0.2,1.0,0.25
+baseline,reranked_first_per_policy_4,1.0,1.0,1.0,1.0,1.0,1.0,0.9333333333333333,1.0,1.0,0.8666666666666667,0.8,1.0,0.75,1.0
+baseline,reranked_first_per_policy_5,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.8,1.0,0.95,1.0
+baseline,reranked_first_per_policy_6,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+conditional,first_per_policy_4,0.0,0.1,0.64,1.0,1.0,0.3,0.8,1.0,1.0,0.2,0.2,0.0,1.0,0.15
+conditional,first_per_policy_5,0.2,0.6,0.68,1.0,1.0,0.3,1.0,1.0,1.0,0.4666666666666667,1.0,0.0,1.0,0.4
+conditional,first_per_policy_6,1.0,1.0,0.8,1.0,1.0,0.3,1.0,1.0,1.0,0.8666666666666667,1.0,1.0,1.0,1.0
+conditional,raw_top_10,0.2,0.7,0.76,1.0,1.0,0.3,1.0,1.0,1.0,0.5333333333333333,1.0,0.0,1.0,0.45
+conditional,reranked_first_per_policy_4,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.7333333333333333,1.0,1.0,1.0,1.0
+conditional,reranked_first_per_policy_5,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+conditional,reranked_first_per_policy_6,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+neutral,first_per_policy_4,0.0,0.1,0.64,1.0,1.0,0.3,0.8666666666666667,1.0,1.0,0.4,0.6,0.0,1.0,0.15
+neutral,first_per_policy_5,0.2,0.7,0.76,1.0,1.0,0.3,1.0,1.0,1.0,0.9333333333333333,1.0,0.4,1.0,0.45
+neutral,first_per_policy_6,1.0,1.0,0.8,1.0,1.0,0.3,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+neutral,raw_top_10,0.2,0.7,0.76,1.0,1.0,0.3,1.0,1.0,1.0,0.9333333333333333,1.0,0.6,1.0,0.5
+neutral,reranked_first_per_policy_4,1.0,1.0,1.0,1.0,1.0,1.0,0.9333333333333333,1.0,1.0,0.7333333333333333,0.8,1.0,1.0,1.0
+neutral,reranked_first_per_policy_5,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+neutral,reranked_first_per_policy_6,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0

@@ -59,7 +59,7 @@ export const CaseAuditWorkspace: React.FC<CaseAuditWorkspaceProps> = ({
     );
   }
 
-  const currentState = caseStates[c.trade_id] || { reviewStatus: "Unreviewed", actionType: null, notes: "" };
+  const currentState = caseStates[c.trade_id] || { reviewStatus: "Not reviewed", actionType: null, notes: "" };
   
   const rawConfidence = c.confidence_score !== undefined && c.confidence_score !== null ? Number(c.confidence_score) : 1.0;
   const reliability = getReliabilityTier(rawConfidence);
@@ -99,10 +99,10 @@ export const CaseAuditWorkspace: React.FC<CaseAuditWorkspaceProps> = ({
 
             <div className="flex items-center gap-1 font-mono text-[11px] shrink-0">
               <span className="bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800/60 text-slate-400 uppercase">
-                RISK: <span className={`${getRiskTier(selectedCase.risk_score).color} font-bold`}>{getRiskTier(selectedCase.risk_score).label}</span>
+                RISK: <span className={`${getRiskTier(rawRisk).color} font-bold`}>{getRiskTier(rawRisk).label}</span>
               </span>
               <span className="bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800/60 text-slate-400 uppercase">
-                CONF: <span className={`${getReliabilityTier(selectedCase.confidence_score).color} font-bold`}>{getReliabilityTier(selectedCase.confidence_score).label}</span>
+                CONF: <span className={`${reliability.color} font-bold`}>{reliability.label}</span>
               </span>
               <span className="bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800/60 text-slate-400 uppercase">
                 ROUTING: <span className={`font-bold ${

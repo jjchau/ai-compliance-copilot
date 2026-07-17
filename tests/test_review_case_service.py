@@ -92,3 +92,102 @@ def test_get_single_case_from_db_returns_serialized_case(monkeypatch):
     assert result['retrieved_policies'] == ['POLICY_KYC_001']
     assert result['retrieved_chunks'] == ['chunk1']
     assert result['escalation_level'] == 'priority'
+
+
+def test_dict_factory_and_serialize_case_handles_bad_json_and_empty_values():
+    import src.services.review_case_service as service_mod
+
+    cursor = MagicMock()
+    cursor.description = [("trade_id",), ("compliance_label",)]
+
+    assert service_mod.dict_factory(cursor, ("T1", 1)) == {
+        "trade_id": "T1",
+        "compliance_label": 1,
+    }
+    assert service_mod._serialize_case({}) == {}
+
+    serialized = service_mod._serialize_case(
+        {
+            "trade_id": "T2",
+            "compliance_label": True,
+            "retrieved_policies": "[bad json",
+            "retrieved_chunks": None,
+        }
+    )
+
+    assert serialized["retrieved_policies"] == []
+    assert serialized["retrieved_chunks"] == []
+
+
+def test_get_all_enriched_cases_filters_and_sorts(monkeypatch):
+    import sqlite3
+    import src.services.review_case_service as service_mod
+
+    executed = []
+
+    class DummyCursor:
+        def execute(self, query, params=None):
+            executed.append((query, params))
+
+        def fetchall(self):
+            return [
+                {
+                    "trade_id": "T1",
+                    "compliance_label": 1,
+                    "retrieved_policies": "[]",
+                    "retrieved_chunks": "[]",
+                }
+            ]
+
+    class DummyConn:
+        def __init__(self):
+            self.row_factory = None
+            self.cursor_obj = DummyCursor()
+
+        def cursor(self):
+            return self.cursor_obj
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(sqlite3, "connect", lambda db_path: DummyConn())
+
+    filtered = service_mod.get_all_enriched_cases("priority")
+    sorted_cases = service_mod.get_all_enriched_cases("invalid")
+
+    assert filtered[0]["trade_id"] == "T1"
+    assert sorted_cases[0]["trade_id"] == "T1"
+    assert executed[0] == (
+        "SELECT * FROM audited_trades WHERE escalation_level = ?",
+        ("priority",),
+    )
+    assert executed[1] == (
+        "SELECT * FROM audited_trades ORDER BY priority_score DESC",
+        None,
+    )
+
+
+def test_get_single_case_from_db_returns_none(monkeypatch):
+    import sqlite3
+    import src.services.review_case_service as service_mod
+
+    class DummyCursor:
+        def execute(self, query, params):
+            pass
+
+        def fetchone(self):
+            return None
+
+    class DummyConn:
+        def __init__(self):
+            self.row_factory = None
+
+        def cursor(self):
+            return DummyCursor()
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(sqlite3, "connect", lambda db_path: DummyConn())
+
+    assert service_mod.get_single_case_from_db("missing") is None

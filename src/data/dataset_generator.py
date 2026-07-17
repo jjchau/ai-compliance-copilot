@@ -344,11 +344,11 @@ def save_dataset(df, output_path):
 
 if __name__ == "__main__":
 
-    random.seed(42)
+    random.seed(24)
 
-    # df = generate_dataset(num_cases=200)
-    df = generate_stratified_evaluation_dataset()
+    df = generate_dataset(num_cases=780)
+    # df = generate_stratified_evaluation_dataset()
     print_dataset_summary(df)
 
-    # save_dataset(df, "data/runtime/trades_runtime_v9.csv")
-    save_dataset(df, "data/runtime/trades_eval_stratified_v1.csv")
+    save_dataset(df, "data/runtime/trades_runtime_780holdout.csv")
+    # save_dataset(df, "data/runtime/trades_eval_stratified_v1.csv")

@@ -12,6 +12,9 @@ Author: Jason Chau
 Date: 2026-05-31
 """
 
+import os
+from typing import Any
+
 from src.data.schema import Trade
 from src.decisioning.decision_engine import evaluate_evidence
 from src.decisioning.compliance_scoring import compute_compliance_probability
@@ -23,11 +26,12 @@ from src.decisioning.llm_engine import GeminiComplianceEngine
 from src.decisioning.schema import *
 from src.logging.ai_logger import log_ai_decision
 from src.api.models import aiAssessment
-from src.orchestration.explanation import generate_explanation
-from src.policy.retrieval import retrieve_policies
 from src.rag.rag import ComplianceRetriever
+from src.logging.retrieval_logger import log_retrieval_context
 
+RETRIEVAL_TOP_K = 10
 MAX_DISTANCE = 0.55
+MAX_LLM_CHUNKS = 5
 
 # Initialize singletons at server launch
 try:
@@ -42,7 +46,6 @@ try:
     print("[✓] Gemini LLM Reasoning Engine active in pipeline.")
 except Exception as e:
     print(f"[X] Gemini LLM Init Error: {e}")
-
 
 def normalize_evidence_with_structured_facts(
     trade: Trade,
@@ -64,17 +67,108 @@ def normalize_evidence_with_structured_facts(
 
 def build_llm_chunks(retrieved_chunks: list[dict]) -> list[str]:
     """
-    Converts vector retrieval objects into plain
-    policy text chunks for Gemini.
+    Convert the exact selected retrieval chunks into the ordered
+    policy-text list passed to Gemini.
     """
 
-    return [chunk["text"] for chunk in retrieved_chunks]
+    llm_chunks = [
+        str(chunk["text"]).strip()
+        for chunk in retrieved_chunks
+    ]
 
+    if any(not text for text in llm_chunks):
+        raise ValueError(
+            "The final Gemini retrieval context contains empty policy text."
+        )
+
+    return llm_chunks
+
+def select_llm_retrieval_chunks(
+    raw_chunks: list[dict[str, Any]],
+    *,
+    max_distance: float = MAX_DISTANCE,
+    max_chunks: int = MAX_LLM_CHUNKS,
+) -> list[dict[str, Any]]:
+    """
+    Select the ordered retrieval context sent to Gemini.
+
+    Selection rules:
+    1. Preserve the retriever's original rank order.
+    2. Reject chunks above the distance threshold.
+    3. Keep only the highest-ranked eligible chunk for each policy.
+    4. Stop after `max_chunks` unique policies.
+
+    The input is not mutated.
+    """
+
+    if max_chunks < 1:
+        raise ValueError("max_chunks must be at least 1.")
+
+    selected_chunks: list[dict[str, Any]] = []
+    seen_policy_ids: set[str] = set()
+
+    for fallback_rank, raw_chunk in enumerate(raw_chunks, start=1):
+        chunk = dict(raw_chunk)
+
+        policy_id = str(chunk.get("policy_id") or "").strip()
+        chunk_id = str(chunk.get("chunk_id") or "").strip()
+        text = str(chunk.get("text") or "").strip()
+        distance = chunk.get("similarity_distance")
+
+        if not policy_id:
+            raise ValueError(
+                f"Retrieved chunk at rank {fallback_rank} has no policy_id."
+            )
+
+        if not chunk_id:
+            raise ValueError(
+                f"Retrieved chunk at rank {fallback_rank} has no chunk_id."
+            )
+
+        if not text:
+            raise ValueError(
+                f"Retrieved chunk {chunk_id} has empty policy text."
+            )
+
+        if distance is None:
+            raise ValueError(
+                f"Retrieved chunk {chunk_id} has no similarity_distance."
+            )
+
+        try:
+            numeric_distance = float(distance)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"Retrieved chunk {chunk_id} has an invalid "
+                f"similarity_distance: {distance!r}"
+            ) from exc
+
+        # Preserve the retriever's original global rank.
+        chunk["rank"] = int(chunk.get("rank") or fallback_rank)
+        chunk["similarity_distance"] = numeric_distance
+
+        if numeric_distance > max_distance:
+            continue
+
+        if policy_id in seen_policy_ids:
+            continue
+
+        seen_policy_ids.add(policy_id)
+        selected_chunks.append(chunk)
+
+        if len(selected_chunks) >= max_chunks:
+            break
+
+    return selected_chunks
 
 def build_retrieval_context(trade: Trade) -> dict:
     """
-    Stage 1:
-    Retrieval only.
+    Stage 1: retrieval and production LLM-context selection.
+
+    Returns both:
+    - raw_chunks: the complete ranked top-k retrieval result;
+    - retrieved_chunks: the exact filtered, deduplicated, ordered chunks
+      that will be sent to Gemini.
     """
 
     query_context = f"""
@@ -96,34 +190,63 @@ def build_retrieval_context(trade: Trade) -> dict:
     KYC status: {trade.kyc_completeness}
     """
 
-    retrieved_chunks = []
-    retrieved_policies = set()
+    raw_chunks: list[dict] = []
+    selected_chunks: list[dict] = []
 
-    if retriever:
+    if retriever is not None:
         try:
-            retrieved_chunks = retriever.retrieve_policy_evidence(
+            retrieved = retriever.retrieve_policy_evidence(
                 query_context,
-                top_k=10
+                top_k=RETRIEVAL_TOP_K,
             )
 
-            for chunk in retrieved_chunks:
+            # Add explicit global rank without changing retrieval order.
+            raw_chunks = [
+                {
+                    **chunk,
+                    "rank": rank,
+                }
+                for rank, chunk in enumerate(retrieved, start=1)
+            ]
 
-                if (
-                    chunk["similarity_distance"] <= MAX_DISTANCE
-                    and chunk["policy_id"] not in retrieved_policies
-                ):
-                    retrieved_policies.add(chunk["policy_id"])
+            selected_chunks = select_llm_retrieval_chunks(
+                raw_chunks,
+                max_distance=MAX_DISTANCE,
+                max_chunks=MAX_LLM_CHUNKS,
+            )
 
-                if len(retrieved_policies) >= 5:
-                    break
+        except Exception as exc:
+            print(
+                f"[X] Retrieval exception on trade "
+                f"{trade.trade_id}: {exc}"
+            )
 
-        except Exception as e:
-            print(f"[X] Retrieval exception on trade {trade.trade_id}: {e}")
+    # A list comprehension preserves selected-chunk order.
+    retrieved_policies = [
+        chunk["policy_id"]
+        for chunk in selected_chunks
+    ]
 
     return {
         "query_context": query_context,
-        "retrieved_policies": list(retrieved_policies),
-        "retrieved_chunks": retrieved_chunks
+
+        # Full ranked semantic result for diagnostics.
+        "raw_chunks": raw_chunks,
+
+        # Exact final context sent to Gemini.
+        "retrieved_chunks": selected_chunks,
+
+        # Exact ordered policies represented in Gemini context.
+        "retrieved_policies": retrieved_policies,
+
+        "retrieval_configuration": {
+            "semantic_top_k": RETRIEVAL_TOP_K,
+            "max_distance": MAX_DISTANCE,
+            "deduplication_unit": "policy_id",
+            "deduplication_strategy":
+                "highest_ranked_eligible_chunk_per_policy",
+            "max_llm_chunks": MAX_LLM_CHUNKS,
+        },
     }
 
 def build_reasoning_output(
@@ -137,6 +260,8 @@ def build_reasoning_output(
     """
 
     llm_chunks = build_llm_chunks(retrieved_chunks)
+
+    assert llm_chunks == [chunk["text"] for chunk in retrieved_chunks]
 
     evidence_dict = gemini_engine.evaluate_with_llm(trade, llm_chunks)
     evidence = ComplianceEvidenceSchema(**evidence_dict)
@@ -162,13 +287,28 @@ def build_reasoning_output(
         )
 
 def build_review_case(trade: Trade) -> dict:
-
     retrieval = build_retrieval_context(trade)
+
+    # This is the exact final ordered context that Gemini will receive.
+    selected_chunks = retrieval["retrieved_chunks"]
+    retrieved_policies = retrieval["retrieved_policies"]
+
+    # Log before Gemini so retrieval evidence remains available even if
+    # the external model call later fails.
+    log_retrieval_context(
+        trade_id=trade.trade_id,
+        query_context=retrieval["query_context"],
+        raw_chunks=retrieval["raw_chunks"],
+        selected_chunks=selected_chunks,
+        logged_retrieved_policies=retrieved_policies,
+        retrieval_configuration=
+            retrieval["retrieval_configuration"],
+    )
 
     reasoning = build_reasoning_output(
         trade,
-        retrieval["retrieved_policies"],
-        retrieval["retrieved_chunks"]
+        retrieved_policies,
+        selected_chunks,
     )
 
     log_ai_decision(
@@ -197,8 +337,8 @@ def build_review_case(trade: Trade) -> dict:
                 reasoning[1]["priority_score"],
 
             flag_reasons=
-                reasoning[1]["flag_reasons"]
-        )
+                reasoning[1]["flag_reasons"],
+        ),
     )
 
     return {
@@ -208,137 +348,5 @@ def build_review_case(trade: Trade) -> dict:
         "has_conflicting_signals":
             has_conflicting_signals(trade),
         "conflict_signals":
-            get_signals(trade)
+            get_signals(trade),
     }
-
-# # OLD FUNCTION, BUT KEPT ACTIVE FOR NOW FOR DEBUGGING --> NEED TO ASK CHATGPT ABOUT evaluate_with_llm() function
-# def build_review_case(trade: Trade) -> dict:
-#     """
-#     Builds a comprehensive audit case by cross-referencing all 16 CSV metrics 
-#     with the Vector DB and Gemini AI engine.
-#     """
-#     query_context = f"""
-#     Client age: {trade.client_age}
-#     Client income: {trade.client_income}
-
-#     Risk tolerance: {trade.risk_tolerance}
-#     Investment experience: {trade.investment_experience}
-#     Investment objective: {trade.investment_objective}
-#     Investment horizon: {trade.investment_time_horizon}
-
-#     Investment product: {trade.investment_type}
-#     Investment amount: {trade.investment_amount}
-
-#     Advisor history risk: {trade.advisor_history_risk}
-
-#     KYC status: {trade.kyc_completeness}
-#     """
-
-
-#     # Create a rich text overview of trade to give ChromaDB maximum context
-#     # query_context = f"""
-#     # risk_tolerance={trade.risk_tolerance}
-#     # investment_experience={trade.investment_experience}
-#     # investment_objective={trade.investment_objective}
-#     # time_horizon={trade.investment_time_horizon}
-
-#     # investment_type={trade.investment_type}
-#     # investment_amount={trade.investment_amount}
-
-#     # client_age={trade.client_age}
-#     # client_income={trade.client_income}
-
-#     # advisor_history_risk={trade.advisor_history_risk}
-
-#     # kyc_status={trade.kyc_completeness}
-#     # """
-
-
-#     # query_context = f"""
-#     # [TRANSACTION CONTEXT]
-#     # Product: {trade.investment_type} | Amount: ${trade.investment_amount:,}
-#     # Client Profile: Age {trade.client_age} | Income: ${trade.client_income:,} | Experience: {trade.investment_experience}
-#     # Objectives: Risk Tolerance is {trade.risk_tolerance}, Objective is {trade.investment_objective}, Horizon is {trade.investment_time_horizon}
-#     # KYC Status: {trade.kyc_completeness}
-    
-#     # [ADVISOR INPUTS]
-#     # History Risk Level: {trade.advisor_history_risk}
-#     # Written Rationale: "{trade.advisor_rationale}"
-#     # Internal Notes: "{trade.advisor_notes}"
-#     # """
-
-#     retrieved_chunks = []
-#     retrieved_policies = set()
-    
-#     if retriever:
-#         try:
-#             # Query top 10 closest policies using the comprehensive summary block
-#             retrieved_chunks = retriever.retrieve_policy_evidence(query_context, top_k=10)
-
-#             for chunk in retrieved_chunks:
-#                 if chunk["similarity_distance"] <= MAX_DISTANCE and chunk["policy_id"] not in retrieved_policies:
-#                     retrieved_policies.add(chunk["policy_id"])
-#                     print(
-#                         chunk["policy_id"],
-#                         chunk["section_scope"],
-#                         chunk["similarity_distance"]
-#                     )    
-#                 if len(retrieved_policies) >= 5:
-#                     break
-    
-#         except Exception as e:
-#             print(f"[X] RAG exception on trade {trade.trade_id}: {e}")
-            
-#     # Create policy ID string list for frontend UI badges
-#     #retrieved_policies = retrieve_policies(trade)
-
-#     # 2. Native compliance prediction stage from retrieved policies
-#     llm_assessment = predict_with_retrieval(trade, list(retrieved_policies))
-#     compliance_probability = llm_assessment.get("compliance_probability", 1.0)
-#     compliance_label = llm_assessment.get("compliance_label", compliance_probability >= 0.9)
-
-#     flag_reasons = generate_explanation(trade, list(retrieved_policies))
-
-#     # 3. Create a bridge packet to satisfy your scoring calculations in decision_engine.py
-#     compliance_prediction = {
-#         "compliance_probability": compliance_probability
-#     }
-#     if "compliance_label" in llm_assessment:
-#         compliance_prediction["compliance_label"] = compliance_label
-    
-#     # Run through risk scoring, confidence scoring, escalation assessment, and prioritization algorithms
-#     evaluated_prediction = evaluate_prediction(trade, compliance_prediction)
-    
-#     compliance_probability = evaluated_prediction.get("compliance_probability", compliance_probability)
-#     compliance_label = evaluated_prediction.get("compliance_label", compliance_label)
-#     risk_score = evaluated_prediction.get("risk_score", 0)
-#     confidence_score = evaluated_prediction.get("confidence_score", 0.0)
-#     escalation_level = evaluated_prediction.get("escalation_level", "none")
-#     priority_score = evaluated_prediction.get("priority_score", 0)
-
-#     # 4. Write to AI decision logs
-#     log_ai_decision(
-#         trade,
-#         aiAssessment(
-#             retrieved_policies = list(retrieved_policies),
-#             compliance_probability = compliance_probability,
-#             compliance_label = compliance_label,
-#             risk_score = risk_score,
-#             confidence_score = confidence_score,
-#             escalation_level = escalation_level,
-#             priority_score = priority_score,
-#             flag_reasons = flag_reasons
-#         )
-#     )
-
-#     # 5. Compile the final case data packet to be sent directly out to FastAPI API endpoints
-#     return {
-#         "trade_id": trade.trade_id,
-#         **trade.model_dump(),
-#         **evaluated_prediction,
-#         "retrieved_policies": list(retrieved_policies),
-#         "retrieved_chunks": retrieved_chunks,   # Full textual evidence blocks
-#         "has_conflicting_signals": has_conflicting_signals(trade),
-#         "conflict_signals": get_signals(trade),
-#         "flag_reasons": flag_reasons    # Contains dynamic 2-sentence Gemini reasoning summary
-#     }

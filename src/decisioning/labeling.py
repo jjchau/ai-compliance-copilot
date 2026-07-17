@@ -175,62 +175,6 @@ def assign_expected_workflow_bucket(
 
     return "Auto_pass"
 
-# def assign_expected_workflow_bucket(
-#     trade: Trade
-# ) -> WorkflowBucket:
-#     """
-#     Ground-truth workflow urgency.
-
-#     Auto_pass
-#         No meaningful concerns.
-
-#     Queue
-#         Low-impact review required.
-
-#     Priority
-#         Meaningful review required.
-
-#     Urgent
-#         Immediate review required.
-#     """
-
-#     hard_violations = sum([
-#         is_kyc_violation(trade),
-#         is_suitability_violation(trade),
-#         is_experience_violation(trade)
-#     ])
-
-#     medium_signals = sum([
-#         is_kyc_uncertain(trade),
-#         is_overexposure(trade),
-#         is_investment_too_aggressive_for_horizon(trade),
-#         is_investment_too_aggressive_for_objective(trade),
-#         has_conflicting_signals(trade)
-#     ])
-
-#     low_signals = sum([
-#         is_missing_rationale(trade),
-#         is_advisor_history_high_risk(trade)
-#     ])
-
-#     # Clear regulatory issue
-#     if hard_violations >= 1:
-#         return "Urgent"
-
-#     # Multiple meaningful concerns
-#     if medium_signals >= 3:
-#         return "Priority"
-
-#     # Single meaningful concern
-#     if medium_signals == 1:
-#         return "Queue"
-
-#     # Documentation / procedural concerns
-#     if low_signals >= 2:
-#         return "Queue"
-
-#     return "Auto_pass"
-
 def assign_primary_policy(trade: Trade) -> str:
 
     relevant = get_relevant_policies(trade)
