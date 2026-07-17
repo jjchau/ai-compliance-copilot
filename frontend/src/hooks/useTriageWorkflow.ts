@@ -19,10 +19,6 @@ export interface TradeCase {
   advisor_notes: string;
   kyc_completeness: string;
   
-  // Enriched Analytical Fields saved in SQLite
-  true_compliance: string;
-  case_type: string;
-
   retrieved_policies?: string[] | string;
   retrieved_chunks?: string[] | string;
   compliance_probability: number;
@@ -35,7 +31,7 @@ export interface TradeCase {
 }
 
 export interface CaseAuditState {
-  reviewStatus: "Not reviewed" | "Reviewed";
+  reviewStatus: "Not reviewed" | "Reviewed" | "Escalated";
   actionType?: "Rejected" | "Approved" | "Escalated" | null;
   notes: string;
 }

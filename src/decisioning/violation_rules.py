@@ -37,6 +37,6 @@ def is_experience_violation(trade: Trade) -> bool:
     """
     An experience violation occurs when the investment type is not suitable for the client's investment experience.
     For example:
-    - A beginner client investing in complex products like Options or ETFs.
+    - A beginner client investing in complex products like Options.
     """
     return is_too_complex_for_experience(trade)

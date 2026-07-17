@@ -195,3 +195,62 @@ def test_assess_escalation_conflicting_signals_routes_queue(monkeypatch):
 
     result = assess_escalation(trade, compliance_probability=0.4, evidence=ev, risk_score=50, confidence_score=0.8)
     assert result == "priority"
+
+
+def test_assess_escalation_compound_hard_violations_with_context_is_urgent():
+    trade = make_trade()
+    ev = ComplianceEvidenceSchema(
+        violations=[
+            ViolationType.KYC_MISSING,
+            ViolationType.EXPERIENCE_COMPLEXITY_MISMATCH,
+        ],
+        concern_signals=[ConcernSignalType.OVEREXPOSURE],
+    )
+
+    result = assess_escalation(
+        trade,
+        compliance_probability=0.2,
+        evidence=ev,
+        risk_score=30,
+        confidence_score=0.9,
+    )
+
+    assert result == "urgent"
+
+
+def test_assess_escalation_senior_client_context_priority_only_with_material_risk():
+    trade = make_trade()
+    senior_only = ComplianceEvidenceSchema(
+        concern_signals=[ConcernSignalType.SENIOR_CLIENT_RISK]
+    )
+    senior_with_risk = ComplianceEvidenceSchema(
+        concern_signals=[
+            ConcernSignalType.SENIOR_CLIENT_RISK,
+            ConcernSignalType.AGGRESSIVE_FOR_OBJECTIVE,
+        ]
+    )
+
+    assert assess_escalation(trade, 0.9, senior_only, 10, 0.9) == "none"
+    assert assess_escalation(trade, 0.9, senior_with_risk, 10, 0.9) == "priority"
+
+
+def test_assess_escalation_evidence_quality_and_weak_documentation_queue_rules():
+    trade = make_trade()
+    uncertain = ComplianceEvidenceSchema(
+        evidence_quality=[EvidenceQualityType.KYC_UNCERTAIN]
+    )
+    weak_only = ComplianceEvidenceSchema(
+        evidence_quality=[EvidenceQualityType.WEAK_RATIONALE]
+    )
+    weak_with_context = ComplianceEvidenceSchema(
+        concern_signals=[ConcernSignalType.HIGH_RISK_ADVISOR],
+        evidence_quality=[EvidenceQualityType.MISSING_RATIONALE],
+    )
+    soft_low_confidence = ComplianceEvidenceSchema(
+        concern_signals=[ConcernSignalType.TOO_CONSERVATIVE_FOR_HORIZON]
+    )
+
+    assert assess_escalation(trade, 0.9, uncertain, 0, 0.9) == "queue"
+    assert assess_escalation(trade, 0.9, weak_only, 0, 0.9) == "none"
+    assert assess_escalation(trade, 0.9, weak_with_context, 0, 0.9) == "queue"
+    assert assess_escalation(trade, 0.9, soft_low_confidence, 0, 0.59) == "queue"

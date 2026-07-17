@@ -12,7 +12,9 @@ from src.decisioning.risk_signals import (
     is_risk_too_low_for_profile,
     is_investment_too_conservative_for_horizon,
     is_investment_too_conservative_for_objective,
-    is_advisor_history_high_risk
+    is_advisor_history_high_risk,
+    is_documentation_deficient,
+    is_elderly_high_risk_trade,
 )
 
 
@@ -234,3 +236,29 @@ class TestIsAdvisorHistoryHighRisk:
     def test_advisor_medium_risk(self, mock_trade):
         mock_trade.advisor_history_risk = 'Medium'
         assert is_advisor_history_high_risk(mock_trade) is False
+
+
+def test_elderly_high_risk_trade_detects_senior_with_stocks_or_options(mock_trade):
+    mock_trade.client_age = 65
+    mock_trade.investment_type = "Stocks"
+    assert is_elderly_high_risk_trade(mock_trade) is True
+
+    mock_trade.client_age = 64
+    assert is_elderly_high_risk_trade(mock_trade) is False
+
+    mock_trade.client_age = 70
+    mock_trade.investment_type = "Bonds"
+    assert is_elderly_high_risk_trade(mock_trade) is False
+
+
+def test_documentation_deficient_for_missing_short_or_generic_rationale(mock_trade):
+    mock_trade.advisor_rationale = None
+    assert is_documentation_deficient(mock_trade) is True
+
+    mock_trade.advisor_rationale = "Client approved trade"
+    assert is_documentation_deficient(mock_trade) is True
+
+    mock_trade.advisor_rationale = (
+        "Reviewed suitability, objectives, risk tolerance, and horizon before trade."
+    )
+    assert is_documentation_deficient(mock_trade) is False

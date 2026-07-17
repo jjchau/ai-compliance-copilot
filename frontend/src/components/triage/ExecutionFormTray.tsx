@@ -28,7 +28,7 @@ export const ExecutionFormTray: React.FC<ExecutionFormTrayProps> = ({
   }, [tradeId, initialNotes]);
 
   return (
-    <div className="pt-0 flex flex-col gap-1.5 shrink-0 border-t border-slate-800/40 w-full">
+    <div data-auto-passed={isAutoPassed} className="pt-0 flex flex-col gap-1.5 shrink-0 border-t border-slate-800/40 w-full">
       <div className="flex flex-col gap-0 w-full">
         {/* Added flex, items-center, and a horizontal gap to align icon and text */}
         <label className="flex items-center gap-1.5 text-[9px] font-black text-white uppercase tracking-widest mb-1">

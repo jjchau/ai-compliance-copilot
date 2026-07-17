@@ -72,7 +72,7 @@ POLICY_RELEVANCE_CHECKS = {
         lambda t:
             False,
 
-    "POL-009-CONFLICT-OF-INTEREST":
+    "POL-009-CONFLICTS-OF-INTEREST":
         lambda t:
             False,
 

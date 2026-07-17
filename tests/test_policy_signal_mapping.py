@@ -24,7 +24,7 @@ class TestPolicySignalMapping:
             "POL-006-HIGH-RISK-PRODUCTS",
             "POL-007-DOCUMENTATION-STANDARDS",
             "POL-008-EXCEPTIONS-AND-OVERRIDES",
-            "POL-009-CONFLICT-OF-INTEREST",
+            "POL-009-CONFLICTS-OF-INTEREST",
             "POL-010-CLIENT-OBJECTIVE"
         ]
         

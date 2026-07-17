@@ -89,8 +89,67 @@ class ComplianceRetriever:
 
         return evidence_list
 
+    def retrieve_best_chunk_for_policy(self, query: str, policy_id: str) -> Dict[str, Any] | None:
+        """
+        Retrieve the single most semantically relevant chunk from one
+        specified policy.
+
+        This is used for targeted candidate inclusion. It does not force
+        the chunk into the final LLM context; it only makes the chunk
+        available to the downstream reranker.
+        """
+        if not query.strip():
+            return None
+
+        if not policy_id.strip():
+            return None
+
+        results = self.collection.query(
+            query_texts=[query],
+            n_results=1,
+            where={"source_policy": policy_id},
+        )
+
+        if (
+            not results
+            or not results.get("ids")
+            or not results["ids"][0]
+        ):
+            return None
+
+        chunk_id = results["ids"][0][0]
+        document = results["documents"][0][0]
+        metadata = results["metadatas"][0][0]
+
+        if (
+            results.get("distances")
+            and results["distances"][0]
+        ):
+            distance = float(
+                results["distances"][0][0]
+            )
+        else:
+            distance = 0.0
+
+        return {
+            "chunk_id": chunk_id,
+            "policy_id": metadata.get(
+                "source_policy",
+                policy_id,
+            ),
+            "section_scope": metadata.get(
+                "section_scope",
+                "General",
+            ),
+            "text": document,
+            "similarity_distance": round(
+                distance,
+                6,
+            ),
+        }
+
 # --- Local Verification Test Harness ---
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     print("=== Launching Retrieval Engine Diagnostics ===")
     try:
         retriever = ComplianceRetriever()

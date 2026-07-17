@@ -1,8 +1,24 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { CaseAuditState, TradeCase } from '../hooks/useTriageWorkflow';
 
-const mockWorkflow = {
+interface MockWorkflow {
+  activeView: 'active' | 'reviewed' | 'passed';
+  urgentCases: TradeCase[];
+  queuedCases: TradeCase[];
+  reviewedCasesList: TradeCase[];
+  passedCasesList: TradeCase[];
+  selectedCase: TradeCase | null;
+  caseStates: Record<string, CaseAuditState>;
+  reviewedTodayCount: number;
+  setView: ReturnType<typeof vi.fn>;
+  selectCase: ReturnType<typeof vi.fn>;
+  updateNotes: ReturnType<typeof vi.fn>;
+  executeAction: ReturnType<typeof vi.fn>;
+}
+
+const mockWorkflow: MockWorkflow = {
   activeView: 'active',
   urgentCases: [],
   queuedCases: [],
@@ -59,26 +75,27 @@ describe('Dashboard', () => {
   it('shows selected case details and updates notes', async () => {
     mockWorkflow.selectedCase = {
       trade_id: 'T1',
+      trade_timestamp: '2026-05-21',
       compliance_probability: 0.9,
       confidence_score: 0.95,
       risk_score: 0.88,
-      flag_reason: 'Test reason',
+      flag_reasons: 'Test reason',
       investment_type: 'Stocks',
       investment_amount: 1000,
-      notional_value: 5000,
-      timestamp: '2026-05-21',
       client_age: 40,
       client_income: 120000,
       risk_tolerance: 'Medium',
       investment_experience: 'Intermediate',
       investment_objective: 'Growth',
+      investment_time_horizon: 'Medium',
       advisor_id: 'A1',
       advisor_experience: 'Mid',
-      advisor_history_risk: 2,
-      has_rationale: true,
+      advisor_history_risk: 'Low',
+      advisor_rationale: 'Rationale here',
       advisor_notes: 'Notes here',
+      kyc_completeness: 'Complete',
       retrieved_policies: ['Policy A', 'Policy B'],
-      compliance_label: 'Compliant',
+      compliance_label: true,
       priority_score: 1,
       escalation_level: 'queue'
     };
