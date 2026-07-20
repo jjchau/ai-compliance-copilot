@@ -1,107 +1,165 @@
-# METRIC HIERARCHY 
+# Metric Hierarchy
 
-## 1. North Star Metric 
+## 1. Purpose
 
-- **% cases correctly resolved at the lowest safe workflow level**:
-	- $\frac{(\text{\# cases correctly resolved at lowest safe workflow level})}{(\text{total \# cases})}$ 
-		- where:
-			- “lowest safe workflow level” is the least burdensome review level that a case can be routed to that still protects against compliance risk. 
-	- Data needed: 
-		- Publicly available policy and regulatory compliance documentation
-		- 1000 simulated cases correctly and incorrectly routed at different levels (system auto-approved, queue, priority, urgent) 
-	- Simulation method:
-		1. Using Python, create "profile factories" for different client and advisor archetypes and "scenario builders" for different compliance outcomes (e.g. aligned recommendation, KYC missing violation, etc.), then specify a distribution of cases generate 1000 cases with randomly sampled variable values fitting within the constraints of the profiles and scenarios sampled under that distribution. 
-		2. Use ChatGPT to craft a small synthetic regulatory policy document corpus based on language sampled from real publicly available policy and regulatory compliance documentation. 
+This document defines the evaluation framework for the AI Compliance Review Copilot.
 
-## 2. Product Success Metrics 
+The goal of the metric hierarchy is to evaluate whether the system can safely support human compliance review, route cases to the appropriate workflow level, reduce unnecessary reviewer burden, and provide evidence-backed, auditable decision support.
 
-Note: All metrics in this section to be calculated ‘overall’ for all data points, and by risk tier, unless otherwise noted. 
+Metrics are grouped into:
 
-- Decision Quality 
-	- **Compliance classification accuracy**
-	- Compliance classification precision / recall
-	- False negative rate for compliance classification
-	- **Expected regulatory risk exposure = $\frac{\sum(FN_i \times Severity)}{N}$**
-		- where:
-			- $FN_i = 1$ if false negative, else $0$
-			- $Severity =$ Severity weighting (e.g. risk tier weights: 1, 5, 10) of $i^{th}$ case
-			- $N =$ # of cases automatically approved 
-	- Workflow routing accuracy
-	- Workflow routing precision / recall
-	- "Urgent" routing recall
-	- "Auto-pass" over-routing
-	- **Expected operational cost** = $\sum(\text{Probability of false positive} × \text{Review cost})$
-	- % cases auto-approved correctly (or **auto-approval accuracy**)
-	- % cases escalated unnecessarily 
-	- Escalation efficiency 
-		- ~~$\text{Useful escalation rate} = \frac{(\text{\# escalations that changed outcomes})}{(\text{total escalations})}$~~
-		- ~~$\text{Avoidable escalation rate} = \frac{(\text{\# escalations where AI was already correct})}{(\text{total escalations})}$~~
-		- **Escalation precision** = $\frac{(\text{\# correctly escalated cases})}{(\text{total escalated cases})}$
-- Efficiency 
-	- Review time per case 
-	- Case throughput per reviewer 
-- Trust 
-	- ~~Override / Acceptance rate~~ 
-		- ~~Override rate = $\frac{(\text{\# flagged cases overridden by humans})}{(\text{total \# flagged cases})}$~~
-		- ~~Data needed: Simulation subset of cases that are “flagged” (should include cases both correctly and incorrectly assessed by AI system)~~
-	- ~~Override / Acceptance vs correctness alignment~~
-	- ~~Follow-up question rate~~ 
-	- ~~Trust change direction over time (overall only)~~
-	- ~~Time to trust stabilization (overall only)~~
-	- ~~Qualitative user sentiment~~
-	- **UPDATE**: **Trust Calibration Index**:
-		- $TCI=\Pr(\text{correct \& handled correctly by system policy})+\Pr(\text{incorrect \& handled correctly by system policy})−λ_1\Pr(\text{high conf \& wrong})−λ_2\Pr(\text{low conf \& correct})$
-			- where:
-				- $λ_1$ is the overconfidence penalty weight
-				- $λ_2$ is the underconfidence pentaly weight
-- Top failure modes
+- North Star Metric
+- MVP evaluation metrics
+- Supporting diagnostics
+- Future validation candidates
 
-## 3. System performance 
+This document defines what should be measured and why. Metric definitions are kept separate from evaluation results so the framework can remain stable as experiments and artifacts evolve.
 
-Note: All metrics to be calculated ‘overall’ for all data points, and by risk tier, unless otherwise noted 
+## 2. North Star Metric
 
-- Retrieval 
-	- Top retrieved policies
-	- Retrieval coverage by policy
-	- **Precision@k**
-	- **Recall@k**
-	- Context sufficiency 
-	- **Retrieval correctness**
-- Generation 
-	- Reasoning faithfulnes 
-	- Logical consistency
-	- Instruction adherence
-	- Regulatory constraint adherence
-	- Hallucination rate
-	- Context utilization score 
-- Calibration 
-	- **Expected Calibration Error**:  
-		$\text{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{n} \left| \frac{1}{|B_m|} \sum_{i \in B_m} \mathbf{1}(\hat{y}_i = y_i) - \frac{1}{|B_m|} \sum_{i \in B_m} \hat{p}_i \right|$
-		- where: 
-			- $M$ is the number of bins we split the confidence range into 
-			- $B_m$ is the mth bin 
-			- $\mathbf{1}$ is the indicator function  
-			- $\hat{y}_i$ is the predicted label of the ith element
-			- $y_i$ is the true label of the ith element 
-			- $\hat{p}_i$ is the maximum probability of the predicted label for the ith element 
+**% cases correctly resolved at the lowest safe workflow level**
 
-		- Data needed: All simulated cases having simulated confidence values (and therefore compliance outcomes) and simulated true compliance outcomes. 
-		- Simulation method: Using Python, define ranges or categorical states for all case variables, then create a dictionary of 10000 cases containing randomly sampled values for each variable unless it’s correlated with one or more other variables. Correlated variables: 
-			- high-risk clients → more complex portfolios  
-			- missing data → higher uncertainty  
-			- edge cases clustered in specific categories 
-	- **Brier score**
-	- **Overconfidence Rate** 
-	- Confidence vs accuracy alignment 
-- End-to-end 
-	- Correctness (% cases system worked correctly for – cases requiring flagging flagged, cases ok to auto-approve auto-approved) 
-	- % failures due to retrieval 
-	- % failures due to generation (retrieval ok but reasoning fails) 
-	- % failures due to confidence calibration (retrieval and reasoning ok but decision wrong) 
+This measures whether the system routes each case to the least burdensome workflow level that still protects against compliance risk.
 
-## 4. Component Diagnostic 
+Workflow levels:
 
-- Embedding drift  
-- Prompt truncation effects  
-- Token budget saturation  
-- Chunk boundary fragmentation  
+- Auto-pass: low-risk case can be resolved without human review
+- Queue: standard human review
+- Priority: higher-risk human review
+- Urgent: highest-risk cases requiring immediate attention
+
+Formula:
+
+`North Star Metric = cases correctly resolved at the lowest safe workflow level / total cases`
+
+Why it matters:
+
+- Accuracy alone does not capture whether the case was routed to the right workflow.
+- A compliant case sent to unnecessary review creates operational burden.
+- A high-risk case routed below the required priority creates safety and timeliness risk.
+
+## 3. MVP Evaluation Metrics
+
+These metrics are required to evaluate whether the prototype is credible as a human-in-the-loop decision-support workflow.
+
+### 3.1 Compliance safety
+
+- Compliance classification accuracy
+- Compliance false-negative rate
+- Unsafe auto-pass rate
+- Urgent-case recall
+
+Purpose:
+
+- Ensure the system does not miss non-compliant or high-risk cases.
+- Treat false compliance and under-prioritized urgent cases as higher-severity failures than unnecessary escalation.
+
+### 3.2 Reviewer workload and review efficiency
+
+- Workflow-routing accuracy
+- Auto-pass over-escalation
+- Escalation precision
+- Failure-mode breakdown by route transition
+
+Purpose:
+
+- Measure whether the system reduces reviewer burden without weakening safety.
+- Identify whether errors are mainly unsafe under-routing or conservative over-routing.
+
+### 3.3 Retrieval quality
+
+- Selected-policy precision: proportion of policies included in the final LLM context that are labelled relevant
+- Selected-policy recall: proportion of labelled relevant policies included in the final LLM context
+- Primary policy retrieval rate: whether the most important relevant policy was included in the final context
+- Any relevant policy retrieval rate: whether at least one relevant policy was included
+
+Purpose:
+
+- Evaluate whether the system surfaces useful policy evidence for AI signal extraction and reviewer inspection.
+- Distinguish broad-but-noisy retrieval from focused, high-value evidence retrieval.
+
+### 3.4 Confidence and trust proxy
+
+- Overconfidence rate
+- Confidence vs. correctness alignment
+- Simulated trust-proxy change over time
+
+Purpose:
+
+- Evaluate whether high-confidence outputs are reliable enough to support reviewer trust.
+- Explore how repeated correct, incorrect, cautious, or overconfident outcomes could affect reviewer trust over time.
+
+Note: the trust proxy is an analytical simulation and should not be interpreted as validated reviewer behaviour.
+
+## 4. Supporting Diagnostics
+
+These diagnostics help explain why the system succeeds or fails. They are secondary to the product-level metrics above.
+
+### 4.1 Retrieval diagnostics
+
+- Retrieval noise by scenario
+- Retrieval coverage by policy
+- Duplicate or repetitive retrieved policy context
+- Primary policy rank in raw retrieval candidates
+
+Purpose:
+
+- Diagnose whether retrieval failures are caused by missing relevant policies, noisy context, duplication, or low ranking of the primary policy.
+- Evaluate whether retrieval improvements translate into better downstream workflow-routing performance.
+
+### 4.2 Confidence and calibration diagnostics
+
+- Confidence distribution by correctness
+- Confidence distribution by workflow route
+- Expected Calibration Error
+- Brier score
+
+Purpose:
+
+- Understand whether the confidence proxy aligns with observed correctness.
+- Identify whether certain workflow routes are associated with lower confidence or higher error risk.
+
+## 5. Future Validation Candidates
+
+These metrics are valuable for later product validation but are outside the core synthetic offline evaluation.
+
+### 5.1 Reviewer efficiency
+
+- Review time per case
+- Case throughput per reviewer
+- Queue aging and time-to-review by workflow priority
+- Reduction in manual policy lookup time
+
+### 5.2 Reviewer behaviour and trust
+
+- Reviewer acceptance / override rate
+- Override correctness
+- Explanation usefulness rating
+- Appropriate reliance on AI-assisted recommendations
+- Reviewer trust calibration
+
+### 5.3 Operational deployment
+
+- Latency from case submission to routing decision
+- System uptime and failure recovery
+- Audit-log completeness
+- Security and access-control validation
+
+### 5.4 AI signal quality validation
+
+- Structured output validity / parsing success
+- Missing or conflicting signal detection
+- Rationale consistency with retrieved evidence
+- Instruction adherence
+- Logical consistency
+
+These diagnostics would require additional schema-level validation, ground-truth signal labels, automated consistency checks, or human review of rationale quality.
+
+## 6. Evaluation Design Principles
+
+- Product-level workflow-routing quality is more important than isolated model accuracy.
+- Compliance false negatives and unsafe auto-pass errors are higher-severity failures than unnecessary escalation.
+- Retrieval improvements should be evaluated by downstream product impact, not only by retrieval metrics.
+- Human-in-the-loop systems should be evaluated for both safety and reviewer burden.
+- Trust-related metrics require real user validation before being treated as product adoption evidence.
+- Diagnostic/tuning data should be separated from final validation data. Development cases are used for iteration and failure analysis; held-out cases are reserved for final evaluation after the pipeline is frozen.

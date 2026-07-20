@@ -1,8 +1,8 @@
-# USER PERSONA 
+# User Persona
 
 ## 1. Role and Context 
 
-- Job title: Financial Compliance Officer 
+- Job title: Compliance Reviewer / Compliance Officer
 - Responsible for reviewing flagged advisor trades/recommendations for suitability and regulatory compliance 
 
 ## 2. Core Goals 
@@ -48,6 +48,7 @@
 
 - Trust increases with clear, consistent, correct, and explainable (cited) outputs 
 - Trust decreases with confidently incorrect, unnecessarily escalated, or opaque outputs 
+- Trust is easier to establish when a system clearly separates AI-generated signals, deterministic routing decisions, and reviewer-controlled final actions
 
 ## 8. Attributes 
 

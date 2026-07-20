@@ -56,7 +56,7 @@ Recommended next steps:
 - Improve urgent-case routing so high-risk cases receive the intended review priority.
 - Reduce unnecessary escalation of low-risk cases without increasing false negatives.
 - Improve primary-policy retrieval and reduce irrelevant context.
-- Validate revised logic on a new untouched held-out dataset.
+- Validate revised logic on a new, untouched held-out dataset.
 - Review labels, thresholds, and workflow assumptions with compliance-domain experts.
 - Validate the prototype with compliance-domain users, including reviewer workflow fit, trust calibration, explanation usefulness, and feedback loops.
 
