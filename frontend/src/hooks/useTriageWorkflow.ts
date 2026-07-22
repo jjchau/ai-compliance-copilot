@@ -43,6 +43,9 @@ interface WorkflowState {
   activeView: "active" | "reviewed" | "passed";
 }
 
+type WorkflowView = WorkflowState["activeView"];
+type VisibleListKey = "urgent" | "queued" | "reviewed" | "passed";
+
 type WorkflowAction =
   | { type: "SET_CASES"; payload: TradeCase[] }
   | { type: "SELECT_CASE"; payload: string | null }
@@ -57,6 +60,111 @@ const initialWorkflowState: WorkflowState = {
   activeView: "active",
 };
 
+const getReviewStatus = (
+  state: Pick<WorkflowState, "caseStates">,
+  tradeId: string,
+): CaseAuditState["reviewStatus"] => {
+  return state.caseStates[tradeId]?.reviewStatus ?? "Not reviewed";
+};
+
+const getVisibleLists = (
+  state: Pick<WorkflowState, "cases" | "caseStates">,
+): Record<VisibleListKey, TradeCase[]> => {
+  const urgent = state.cases.filter((c) => {
+    if (!c || !c.trade_id) return false;
+    return c.escalation_level === "urgent" && getReviewStatus(state, c.trade_id) === "Not reviewed";
+  });
+
+  const queued = state.cases
+    .filter((c) => {
+      if (!c || !c.trade_id) return false;
+      const status = getReviewStatus(state, c.trade_id);
+      return (c.escalation_level === "priority" || c.escalation_level === "queue") && status === "Not reviewed";
+    })
+    .sort((a, b) => (Number(b?.priority_score) || 0) - (Number(a?.priority_score) || 0));
+
+  const reviewed = state.cases.filter((c) => {
+    if (!c || !c.trade_id) return false;
+    const status = getReviewStatus(state, c.trade_id);
+    return status === "Reviewed" || status === "Escalated";
+  });
+
+  const passed = state.cases.filter((c) => {
+    if (!c || !c.trade_id) return false;
+    return c.escalation_level === "none" && getReviewStatus(state, c.trade_id) === "Not reviewed";
+  });
+
+  return { urgent, queued, reviewed, passed };
+};
+
+const getDefaultSelectedCaseId = (
+  state: Pick<WorkflowState, "cases" | "caseStates">,
+  view: WorkflowView,
+): string | null => {
+  const lists = getVisibleLists(state);
+
+  if (view === "active") {
+    return lists.urgent[0]?.trade_id ?? lists.queued[0]?.trade_id ?? null;
+  }
+
+  if (view === "reviewed") {
+    return lists.reviewed[0]?.trade_id ?? null;
+  }
+
+  return lists.passed[0]?.trade_id ?? null;
+};
+
+const getVisibleListKeyForTrade = (
+  state: Pick<WorkflowState, "cases" | "caseStates">,
+  view: WorkflowView,
+  tradeId: string,
+): VisibleListKey | null => {
+  const lists = getVisibleLists(state);
+
+  if (view === "active") {
+    if (lists.urgent.some((c) => c.trade_id === tradeId)) return "urgent";
+    if (lists.queued.some((c) => c.trade_id === tradeId)) return "queued";
+    return null;
+  }
+
+  if (view === "reviewed") {
+    return lists.reviewed.some((c) => c.trade_id === tradeId) ? "reviewed" : null;
+  }
+
+  return lists.passed.some((c) => c.trade_id === tradeId) ? "passed" : null;
+};
+
+const getNextSelectedCaseIdAfterAction = (
+  previousState: WorkflowState,
+  nextState: WorkflowState,
+  tradeId: string,
+): string | null => {
+  const sourceListKey = getVisibleListKeyForTrade(
+    previousState,
+    previousState.activeView,
+    tradeId,
+  );
+
+  if (!sourceListKey) {
+    return getDefaultSelectedCaseId(nextState, nextState.activeView);
+  }
+
+  const previousList = getVisibleLists(previousState)[sourceListKey];
+  const nextList = getVisibleLists(nextState)[sourceListKey];
+  const previousIndex = previousList.findIndex((c) => c.trade_id === tradeId);
+  const nextCandidateId = previousList[previousIndex + 1]?.trade_id;
+
+  if (nextCandidateId && nextList.some((c) => c.trade_id === nextCandidateId)) {
+    return nextCandidateId;
+  }
+
+  return (
+    nextList[previousIndex]?.trade_id
+    ?? nextList[previousIndex - 1]?.trade_id
+    ?? getDefaultSelectedCaseId(nextState, nextState.activeView)
+  );
+};
+
 function workflowReducer(state: WorkflowState, action: WorkflowAction): WorkflowState {
   switch (action.type) {
     case "SET_CASES": {
@@ -68,17 +176,26 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
           notes: "",
         };
       });
-      return {
+      const nextState = {
         ...state,
         cases: action.payload,
         caseStates: defaultStates,
-        selectedCaseId: action.payload.length > 0 ? action.payload[0].trade_id : null,
+      };
+
+      return {
+        ...nextState,
+        selectedCaseId: getDefaultSelectedCaseId(nextState, nextState.activeView),
       };
     }
     case "SELECT_CASE":
       return { ...state, selectedCaseId: action.payload };
-    case "SET_VIEW":
-      return { ...state, activeView: action.payload, selectedCaseId: null };
+    case "SET_VIEW": {
+      const nextState = { ...state, activeView: action.payload };
+      return {
+        ...nextState,
+        selectedCaseId: getDefaultSelectedCaseId(nextState, action.payload),
+      };
+    }
     case "UPDATE_NOTES":
       return {
         ...state,
@@ -90,8 +207,8 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
           },
         },
       };
-    case "EXECUTE_ACTION":
-      return {
+    case "EXECUTE_ACTION": {
+      const nextState = {
         ...state,
         caseStates: {
           ...state.caseStates,
@@ -102,6 +219,16 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
           },
         },
       };
+
+      return {
+        ...nextState,
+        selectedCaseId: getNextSelectedCaseIdAfterAction(
+          state,
+          nextState,
+          action.payload.tradeId,
+        ),
+      };
+    }
     default:
       return state;
   }
@@ -160,39 +287,11 @@ export function useTriageWorkflow() {
 
   const selectedCase = state.cases.find((c) => c && c.trade_id === state.selectedCaseId) || null;
 
-  // Defensively filter urgent cases while accounting for empty state initializations
-  const urgentCases = state.cases.filter((c) => {
-    if (!c || !c.trade_id) return false;
-    const tracking = state.caseStates[c.trade_id];
-    const status = tracking ? tracking.reviewStatus : "Not reviewed";
-    return c.escalation_level === "urgent" && status === "Not reviewed";
-  });
-  
-  // Defensively filter and sort queued cases
-  const queuedCases = state.cases
-    .filter((c) => {
-      if (!c || !c.trade_id) return false;
-      const tracking = state.caseStates[c.trade_id];
-      const status = tracking ? tracking.reviewStatus : "Not reviewed";
-      return (c.escalation_level === "priority" || c.escalation_level === "queue") && status === "Not reviewed";
-    })
-    .sort((a, b) => (Number(b?.priority_score) || 0) - (Number(a?.priority_score) || 0));
-
-  // Defensively filter reviewed cases
-  const reviewedCasesList = state.cases.filter((c) => {
-    if (!c || !c.trade_id) return false;
-    const tracking = state.caseStates[c.trade_id];
-    const status = tracking ? tracking.reviewStatus : "Not reviewed";
-    return status === "Reviewed" || status === "Escalated";
-  });
-
-  // Defensively filter auto-passed cases
-  const passedCasesList = state.cases.filter((c) => {
-    if (!c || !c.trade_id) return false;
-    const tracking = state.caseStates[c.trade_id];
-    const status = tracking ? tracking.reviewStatus : "Not reviewed";
-    return c.escalation_level === "none" && status === "Not reviewed";
-  });
+  const visibleLists = getVisibleLists(state);
+  const urgentCases = visibleLists.urgent;
+  const queuedCases = visibleLists.queued;
+  const reviewedCasesList = visibleLists.reviewed;
+  const passedCasesList = visibleLists.passed;
 
   return {
     cases: state.cases,

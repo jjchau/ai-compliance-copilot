@@ -135,7 +135,7 @@ export default function Dashboard() {
       </div>
 
       {/* Primary Split Workspace */}
-      <div className="flex-1 grid grid-rows-[33fr_67fr] gap-0 min-h-0">
+      <div className="flex-1 grid grid-rows-[33fr_67fr] gap-2 min-h-0">
         
         {/* UPPER VIEW GRIDS */}
         <div className="min-h-0">
@@ -147,7 +147,7 @@ export default function Dashboard() {
                   <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
                   <h2 className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Urgent Action Required</h2>
                 </div>
-                <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
+                <div className="flex-1 overflow-auto custom-scrollbar border border-slate-800/30 rounded min-h-0">
                   {workflow.urgentCases.length === 0 ? <p className="text-xs text-slate-500 p-2 italic">No urgent cases outstanding.</p> : (
                     <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                       <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
@@ -188,7 +188,7 @@ export default function Dashboard() {
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
                   <h2 className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Review Queue</h2>
                 </div>
-                <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
+                <div className="flex-1 overflow-auto custom-scrollbar border border-slate-800/30 rounded min-h-0">
                   {workflow.queuedCases.length === 0 ? <p className="text-xs text-slate-500 p-1 italic">Review queue empty.</p> : (
                     <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                       <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
@@ -229,7 +229,7 @@ export default function Dashboard() {
           {/* Table C: Historical Audited Logs */}
           {workflow.activeView === "reviewed" && (
             <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col h-full min-h-0">
-              <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
+              <div className="flex-1 overflow-auto custom-scrollbar border border-slate-800/30 rounded min-h-0">
                 {workflow.reviewedCasesList.length === 0 ? <p className="text-slate-500 text-xs p-3 italic text-center">No logs audited yet.</p> : (
                   <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                     <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
@@ -266,7 +266,7 @@ export default function Dashboard() {
           {/* Table D: Straight-Through System Passed Logs */}
           {workflow.activeView === "passed" && (
             <div className="bg-slate-900 border border-slate-800 rounded-md p-1.5 flex flex-col h-full min-h-0">
-              <div className="flex-1 overflow-auto border border-slate-800/30 rounded min-h-0">
+              <div className="flex-1 overflow-auto custom-scrollbar border border-slate-800/30 rounded min-h-0">
                 {workflow.passedCasesList.length === 0 ? <p className="text-slate-500 text-xs p-3 italic text-center">No auto-passed logs found.</p> : (
                   <table className="text-left text-xs border-collapse table-fixed w-max min-w-full">
                     <thead className="sticky top-0 bg-slate-900 text-slate-400 font-bold uppercase text-[9px] border-b border-slate-800 z-10">
