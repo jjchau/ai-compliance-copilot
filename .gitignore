@@ -248,3 +248,6 @@ data/chroma/
 
 # Local historical files for project evolution traceability
 project_history/
+
+# PDF files
+*.pdf
