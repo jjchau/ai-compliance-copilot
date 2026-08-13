@@ -4,18 +4,19 @@
 
 Compliance teams in wealth management must review advisor investment recommendations for suitability and regulatory risk. Human-only review is difficult to scale, while traditional rules-based alerting can create excessive reviewer burden and still miss complex cases.
 
-For this project, I evaluated a more operational decision problem than simple compliance classification: could AI-assisted signals and deterministic routing logic identify the lowest safe workflow level for each case — auto-pass for low-risk cases, queue for standard human review, priority for higher-risk review, and urgent for the highest-risk cases requiring immediate attention?
+For this project, I evaluated a more operational decision problem than simple compliance classification: could structured AI evidence analysis and deterministic routing logic identify the lowest safe workflow level for each case — auto-pass for low-risk cases, queue for standard human review, priority for higher-risk review, and urgent for the highest-risk cases requiring immediate attention?
 
 ## Proposed Solution
 
-An AI Compliance Review Copilot: a RAG-enabled, human-in-the-loop decision-support workflow for simulated investment compliance review. The prototype I built combines:
+An AI Compliance Review Copilot: a RAG-enabled, human-in-the-loop decision-support workflow for simulated investment compliance review. The prototype workflow combines:
 
 - RAG-based retrieval over a synthetic compliance-policy corpus
-- Structured AI signal extraction using case data and retrieved policy evidence
-- Deterministic scoring and routing logic that converts AI-extracted signals into workflow decisions
+- Structured AI evidence analysis using case data and retrieved policy evidence
+- Deterministic scoring and routing logic that converts structured evidence outputs into workflow decisions
 - Audit logging for decision traceability
-- Evaluation notebooks for metric analysis, retrieval diagnostics, and failure-mode analysis
 - A reviewer dashboard prototype for triage, evidence review, and decision history
+
+I evaluated the prototype using notebooks for metric analysis, retrieval diagnostics, calibration checks, trust-proxy analysis, and failure-mode analysis.
 
 ## Evaluation Results
 
@@ -45,13 +46,17 @@ A follow-up retrieval benchmark showed that improving retrieval quality did not 
 
 The current system should be positioned as a human-in-the-loop compliance review copilot, not an autonomous decision system.
 
-Recommended next steps:
+Recommended next steps fall into two tracks:
 
+**Product and domain validation**
+- Validate the target persona, workflow assumptions, explanation needs, and value proposition with compliance-domain users.
+- Review labels, routing thresholds, and workflow assumptions with compliance-domain experts.
+
+**Technical hardening**
 - Improve urgent-case routing so high-risk cases receive the intended review priority.
 - Reduce unnecessary escalation of low-risk cases without increasing false negatives.
 - Improve primary-policy retrieval and reduce irrelevant context.
 - Validate revised logic on a new, untouched held-out dataset.
-- Review labels, thresholds, workflow assumptions, explanation quality, and feedback loops with compliance-domain users.
 
 A limited future auto-pass capability may be appropriate for narrowly defined low-risk cases, but only after additional held-out validation confirms that safety metrics remain stable.
 
