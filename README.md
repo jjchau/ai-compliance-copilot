@@ -2,7 +2,9 @@
 A human-in-the-loop, RAG-enabled decision-support workflow for investment compliance review.
 
 ## 1. Overview
-This project implements and evaluates a human-in-the-loop, RAG-enabled workflow for reviewing simulated investment recommendations. It combines policy retrieval, AI-assisted signal extraction, deterministic scoring and routing, a reviewer-dashboard prototype, and retrieval diagnostics to evaluate where automation may be appropriate and where human review remains necessary.
+  This project implements and evaluates a human-in-the-loop, RAG-enabled workflow for reviewing simulated investment recommendations. The prototype uses policy retrieval, structured AI evidence analysis, deterministic scoring and routing, and a reviewer dashboard to support risk-based triage and evidence review.
+
+Separate evaluation notebooks analyze compliance safety, workflow-routing quality, reviewer burden, retrieval behaviour, confidence calibration, trust-proxy behaviour, and failure modes to assess where automation may be appropriate and where human review remains necessary.
 
 **Start here:** [Executive Memo](docs/executive_memo.md) — a concise product summary of the problem, solution, results, and recommendation.
 
@@ -24,8 +26,8 @@ flowchart LR
     C --> D[Retrieved policy
     evidence]
 
-    B --> E[AI signal
-    extraction]
+    B --> E[Structured AI
+    evidence analysis]
     D --> E
 
     E --> F[Deterministic
@@ -52,10 +54,10 @@ flowchart LR
 ## 4. Implemented Scope
 ### 4.1 AI and decision pipeline
 - Synthetic case generation and ground-truth labeling
-- RAG-based policy retrieval and structured AI signal extraction
-- Deterministic scoring logic using case attributes, retrieved evidence, and AI-extracted signals
+- RAG-based policy retrieval and structured AI evidence analysis
+- Deterministic scoring logic using case attributes and structured evidence outputs generated from retrieved policy context
 - Risk-based workflow routing
-- Retrieval, AI-decision, and reviewer-action logging for decision traceability
+- Retrieval, AI-assessment, and reviewer-action logging for decision traceability
 
 ### 4.2 Evaluation
 - North Star Metric, compliance, and workflow-routing evaluation
@@ -135,7 +137,7 @@ Retrieval benchmarking showed that retrieval quality could improve without mater
 
 ### Deterministic controls make regulated AI workflows more auditable, but they also become product design constraints
 
-The system intentionally uses deterministic scoring and routing logic after AI signal extraction to make the workflow more predictable, explainable, and auditable. Evaluation showed that this control layer was central to product performance, so the next iteration should focus not only on model or retrieval improvements, but also on routing rules, thresholds, confidence handling, and label alignment.
+The system intentionally uses deterministic scoring and routing logic after structured AI evidence analysis to make the workflow more predictable, explainable, and auditable. Evaluation showed that this control layer was central to product performance, so the next iteration should focus not only on model or retrieval improvements, but also on routing rules, thresholds, confidence handling, and label alignment.
 
 ### Safety and reviewer efficiency must be optimized together
 
@@ -143,7 +145,7 @@ The system behaved conservatively, which is appropriate for compliance review, b
 
 ### Structured AI output still needs validation
 
-Structured outputs make LLM responses easier to parse and use in downstream logic, but schema validity does not guarantee that extracted signals are complete, consistent, or correctly mapped to business rules.
+Structured outputs make LLM responses easier to parse and use in downstream logic, but schema validity does not guarantee that evidence-analysis outputs are complete, consistent, or correctly mapped to business rules.
 
 ### Trust can be decomposed into product-observable behaviours
 
@@ -154,13 +156,17 @@ The current prototype is best positioned as a human decision-support system rath
 
 The held-out evaluation set results support continued use of the pipeline to organize cases, surface policy evidence, and assist reviewer triage. However, unattended deployment is not yet recommended because urgent-case recall and primary-policy retrieval remain below the level required for reliable risk-based automation.
 
-Before broader deployment:
+Before broader deployment, further validation of both the product assumptions and the technical workflow is recommended as follows:
 
-- Improve urgent-case routing so that high-risk cases are consistently surfaced at the required review priority.
-- Increase primary-policy retrieval and reduce repetitive or irrelevant context.
-- Reduce unnecessary auto-pass over-routing without weakening false-negative or urgent-case safeguards.
-- Validate any materially revised pipeline on a new, untouched held-out dataset.
-- Validate the prototype with compliance-domain users, including reviewer workflow fit, trust calibration, explanation usefulness, and feedback loops.
+**Product and domain validation**
+- Validate the target persona, workflow pain points, explanation needs, and value proposition with compliance-domain users
+- Review labels, routing thresholds, and workflow assumptions with compliance-domain experts
+
+**Technical hardening**
+- Improve urgent-case routing so that high-risk cases are consistently surfaced at the required review priority
+- Increase primary-policy retrieval and reduce repetitive or irrelevant context
+- Reduce unnecessary auto-pass over-routing without weakening false-negative or urgent-case safeguards
+- Validate any materially revised pipeline on a new, untouched held-out dataset
 
 A limited future auto-pass capability may be appropriate for narrowly defined, low-risk cases, but only after held-out evaluation confirms that safety metrics remain stable.
 
@@ -175,17 +181,18 @@ A limited future auto-pass capability may be appropriate for narrowly defined, l
 ## 11. Dataset and Assumptions
 |Component|Description|
 |:--------|:----------|
-|Cases|1,000 synthetic advisor investment recommendations spanning multiple compliance scenarios, client archetypes, and advisor profiles. A 220-case development set was used to diagnose and tune pipeline behaviour; 780 held-out cases were reserved for final evaluation. The AI evaluation notebook analyzes enriched results stored in `compliance_audit.db`, which is generated by `enrich_dataset.py` from runtime CSV inputs. A curated copy of the 220-case development dataset is committed under `data/evaluation/` so the retrieval benchmark notebook can run when regenerated `data/runtime/` files are absent.|
+|Cases|1,000 synthetic advisor investment recommendations spanning multiple compliance scenarios, client archetypes, and advisor profiles. A 220-case development set was used to diagnose and tune pipeline behaviour; 780 held-out cases were reserved for final evaluation. The main evaluation notebook (`notebooks/AI_compliance_copilot_evaluation.ipynb`) analyzes enriched results stored in `compliance_audit.db`, which is generated by `enrich_dataset.py` from runtime CSV inputs. A curated copy of the 220-case development dataset is committed under `data/evaluation/` so the retrieval benchmark notebook can run when regenerated `data/runtime/` files are absent.|
 |Policy corpus|Ten synthetic internal-policy documents, including two intentionally irrelevant/noise documents, informed by themes in publicly accessible [HighPoint Advisor Group](https://highpointplanningpartners.com/wp-content/uploads/2024/03/Compliance-Manual-11-2022.pdf) and [AE Wealth Management](https://aewealthmanagement.com/advisor-login/wp-content/uploads/sites/7/2022/09/Compliance-Policy-Manual_AEWM_Jan-10-2023_FINAL.pdf) compliance manuals and broader Canadian and U.S. wealth-management compliance concepts. The corpus is simplified for evaluation and does not reproduce either firm’s policies.|
 |Ground truth|Expected compliance labels, relevant and primary policies, and workflow routes were generated using deterministic ground-truth rules separate from the prediction and routing algorithms. The labels reflect the project’s simplified domain assumptions rather than expert regulatory adjudication.|
-|AI signal extraction|Gemini 3.1 Flash-Lite generates structured evidence and compliance signals using case data and retrieved policy context.|
-|Decision layer|Deterministic scoring and routing logic converts AI-extracted signals, case attributes, and retrieved evidence into compliance labels, risk scores, confidence scores, and workflow routes.|
+|AI evidence analysis|Gemini 3.1 Flash-Lite analyzes case data and retrieved policy context to generate structured compliance evidence, concern signals, mitigating factors, evidence-quality findings, and audit rationale.|
+|Decision layer|Deterministic scoring and routing logic converts case attributes and structured evidence outputs generated from retrieved policy context into compliance labels, risk scores, confidence scores, and workflow routes.|
 |Risk score|A deterministic severity proxy representing the potential firm-level regulatory or legal impact of failing to identify a non-compliant case.| 
-|Synthetic confidence proxy|A deterministic score that increases with data completeness, evidence quality, and directional consistency, and decreases with missing or conflicting signals. It is used in workflow routing logic and not treated as the model’s internal probability of correctness.|
+|Synthetic confidence proxy|A deterministic score that increases with data completeness, evidence quality, and directional consistency, and decreases with missing or conflicting evidence. It is used in workflow routing logic and not treated as the model’s internal probability of correctness.|
 |Trust simulation|A synthetic trust score is updated sequentially based on compliance and routing correctness, with penalties for incorrect outcomes. It is an analytical proxy rather than a validated model of reviewer behaviour; no real-user study was conducted.|
 
 ## 12. Limitations and Next Steps
 ### 12.1 Limitations
+- Problem, persona, and workflow assumptions were not validated with real compliance reviewers, compliance leaders, or buyer stakeholders
 - Synthetic rather than firm-provided investment recommendation data
 - Synthetic and limited policy corpus
 - Labels based on designed rules and assumptions rather than expert legal adjudication
@@ -195,16 +202,17 @@ A limited future auto-pass capability may be appropriate for narrowly defined, l
 - Calibration evaluation limited by sample size
 
 ### 12.2 Next Steps
-- Validate any materially revised pipeline on a new, untouched held-out dataset.
-- Expand the policy corpus
-- Conduct reviewer usability testing
+- Validate the target persona, workflow pain points, explanation needs, and value proposition with compliance-domain users
+- Review labels, routing thresholds, and workflow assumptions with compliance-domain experts
+- Validate any materially revised pipeline on a new, untouched held-out dataset
+- Expand the policy corpus and improve policy-specific retrieval coverage
 - Add feedback-based recalibration
 
 ## 13. Technology
 
 - **Backend and evaluation:** Python, FastAPI, SQLite, Jupyter
 - **Retrieval:** Sentence Transformers (`all-MiniLM-L6-v2`)
-- **AI assessment:** Gemini 3.1 Flash-Lite
+- **AI evidence assessment:** Gemini 3.1 Flash-Lite
 - **Frontend:** React
 
 ## 14. Repository Guide
