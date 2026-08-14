@@ -48,7 +48,7 @@
 
 - Trust increases with clear, consistent, correct, and explainable (cited) outputs 
 - Trust decreases with confidently incorrect, unnecessarily escalated, or opaque outputs 
-- Trust is easier to establish when a system clearly separates AI-generated signals, deterministic routing decisions, and reviewer-controlled final actions
+- Trust is easier to establish when a system clearly separates AI-generated compliance findings, deterministic routing decisions, and reviewer-controlled final actions
 
 ## 8. Attributes 
 

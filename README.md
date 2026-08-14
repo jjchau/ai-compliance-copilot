@@ -55,7 +55,7 @@ flowchart LR
 ### 4.1 AI and decision pipeline
 - Synthetic case generation and ground-truth labeling
 - RAG-based policy retrieval and structured AI evidence analysis
-- Deterministic scoring logic using case attributes and structured evidence outputs generated from retrieved policy context
+- Deterministic scoring logic using case attributes and structured compliance findings generated from case data and retrieved policy context
 - Risk-based workflow routing
 - Retrieval, AI-assessment, and reviewer-action logging for decision traceability
 
@@ -145,7 +145,7 @@ The system behaved conservatively, which is appropriate for compliance review, b
 
 ### Structured AI output still needs validation
 
-Structured outputs make LLM responses easier to parse and use in downstream logic, but schema validity does not guarantee that evidence-analysis outputs are complete, consistent, or correctly mapped to business rules.
+Structured outputs make LLM responses easier to parse and use in downstream logic, but schema validity does not guarantee that compliance findings are complete, consistent, or correctly mapped to business rules.
 
 ### Trust can be decomposed into product-observable behaviours
 
@@ -185,7 +185,7 @@ A limited future auto-pass capability may be appropriate for narrowly defined, l
 |Policy corpus|Ten synthetic internal-policy documents, including two intentionally irrelevant/noise documents, informed by themes in publicly accessible [HighPoint Advisor Group](https://highpointplanningpartners.com/wp-content/uploads/2024/03/Compliance-Manual-11-2022.pdf) and [AE Wealth Management](https://aewealthmanagement.com/advisor-login/wp-content/uploads/sites/7/2022/09/Compliance-Policy-Manual_AEWM_Jan-10-2023_FINAL.pdf) compliance manuals and broader Canadian and U.S. wealth-management compliance concepts. The corpus is simplified for evaluation and does not reproduce either firm’s policies.|
 |Ground truth|Expected compliance labels, relevant and primary policies, and workflow routes were generated using deterministic ground-truth rules separate from the prediction and routing algorithms. The labels reflect the project’s simplified domain assumptions rather than expert regulatory adjudication.|
 |AI evidence analysis|Gemini 3.1 Flash-Lite analyzes case data and retrieved policy context to generate structured compliance evidence, concern signals, mitigating factors, evidence-quality findings, and audit rationale.|
-|Decision layer|Deterministic scoring and routing logic converts case attributes and structured evidence outputs generated from retrieved policy context into compliance labels, risk scores, confidence scores, and workflow routes.|
+|Decision layer|Deterministic scoring and routing logic converts case attributes and structured compliance findings generated from case data and retrieved policy context into compliance labels, risk scores, confidence scores, and workflow routes.|
 |Risk score|A deterministic severity proxy representing the potential firm-level regulatory or legal impact of failing to identify a non-compliant case.| 
 |Synthetic confidence proxy|A deterministic score that increases with data completeness, evidence quality, and directional consistency, and decreases with missing or conflicting evidence. It is used in workflow routing logic and not treated as the model’s internal probability of correctness.|
 |Trust simulation|A synthetic trust score is updated sequentially based on compliance and routing correctness, with penalties for incorrect outcomes. It is an analytical proxy rather than a validated model of reviewer behaviour; no real-user study was conducted.|
@@ -212,7 +212,7 @@ A limited future auto-pass capability may be appropriate for narrowly defined, l
 
 - **Backend and evaluation:** Python, FastAPI, SQLite, Jupyter
 - **Retrieval:** Sentence Transformers (`all-MiniLM-L6-v2`)
-- **AI evidence assessment:** Gemini 3.1 Flash-Lite
+- **AI evidence analysis:** Gemini 3.1 Flash-Lite
 - **Frontend:** React
 
 ## 14. Repository Guide

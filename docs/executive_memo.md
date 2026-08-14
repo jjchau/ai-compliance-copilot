@@ -12,7 +12,7 @@ An AI Compliance Review Copilot: a RAG-enabled, human-in-the-loop decision-suppo
 
 - RAG-based retrieval over a synthetic compliance-policy corpus
 - Structured AI evidence analysis using case data and retrieved policy evidence
-- Deterministic scoring and routing logic that converts structured evidence outputs into workflow decisions
+- Deterministic scoring and routing logic that converts structured compliance findings into workflow decisions
 - Audit logging for decision traceability
 - A reviewer dashboard prototype for triage, evidence review, and decision history
 

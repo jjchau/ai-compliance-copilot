@@ -75,7 +75,7 @@ Purpose:
 
 Purpose:
 
-- Evaluate whether the system surfaces useful policy evidence for AI signal extraction and reviewer inspection.
+- Evaluate whether the system surfaces useful policy evidence for AI assessment and reviewer inspection.
 - Distinguish broad-but-noisy retrieval from focused, high-value evidence retrieval.
 
 ### 3.4 Confidence and trust proxy
@@ -145,15 +145,17 @@ These metrics are valuable for later product validation but are outside the core
 - Audit-log completeness
 - Security and access-control validation
 
-### 5.4 AI signal quality validation
+### 5.4 AI assessment quality validation
 
 - Structured output validity / parsing success
-- Missing or conflicting signal detection
+- Completeness and correctness of structured compliance findings
+- Missing or conflicting evidence detection
+- Concern-signal or violation precision/recall where labelled data is available
 - Rationale consistency with retrieved evidence
 - Instruction adherence
 - Logical consistency
 
-These diagnostics would require additional schema-level validation, ground-truth signal labels, automated consistency checks, or human review of rationale quality.
+These diagnostics would require additional schema-level validation, ground-truth labels for key findings or concern signals, automated consistency checks, or human review of rationale quality.
 
 ## 6. Evaluation Design Principles
 

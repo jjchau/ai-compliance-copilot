@@ -10,7 +10,7 @@ Compliance reviewers of financial advisor recommendations at investment firms.
 
 ## 3. Proposed System 
 
-A human-in-the-loop AI compliance review copilot for advisor investment recommendations. The system retrieves relevant policy evidence, uses AI to extract structured compliance signals from case data and retrieved context, and applies deterministic scoring and routing logic to recommend the lowest safe workflow level: auto-pass, queue, priority, or urgent review.
+A human-in-the-loop AI compliance review copilot for advisor investment recommendations. The system retrieves relevant policy evidence, uses AI to analyze case data and retrieved policy context into structured compliance findings, and applies deterministic scoring and routing logic to recommend the lowest safe workflow level: auto-pass, queue, priority, or urgent review.
 
 ## 4. Value Proposition 
 
@@ -46,14 +46,14 @@ AI-assisted compliance review that helps teams prioritize high-risk cases, surfa
 The initial MVP will prototype core system capabilities across four epics: 
 
 1. Advisor recommendation workflow routing
-    - Routing cases to the lowest safe workflow level based on compliance signals, risk, and confidence
+    - Routing cases to the lowest safe workflow level based on compliance findings, risk, and confidence
     - Escalating high-risk, low-confidence, or potentially non-compliant cases for human review
 2. Human compliance review 
     - Presenting routed cases in a structured summary on screen for quick human understanding
     - Sorting review cases by risk and urgency so human reviewers can tackle the highest-priority cases first
 3. AI assessment explainability 
-    - Producing AI-extracted signals in a structured format suitable for deterministic scoring and audit logging
-    - Showing structured AI-extracted signals, rationale, and retrieved policy evidence for human reviewers to inspect 
+    - Producing structured compliance findings suitable for deterministic scoring and audit logging
+    - Showing compliance findings, rationale, and retrieved policy evidence for human reviewers to inspect 
 4. Human case control 
     - Allowing human reviewers to manually override the AI’s case assessments and enter case review notes 
 
@@ -81,12 +81,12 @@ The following capabilities will be considered for future product iterations:
 ## 9. User Workflow 
 
 1. Advisor submits recommendation / trade. 
-2. The system retrieves relevant policy context, uses AI to extract structured compliance signals, and applies deterministic scoring and routing logic to generate a compliance outcome, confidence proxy, risk score, and workflow route.
+2. The system retrieves relevant policy context, uses AI to analyze the case against retrieved policy evidence, and applies deterministic scoring and routing logic to generate a compliance outcome, confidence proxy, risk score, and workflow route.
 3. Cases routed to queue, priority, or urgent review are displayed in a risk-prioritized reviewer dashboard.
 4. Compliance reviewers select cases from a risk-prioritized dashboard for review.
-5. Compliance reviewer reviews the structured case summary, AI-extracted signals, rationale, and retrieved policy evidence. 
+5. Compliance reviewer reviews the structured case summary, AI-generated compliance findings, rationale, and retrieved policy evidence.
 6. Compliance reviewer accepts or overrides the AI’s assessment of the case and can add notes to be logged with a timestamped record of their review. If no notes are input, the system will generate a warning message for the reviewer, which the reviewer may choose to ignore. 
 
 ## 10. Requirements
 
-Requirements were implemented through user stories covering policy retrieval, AI signal extraction, deterministic scoring, workflow routing, reviewer dashboard functionality, audit logging, and evaluation diagnostics. The implemented scope is summarized in the README and evaluated in the accompanying notebooks.
+Requirements were implemented through user stories covering policy retrieval, structured AI evidence analysis, deterministic scoring, workflow routing, reviewer dashboard functionality, audit logging, and evaluation diagnostics. The implemented scope is summarized in the README and evaluated in the accompanying notebooks.
