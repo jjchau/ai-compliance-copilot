@@ -53,13 +53,13 @@ flowchart LR
 
 ## 4. Implemented Scope
 ### 4.1 AI and decision pipeline
-- Synthetic case generation and ground-truth labeling
 - RAG-based policy retrieval and structured AI evidence analysis
 - Deterministic scoring logic using case attributes and structured compliance findings generated from case data and retrieved policy context
 - Risk-based workflow routing
 - Retrieval, AI-assessment, and reviewer-action logging for decision traceability
 
 ### 4.2 Evaluation
+- Synthetic case generation and ground-truth labeling
 - North Star Metric, compliance, and workflow-routing evaluation
 - Safety and reviewer-burden analysis
 - Retrieval and calibration diagnostics
@@ -72,7 +72,7 @@ flowchart LR
 - Decision history and audit trail
 
 ## 5. Primary Evaluation Question
-**Can the system correctly resolve investment compliance cases at the lowest safe workflow level while limiting regulatory risk and unnecessary reviewer escalation?**
+**Can the system correctly route investment compliance cases to the lowest safe workflow level, limiting both regulatory risk and unnecessary reviewer escalation?**
 
 ## 6. Evaluation Scorecard
 ### Product Safety and Workflow Outcomes:
@@ -85,7 +85,7 @@ flowchart LR
 |Auto-pass over-escalation|33.5%|Ninety-one of 272 eligible auto-pass cases were unnecessarily sent to review workflows.|
 |Escalation precision|84.7%|Most system-escalated cases corresponded to cases that required compliance review.|
 
-*The North Star Metric is the percentage of cases correctly resolved at the lowest safe workflow level. In this framework, it is equivalent to workflow-routing accuracy.
+*The North Star Metric is the percentage of cases correctly routed to the lowest safe workflow level. In this framework, it is equivalent to workflow-routing accuracy.
 
 ### Trust and Confidence:
 |Metric|Result|Product implication|
