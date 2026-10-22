@@ -91,7 +91,7 @@ Violations are NOT:
 
 ---
 
-Concern signals may:
+2. Concern signals may:
 
 • increase concern severity
 • indicate unusual suitability patterns
